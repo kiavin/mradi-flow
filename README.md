@@ -19,7 +19,7 @@ npm install
 Create .env file and copy the contents of .env.example
 
 ## NOTE:
-    For warp CLI code generator to run you must configure .env with sample configuration in .env.example
+# For warp CLI code generator to run you must configure .env with sample configuration in .env.example
 
 ## Warp CLI Commands
 
