@@ -8,13 +8,15 @@ import dotenv from 'dotenv';
 // import { config } from '../config/config.js';
 
 
-// Load .env only if it exists
-if (fs.existsSync('.env')) {
-  dotenv.config();
-} else {
-  console.warn('⚠️ Warning: .env file not found! Using default API base URL.');
-  process.env.API_BASE_URL = 'http://localhost/projects/tummeet_app/omnibase';
+// Check if .env exists; if not, throw an error and exit
+if (!fs.existsSync('.env')) {
+  console.error(chalk.red('❌ Error: Missing .env file!'));
+  console.error(chalk.red('Please create a .env file with the required configuration.'));
+  process.exit(1); 
 }
+
+dotenv.config();
+
 
 const program = new Command();
 
@@ -49,7 +51,8 @@ Available Commands:
 
 if (process.argv.length > 2) {
   process.argv = process.argv.flatMap(arg =>
-    arg.match(/^form[:/](create)$/) ? ['form', 'create'] : arg
+    // arg.match(/^form[:/](create)$/) ? ['form', 'create'] : arg
+    arg.match(/^(form|module)[:/](create)$/) ? [arg.split(/[:/]/)[0], 'create'] : arg
   );
 }
 

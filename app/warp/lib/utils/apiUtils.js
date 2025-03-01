@@ -1,11 +1,10 @@
 import dotenv from 'dotenv';
 
-// Load environment variables if not already loaded
 dotenv.config();
 
-export const fetchSwaggerJson = async (moduleName, routeName) => {
+export const fetchSwaggerJson = async (moduleName, routeName = '', isModule = false) => {
     try {
-        const baseUrl = process.env.API_BASE_URL || 'http://localhost/projects/tummeet_app/omnibase';
+        const baseUrl = process.env.API_BASE_URL || 'http://localhost:9009/';
 
         const url = `${baseUrl}v1/docs/openapi-json-resource.json?mod=${moduleName}`;
         console.log(`Fetching Swagger JSON from: ${url}`);
@@ -16,6 +15,10 @@ export const fetchSwaggerJson = async (moduleName, routeName) => {
         }
 
         const data = await response.json()
+
+        if (isModule) {
+            return data
+        }
 
         if (!data.components || !data.components.schemas) {
             throw new Error(`Module '${moduleName}' not found in Swagger JSON.`)

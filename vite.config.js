@@ -30,7 +30,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/v1': {
-        target: 'http://localhost/projects/tummeet_app/omnibase/',
+        target: process.env.API_BASE_URL || 'http://localhost:9009',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
