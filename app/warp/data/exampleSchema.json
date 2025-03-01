@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "integer",
+      "example": "integer"
+    },
+    "user_id": {
+      "title": "User id",
+      "type": "int",
+      "example": "int"
+    },
+    "appointment_date": {
+      "title": "Date",
+      "type": "string",
+      "example": "string"
+    },
+    "start_time": {
+      "title": "Start time",
+      "type": "string",
+      "example": "string"
+    },
+    "end_time": {
+      "title": "End time",
+      "type": "string",
+      "example": "string"
+    },
+    "contact_name": {
+      "title": "Contact name",
+      "type": "string",
+      "example": "string"
+    },
+    "email_address": {
+      "title": "Email address",
+      "type": "string",
+      "example": "string"
+    },
+    "mobile_number": {
+      "title": "Mobile number",
+      "type": "string",
+      "example": "string"
+    },
+    "subject": {
+      "title": "Subject",
+      "type": "string",
+      "example": "string"
+    },
+    "appointment_type": {
+      "title": "Appointment type",
+      "type": "string",
+      "example": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string",
+      "example": "string"
+    },
+    "created_at": {
+      "title": "Created at",
+      "type": "string",
+      "example": "string"
+    },
+    "updated_at": {
+      "title": "Updated at",
+      "type": "string",
+      "example": "string"
+    }
+  },
+  "type": "object"
+}
