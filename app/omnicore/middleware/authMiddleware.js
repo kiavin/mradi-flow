@@ -1,15 +1,15 @@
-import { useAuthStore } from '@/stores/authStore'; // Import Pinia/Vuex auth store
+import { useAuthStore } from '~/stores/authStore';
 
 export function authMiddleware(to, from, next) {
     const authStore = useAuthStore();
-    const userIsAuthenticated = authStore.isAuthenticated; // Check if user is logged in
+    const userIsAuthenticated = authStore.isAuthenticated; 
 
     // Get module config dynamically based on route
     const moduleName = to.matched[0]?.name || ''; // Extract module name
     let moduleConfig;
 
     try {
-        moduleConfig = require(`@/modules/${moduleName}/module.config.js`).default;
+        moduleConfig = require(`@/${moduleName}/${moduleName}.config.js`).default;
     } catch (error) {
         console.warn(`⚠️ No config found for module: ${moduleName}. Defaulting to open access.`);
         moduleConfig = { IS_SECURE: true, SAFE_ROUTES: [] }; // Default: all routes open
