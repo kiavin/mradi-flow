@@ -77,10 +77,10 @@ const moduleCreateCommand = new Command('create')
             ]);
 
             if (confirmAll.generateAll) {
-              selectedFolders = allFolders; // Generate everything
+              selectedFolders = allFolders;
             } else {
               console.log(chalk.red('❌ Module generation cancelled.'));
-              return; // Exit the command
+              return;
             }
           }
         } catch (error) {
@@ -88,7 +88,6 @@ const moduleCreateCommand = new Command('create')
             console.error(chalk.red('❌ Error: The terminal does not support prompts.'));
           } else {
             console.log(chalk.yellow('\n👋 Exiting Warp CLI. Goodbye!'));
-            // eslint-disable-next-line no-undef
             process.exit(0);
           }
         }
@@ -99,20 +98,16 @@ const moduleCreateCommand = new Command('create')
     }
 
 
-    // ✅ Show a loading spinner while generating
+    // Show a loading spinner while generating
     const spinner = ora('Generating module...').start();
 
 
     try {
       const success = await generateModule(name, selectedFolders);
-      // if (success) {
-      //   console.log(chalk.green(`✅ Module successfully generated at: ${name}`));
-      // }
       if (success) {
         spinner.succeed(chalk.green(`✅ Module successfully generated at: ${name}`));
       }
     } catch (error) {
-      // console.error(chalk.red(`❌ Error generating module: ${error.message}`));
       spinner.fail(chalk.red(`❌ Error generating module: ${error.message}`));
     }
 

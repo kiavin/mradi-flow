@@ -11,7 +11,7 @@ export const fetchSwaggerJson = async (moduleName, routeName = '', isModule = fa
         const response = await fetch(url)
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch Swagger JSON: ${response.statusText}`)
+            throw new Error(`Failed to fetch Swagger JSON: HTTP ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json()

@@ -11,13 +11,12 @@ export async function generateModule(moduleName, selectedFolders) {
     const moduleData = await fetchSwaggerJson(moduleName, '', true);
 
     if (moduleData.error) {
-        console.error(chalk.red(`❌ Failed to fetch module: ${moduleData.error}`));
-        return;
+        console.error(chalk.red(`❌ ${moduleData.error}`));
+        throw new Error(moduleData.error);
     }
 
-    if (!moduleData || moduleData.length === 0 || moduleData.error) {
-        console.log(chalk.red(`❌ No schema found for module: ${moduleName}`));
-        throw new Error(`❌ No schema found for module: ${moduleName}`)
+    if (!moduleData || Object.keys(moduleData).length === 0) {
+        throw new Error(`No schema found for module: ${moduleName}`);
     }
 
     const modulePath = path.resolve(`modules/${moduleName}`);

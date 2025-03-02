@@ -5,10 +5,8 @@ import chalk from 'chalk';
 import registerCommands from '../commands/index.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
-// import { config } from '../config/config.js';
 
 
-// Check if .env exists; if not, throw an error and exit
 if (!fs.existsSync('.env')) {
   console.error(chalk.red('❌ Error: Missing .env file!'));
   console.error(chalk.red('Please create a .env file with the required configuration.'));
@@ -51,12 +49,11 @@ Available Commands:
 
 if (process.argv.length > 2) {
   process.argv = process.argv.flatMap(arg =>
-    // arg.match(/^form[:/](create)$/) ? ['form', 'create'] : arg
     arg.match(/^(form|module)[:/](create)$/) ? [arg.split(/[:/]/)[0], 'create'] : arg
   );
 }
 
-// Register all subcommands (like 'form', 'page', etc.)
+// Register all subcommands 
 registerCommands(program);
 
 program.parse(process.argv);
