@@ -37,7 +37,7 @@ export async function generateModule(moduleName, selectedFolders) {
 
 
     // Create only selected folders
-    createFolders(modulePath, selectedFolders);
+    createFolders(modulePath, selectedFolders, moduleName);
 
     // Generate Routes (if "router" is selected)
     if (selectedFolders.includes('router')) {
