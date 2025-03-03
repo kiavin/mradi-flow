@@ -2,9 +2,9 @@ export default function formTemplate(name, properties) {
     const scriptSection = `
 <script setup>
 import { ref } from 'vue';
-import Input from '@/components/atoms/inputs/Input.vue';
-import Label from '@/components/atoms/Label.vue';
-import Btn from '@/components/atoms/buttons/Button.vue'
+import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
+import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
 
 const isLoading = ref(false)
 
@@ -30,18 +30,18 @@ function onSubmit() {
 
     const templateSection = `
         <template>
-            <b-form @submit.prevent="onSubmit" class="row g-3">
+            <form @submit.prevent="onSubmit" class="row g-3">
                 ${Object.entries(properties).map(([key, value]) => `
-                <div class="mb-3 form-floating custom-form-floating form-group">
-                    <Input :id="'${key}'" :type="'${mapInputType(value.type)}'" v-model="formData.${key}" />
+                <div class="mb-2 form-group">
                     <Label :labelFor="'${key}'"> ${value.title} </Label>
+                    <Input :id="'${key}'" :type="'${mapInputType(value.type)}'" v-model="formData.${key}" />
                 </div>
                 `).join('')}
-
-                <div class="col-12">
-                    <Btn variant="primary" type="submit"> Submit </Btn>
+                
+                <div class="text-center mt-3">
+                    <Button type="submit" customClass="btn btn-success d-inline-block"> Save </Button>
                 </div>
-            </b-form>
+            </form>
         </template>
     `;
 

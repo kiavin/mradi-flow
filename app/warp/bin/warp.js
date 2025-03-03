@@ -6,14 +6,20 @@ import registerCommands from '../commands/index.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
+dotenv.config();
+
 
 if (!fs.existsSync('.env')) {
   console.error(chalk.red('❌ Error: Missing .env file!'));
   console.error(chalk.red('Please create a .env file with the required configuration.'));
-  process.exit(1); 
+  process.exit(1);
 }
 
-dotenv.config();
+if (!process.env.API_BASE_URL) {
+  console.error(chalk.red('❌ Error: API_BASE_URL is missing in the .env file!'));
+  console.error(chalk.red('Please add API_BASE_URL=<your_api_url> to your .env file.'));
+  process.exit(1);
+}
 
 
 const program = new Command();
@@ -42,9 +48,9 @@ Available Commands:
   ${chalk.green('component')} Generate a standalone component
         `);
 
-      //   if (config.FEATURE_FLAGS.DEBUG_MODE) {
-      //     console.log(chalk.yellow('⚠️ Debug mode is enabled.'));
-      // }
+    //   if (config.FEATURE_FLAGS.DEBUG_MODE) {
+    //     console.log(chalk.yellow('⚠️ Debug mode is enabled.'));
+    // }
   });
 
 if (process.argv.length > 2) {

@@ -3,12 +3,14 @@ import path from 'path';
 import chalk from 'chalk';
 import { console } from 'inspector';
 import { generateModuleRoutes, createFolders, generateStore, generateService } from '../utils/cliUtils.js';
+import { createFormTemplate } from './helpers.js';
 
 export async function generateModule(moduleName, selectedFolders) {
 
     console.log(chalk.yellow(`🚀 Fetching schema for module: ${moduleName}...`));
 
     const moduleData = await fetchSwaggerJson(moduleName, '', true);
+    
 
     if (moduleData.error) {
         console.error(chalk.red(`❌ ${moduleData.error}`));
@@ -22,18 +24,6 @@ export async function generateModule(moduleName, selectedFolders) {
     const modulePath = path.resolve(`modules/${moduleName}`);
 
     console.log(chalk.green(`🚀 Generating module: ${moduleName}...`));
-
-    // Create folders and default files
-    // createFolders(modulePath);
-
-    // generateModuleRoutes(moduleData, modulePath);
-
-    // Generate Pinia Store
-    // generateStore(moduleName, moduleData, modulePath);
-
-    // Generate API Service
-    // generateService(moduleName, modulePath);
-
 
     // Create only selected folders
     createFolders(modulePath, selectedFolders, moduleName);
@@ -56,8 +46,29 @@ export async function generateModule(moduleName, selectedFolders) {
         console.log(chalk.yellow(`🔗 API Service generated`));
     }
 
+    // Generate Form (if "views" is selected)
+    if (selectedFolders.includes('views')) {
+        console.log(chalk.yellow(`📝 Generating form for module: ${moduleName}...`));
+        for (const schemaName in moduleData.components.schemas) {
+            const schema = moduleData.components.schemas[schemaName]; // Get the schema object
+            
+            if (!schema.properties || Object.keys(schema.properties).length === 0) {
+                console.log(`⚠️ No properties found for ${schemaName}. Skipping form generation.`);
+                continue;
+            }
+    
+            // Call createFormTemplate with schemaName and properties
+            createFormTemplate('Form', moduleName, schemaName, modulePath, schema);
+            console.log(chalk.green(`✅ Form for "${schemaName}" created successfully!`));
+        }
+    
+    }
+
 
     console.log(chalk.green(`✅ Module "${moduleName}" generated successfully!`));
     return true;
 }
 
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }

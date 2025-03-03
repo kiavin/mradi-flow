@@ -13,7 +13,7 @@ export const config = {
     CLI_NAME: process.env.CLI_NAME || 'Voyage CLI',
     VERSION: process.env.VERSION || '1.0.0',
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-    ENABLE_INQUIRY: process.env.ENABLE_INQUIRY || false,
+    ENABLE_INQUIRY: process.env.ENABLE_INQUIRY === 'true',
     FEATURE_FLAGS: {
         ENABLE_SWAGGER: process.env.ENABLE_SWAGGER === 'true',
         DEBUG_MODE: process.env.DEBUG_MODE === 'true',

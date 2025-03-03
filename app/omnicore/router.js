@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/main/views/HomeView.vue'
+import LandingView from '@/main/views/Index.vue'
+import PlayGroundView from '@/main/views/PlayGround.vue'
+import moduleRoutes from './generatedRoutes.js';
+// import Sc from '@/scheduler/router/index.js'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,13 +11,17 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: LandingView,
+      meta: { title: 'Omniface - Home' },
     },
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('@/main/views/AboutView.vue'),
+      path: '/play',
+      name: 'playground',
+      component: PlayGroundView,
+      meta: { title: 'Omniface - Home' },
     },
+    // ...Sc,
+    ...moduleRoutes,
     // {
     //   path: "/:pathMatch(.*)*",
     //   name: "NotFound",
@@ -24,5 +32,10 @@ const router = createRouter({
     // },
   ],
 })
+
+// router.beforeEach((to, from, next) => {
+  // document.title = to.meta.title || 'Omniface';
+//   authMiddleware(to, from, next);
+// });
 
 export default router
