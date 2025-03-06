@@ -86,7 +86,7 @@ const handleEdit = (id) => {
   // alert(`Editing record with ID: ${id}`)
   proxy.$showAlert({
     message: 'Edit Mode',
-    type: 'warning',
+    title: 'warning',
     showConfirmButton: true,
     confirmButtonText: 'Yes, edit it!',
     cancelButtonText: 'No, stay here',
@@ -98,21 +98,37 @@ const handleEdit = (id) => {
   })
 }
 
-const handleDelete = (id) => {
-  // alert(`Deleting record with ID: ${id}`)
-  proxy.$showAlert({
-    message: 'Delete Mode',
-    type: 'error',
+const handleDelete = async (id) => {
+  const result = await proxy.$showAlert({
+    title: 'Are you sure?',
+    text: 'You won’t be able to revert this!',
+    icon: 'warning',
     showConfirmButton: true,
     confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'No, stay here',
+    cancelButtonText: 'No, cancel!',
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
-    confirmButtonTextColor: '#3085d6',
-    cancelButtonTextColor: '#3085d6',
     reverseButtons: true,
-  })
-}
+  });
+
+  if (result.isConfirmed) {
+    // Perform the delete action here
+    console.log('Deleting record with ID:', id);
+    
+    // Show success alert
+    await proxy.$showAlert({
+      title: 'Deleted!',
+      text: 'Record deleted successfully',
+      icon: 'success',
+      showCancelButton: false,
+    });
+
+    // Refresh data or update UI if needed
+  } else {
+    console.log('Deletion cancelled');
+  }
+};
+
 
 const handleSearch = (query) => {
   request(null, {
@@ -190,9 +206,7 @@ onMounted(() => {
         :columnFormatters="{
           status: Demo,
         }"
-        :mergedColumns="[
-          { keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' },
-        ]"
+        :mergedColumns="[{ keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' }]"
       />
     </div>
   </div>

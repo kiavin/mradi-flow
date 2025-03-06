@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '@/main/views/Index.vue'
 import PlayGroundView from '@/main/views/PlayGround.vue'
 import moduleRoutes from './generatedRoutes.js';
+import View from '@/main/views/View.vue'
 // import Sc from '@/scheduler/router/index.js'
 
 
@@ -19,6 +20,13 @@ const router = createRouter({
       name: 'playground',
       component: PlayGroundView,
       meta: { title: 'Omniface - Home' },
+    },
+    {
+      path: '/view-demo/:id',
+      name: 'view',
+      component: View,
+      meta: { title: 'Omniface - Home' },
+      props: true
     },
     // ...Sc,
     ...moduleRoutes,

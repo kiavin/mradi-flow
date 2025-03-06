@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, defineProps, defineEmits, watch } from 'vue'
+import { ref, computed, defineEmits, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faEye, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import SearchInput from '../molecules/SearchInput.vue'

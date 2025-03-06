@@ -119,6 +119,14 @@ export const generateModuleRoutes = (schema, modulePath) => {
   fs.mkdirSync(path.join(modulePath, 'router'), { recursive: true });
 
   Object.keys(schema.components.schemas).forEach(route => {
+    const schemaProperties = schema.components.schemas[route]?.properties || {};
+
+    // Generate tableColumns dynamically
+    const tableColumns = Object.keys(schemaProperties).map(key => ({
+      key,
+      label: key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()) // Convert snake_case to "Title Case"
+    }));
+
     const routePath = path.join(modulePath, 'views', route);
     const routerPath = path.join(modulePath, 'router', `${route}.js`);
     fs.mkdirSync(routePath, { recursive: true });
@@ -126,7 +134,8 @@ export const generateModuleRoutes = (schema, modulePath) => {
     // Create Vue files using the page template
     ['index', 'create', 'update', 'view'].forEach(file => {
       const filePath = path.join(routePath, `${file}.vue`);
-      const pageContent = pageTemplate(route, file); // Generate based on type
+      const routeName = `${route}`;
+      const pageContent = pageTemplate(route, file, tableColumns, routeName); // Generate based on type
 
       fs.writeFileSync(filePath, pageContent);
       console.log(chalk.blue(`📄 Created: ${filePath}`));

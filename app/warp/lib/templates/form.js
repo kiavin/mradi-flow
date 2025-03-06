@@ -6,25 +6,17 @@ import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
 
-const isLoading = ref(false)
-
-// Define reactive properties
-const formData = ref({
-    ${Object.keys(properties).map((key) => `${key}: ''`).join(',\n    ')}
+const props = defineProps({
+    formData: Object,
+    error: Object, 
+    isLoading: Boolean 
 });
 
-// Submit function
-function onSubmit() {
-    try {
-    isLoading.value = true;
-        console.log('Form Submitted:', formData.value);
-        
-    } catch (err) {
-        console.error('Error submitting form:', err);
-    } finally {
-        isLoading.value = false;
-    }
-}
+const emit = defineEmits(['submit', 'update']);
+
+const onSubmit = () => {
+    emit('submit', props.formData); // Emit the form data to the parent
+};
 </script>
     `;
 
@@ -35,12 +27,19 @@ function onSubmit() {
                 <div class="mb-2 form-group">
                     <Label :labelFor="'${key}'"> ${value.title} </Label>
                     <Input :id="'${key}'" :type="'${mapInputType(value.type)}'" v-model="formData.${key}" />
+                    <p v-if="error?.formData?.${key}" class="text-danger">{{ error.formData.${key} }}</p>
                 </div>
                 `).join('')}
                 
                 <div class="text-center mt-3">
-                    <Button type="submit" customClass="btn btn-success d-inline-block"> Save </Button>
-                </div>
+            <Button 
+                type="submit" 
+                customClass="btn btn-success d-inline-block" 
+                :disabled="isLoading"
+            >
+                {{ isLoading ? 'Submitting...' : '${name}' }}
+            </Button>
+        </div>
             </form>
         </template>
     `;
