@@ -1,17 +1,25 @@
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
-// import path from "path";
+import omnifaceEnvPlugin from './app/omnicore/plugins/omniface-vite-plugin';
 
 // const selectedTheme = process.env.VITE_THEME || "hope-ui";
 
 // https://vite.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    include: [
+      "@fortawesome/free-solid-svg-icons",
+      "@fortawesome/free-regular-svg-icons",
+      "@fortawesome/free-brands-svg-icons",
+      "@fortawesome/vue-fontawesome"
+    ],
+  },
   plugins: [
     vue(),
     vueDevTools(),
+    omnifaceEnvPlugin()
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.vue', '.ts', '.tsx'],

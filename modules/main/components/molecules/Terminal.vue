@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import gsap from 'gsap'
+//import gsap from 'gsap'
 
 const commands = ref([
   'Initializing Omnibase Framework...',

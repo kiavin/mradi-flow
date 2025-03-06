@@ -6,18 +6,21 @@ import registerCommands from '../commands/index.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-dotenv.config();
 
+// dotenv.config();
+dotenv.config({ path: './omniface.cfg' });
 
-if (!fs.existsSync('.env')) {
-  console.error(chalk.red('❌ Error: Missing .env file!'));
+if (!fs.existsSync('omniface.cfg')) {
+  console.error(chalk.red('❌ Error: Missing omniface config file!'));
   console.error(chalk.red('Please create a .env file with the required configuration.'));
   process.exit(1);
 }
 
+dotenv.config({ path: './omniface.cfg' });
+
 if (!process.env.API_BASE_URL) {
-  console.error(chalk.red('❌ Error: API_BASE_URL is missing in the .env file!'));
-  console.error(chalk.red('Please add API_BASE_URL=<your_api_url> to your .env file.'));
+  console.error(chalk.red('❌ Error: API_BASE_URL is missing in the config  file!'));
+  console.error(chalk.red('Please add API_BASE_URL=<your_api_url> to your omniface.cfg file.'));
   process.exit(1);
 }
 

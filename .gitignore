@@ -30,3 +30,5 @@ coverage
 *.tsbuildinfo
 workflow.md
 logic.md
+api.txt
+ddd.rty

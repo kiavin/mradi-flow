@@ -10,65 +10,9 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-/**
- * Creates the module folders and adds a default.txt file in each.
+ /**
+ * Creates the folders for a new module.
  */
-// export function createFolders(modulePath) {
-//     const folders = [
-//         'components/atoms',
-//         'components/molecules',
-//         'components/organisms',
-//         'plugins',
-//         'utils',
-//         'stores',
-//         'services',
-//         'middleware',
-//         'views',
-//         'router'
-//     ];
-
-//     folders.forEach(folder => {
-//         const fullPath = path.join(modulePath, folder);
-//         fs.mkdirSync(fullPath, { recursive: true });
-
-//         // Add a default.txt file with a comment
-//         const defaultFile = path.join(fullPath, 'default.txt');
-//         fs.writeFileSync(defaultFile, '// default data');
-
-//         console.log(chalk.yellow(`📂 Created: ${fullPath}`));
-//         console.log(chalk.gray(`📄 Added default.txt to ${fullPath}`));
-//     });
-// }
-
-// export function createFolders(modulePath, selectedFolders, moduleName) {
-//     selectedFolders.forEach(folder => {
-//         const fullPath = path.join(modulePath, folder);
-//         fs.mkdirSync(fullPath, { recursive: true });
-
-//         // Add a default.txt file with a comment
-//         const defaultFile = path.join(fullPath, 'default.js');
-//         fs.writeFileSync(defaultFile, '// default data');
-
-//         console.log(chalk.yellow(`📂 Created: ${fullPath}`));
-//         console.log(chalk.gray(`📄 Added default.txt to ${fullPath}`));
-//     });
-
-//     // Create the `module.config.js` file **once per module**
-//     const configFile = path.join(modulePath, `${capitalize(moduleName)}.config.js`);
-
-//     if (!fs.existsSync(configFile)) {
-//         // Default config file
-//         const configContent = `export default {
-//         // Default Configuration for ${moduleName} module
-//         IS_SECURE: false, // If false, authentication is required for this module
-//         SAFE_ROUTES: [] // Routes accessible without authentication
-//     };`;
-
-//         fs.writeFileSync(configFile, configContent);
-//         console.log(chalk.green(`⚙️ Created module.config.js`));
-//     }
-// }
-
 export function createFolders(modulePath, selectedFolders, moduleName) {
   selectedFolders.forEach(folder => {
     const fullPath = path.join(modulePath, folder);

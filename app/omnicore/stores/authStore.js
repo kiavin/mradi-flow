@@ -28,6 +28,7 @@ export const useAuthStore = defineStore('userAuth', {
 
       console.log('Store initialized')
     },
+    
 
     // initStore() {
     //   const storedToken = localStorage.getItem('user.token');

@@ -2,10 +2,6 @@
 import { onMounted, onUnmounted } from 'vue';
 
 // import '../assets/style.css'
-// import '../assets/js/main.js'
-
-// import '../assets/css/vendors/aos.css'
-import '../assets/css/vendors/swiper-bundle.min.css'
 import Hero from '@/main/components/organisms/Hero.vue'
 import Header from '@/main/components/organisms/Header.vue'
 import Features from '@/main/components/organisms/Features.vue'

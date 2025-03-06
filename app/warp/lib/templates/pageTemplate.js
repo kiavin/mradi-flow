@@ -1,6 +1,6 @@
 export default function pageTemplate(name, type) {
     let scriptContent = `<script setup>\nimport { ref } from 'vue';\n`;
-    let templateContent = `<template>\n  <div class="container">\n    <h1>{{ name }} Page</h1>\n`;
+    let templateContent = `<template>\n  <div class="container">\n    <h1 class="h1 mt-2">{{ name }} Page</h1>\n`;
   
     // Include Form component for 'create' and 'update' pages
     if (['create', 'update'].includes(type)) {

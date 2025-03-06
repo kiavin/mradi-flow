@@ -22,7 +22,7 @@ export function showAlert({
     });
 }
 
-export function showToast({ title = '', icon = '#fff', timer = 3000, position = 'top' }, background = '#fff', grow = '') {
+export function showToast({ title = 'toast demo', icon = '#fff', timer = 3000, position = 'top' }={}, background = '#fff', grow = '') {
     return Swal.fire({
         toast: true,
         title,
