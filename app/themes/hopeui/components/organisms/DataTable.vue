@@ -39,19 +39,19 @@ const actions = computed(() => {
       key: 'view',
       icon: faEye,
       callback: (row) => emit('view', row.id),
-      show: props.showView,
+      show: (row) => props.showView && row.is_deleted !== 1,
     },
     {
       label: 'Edit',
       key: 'edit',
       icon: ['fas', 'pen-to-square'],
       callback: (row) => emit('edit', row.id),
-      show: props.showEdit,
+      show: (row) => props.showEdit && row.is_deleted !== 1,
     },
     {
       label: 'Delete',
       key: 'delete',
-      icon: faTrashCan,
+      icon: (row) => (row.is_deleted === 1 ? ['fas', 'rotate-left'] : faTrashCan),
       callback: (row) => emit('delete', row.id),
       show: props.showDelete,
     },
@@ -192,7 +192,8 @@ const handlePerPageChange = (newPerPage) => {
               <template v-for="action in actions" :key="action.key">
                 <slot :name="`${action.key}-icon`" :row="row">
                   <font-awesome-icon
-                    :icon="action.icon"
+                    v-if="typeof action.show === 'function' ? action.show(row) : action.show"
+                    :icon="typeof action.icon === 'function' ? action.icon(row) : action.icon"
                     @click="() => action.callback(row)"
                     class="icon"
                     :class="{

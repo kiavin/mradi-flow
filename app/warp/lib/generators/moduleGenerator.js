@@ -30,7 +30,7 @@ export async function generateModule(moduleName, selectedFolders) {
 
     // Generate Routes (if "router" is selected)
     if (selectedFolders.includes('router')) {
-        generateModuleRoutes(moduleData, modulePath);
+        generateModuleRoutes(moduleData, modulePath, moduleName);
         console.log(chalk.yellow(`📌 Routes generated`));
     }
 
@@ -71,4 +71,4 @@ export async function generateModule(moduleName, selectedFolders) {
 
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
-  }
+}

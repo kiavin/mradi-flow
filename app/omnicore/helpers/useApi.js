@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, watchEffect } from 'vue'
 import axios from 'axios'
 import qs from 'qs' // Import for handling query parameters
 
@@ -92,6 +92,13 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             data.value = null // Ensure no old data is returned on error
         }
     }
+
+    //Watch for changes in `data.value`
+    watchEffect(() => {
+        if (data.value) {
+            console.log('Updated data:', data.value) // Debugging
+        }
+    })
 
     // Auto-fetch for GET requests when dependencies change
     watch(() => [baseUrl, method, options], () => {

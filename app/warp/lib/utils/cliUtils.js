@@ -10,6 +10,10 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function lowercase(str) {
+  return str.toLowerCase();
+}
+
  /**
  * Creates the folders for a new module.
  */
@@ -73,7 +77,6 @@ export const use${capitalize(moduleName)}Store = defineStore('${moduleName}', {
   console.log(chalk.blue(`📄 Created: ${storePath}`));
 }
 
-
 /**
  * Generates API service functions for the module.
  */
@@ -106,7 +109,7 @@ export default {
  * @param {Object} schema - The Swagger module schema.
  * @param {string} modulePath - Path to the module directory.
  */
-export const generateModuleRoutes = (schema, modulePath) => {
+export const generateModuleRoutes = (schema, modulePath, moduleName) => {
   if (!schema || !schema.components || !schema.components.schemas) {
     console.error(chalk.red('❌ Invalid schema: Missing components or schemas.'));
     return;
@@ -134,8 +137,8 @@ export const generateModuleRoutes = (schema, modulePath) => {
     // Create Vue files using the page template
     ['index', 'create', 'update', 'view'].forEach(file => {
       const filePath = path.join(routePath, `${file}.vue`);
-      const routeName = `${route}`;
-      const pageContent = pageTemplate(route, file, tableColumns, routeName); // Generate based on type
+      // const routeName = lowercase(route);
+      const pageContent = pageTemplate(route, file, tableColumns, moduleName); // Generate based on type
 
       fs.writeFileSync(filePath, pageContent);
       console.log(chalk.blue(`📄 Created: ${filePath}`));

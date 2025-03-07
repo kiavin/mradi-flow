@@ -1,17 +1,39 @@
-export function createPageTemplate(resource) {
-    return `<script setup>
-import { ref } from 'vue';
+export function createPageTemplate(resource, moduleName) {
+  return `<script setup>
+import { ref, getCurrentInstance } from 'vue';
 import { useApi } from '~/omnicore/helpers/useApi';
+import { useRouter } from 'vue-router'
 import Form from './form.vue';
 
-const apiBaseUrl = \`/v1/${resource}\`;
+const { proxy } = getCurrentInstance()
+const router = useRouter()
+
+const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}\`;
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
 
 const formData = ref({});
 
 const handleSubmit = async (data) => {
-await request(data);
-};
+  await request(data)
+
+  if (error.value) {
+    return 
+  }
+
+  proxy.$showAlert({ 
+    title: 'Success',
+    icon: 'success', 
+    text: '${resource} created successfully',
+    showConfirmButton: false,
+    showCancelButton: false,
+    draggable: true,
+    timer: 2000, 
+    timerProgressBar: true,
+})
+  setTimeout(() => {
+    router.push({ name: '${resource}' })
+  }, 2000)
+}
 </script>
 
 <template>
@@ -30,30 +52,62 @@ await request(data);
 }
 
 
-export function updatePageTemplate(resource) {
-    return `<script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+export function updatePageTemplate(resource, moduleName) {
+  return `<script setup>
+import { ref, onMounted, watch, getCurrentInstance } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '~/omnicore/helpers/useApi';
 import Form from './form.vue';
 
+const { proxy } = getCurrentInstance()
+const router = useRouter()
+
 const route = useRoute();
 const id = route.params.id;
-const apiBaseUrl = \`/v1/${resource}/\${id}\`;
+const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}/\${id}\`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true);
+const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
 const formData = ref({});
+const errors = ref({});
+
+
+watch(data, () => {
+  if (data.value) {
+    formData.value = data.value.dataPayload.data || {}
+  }
+})
 
 //   onMounted(async () => {
-//     const response = await request();
-//     formData.value = response || {};
+//     await request();
+//     formData.value = data.value || {};
 //   });
 
 const handleSubmit = async (updatedData) => {
-    // Create a new API call for PUT request
-    const { request: updateData } = useApi(apiBaseUrl, 'PUT', {}, false);
-    await updateData(updatedData);
-};
+  // Create a new API call for PUT request
+  const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+  await updateData(updatedData)
+  if (error.value) {
+    console.log('Error', error.value)
+    errors.value = error.value
+  }
+  if (error.value) {
+    return
+  }
+
+  proxy.$showAlert({
+    title: 'Success',
+    icon: 'success',
+    text: '${resource} Updated successfully',
+    showConfirmButton: false,
+    showCancelButton: false,
+    draggable: true,
+    timer: 2000,
+    timerProgressBar: true,
+  })
+  setTimeout(() => {
+    router.push({ name: '${resource}' })
+  }, 2000)
+}
 </script>
 
 <template>
@@ -61,7 +115,7 @@ const handleSubmit = async (updatedData) => {
     <h1 class="h1 mt-2">Update ${resource}</h1>
     <Form 
     :formData="formData" 
-    :error="error" 
+    :error="errors" 
     :isLoading="isLoading" 
     @submit="handleSubmit" 
     />
@@ -72,39 +126,51 @@ const handleSubmit = async (updatedData) => {
 }
 
 
-export function viewPageTemplate(resource) {
-    return `<script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+export function viewPageTemplate(resource, moduleName) {
+  return `<script setup>
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '~/omnicore/helpers/useApi';
+import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Form from './form.vue';
 
 const route = useRoute();
+const router = useRouter();
 const id = route.params.id;
-const apiBaseUrl = \`/v1/${resource}/\${id}\`;
+const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}/\${id}\`;
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true);
 const formData = ref({});
 
-onMounted(async () => {
-await request();
-formData.value = data.value || {};
-});
+// onMounted(async () => {
+// await request();
+// formData.value = data.value || {};
+// });
 
 watch(data, () => {
-  formData.value = data.value || {};
+  if (data.value) {
+    formData.value = data.value.dataPayload.data || {};
+  }
 });
 
 </script>
 
 <template>
 <div class="container">
-    <h1 class="h1 mt-2">View ${resource}</h1>
+    <div class="row d-flex justify-content-between align-items-center">
+      <div class="col-auto">
+        <h1 class="h1 mt-2">View ${resource}</h1>
+      </div>
+      <div class="col-auto">
+        <Button type="submit" customClass="btn btn-success" @click="() => {router.push({ name: '${resource}-update', params: { id } });}"> Edit </Button>
+      </div>
+    </div>
+
     <Form 
     :formData="formData" 
     :error="error" 
     :isLoading="isLoading" 
-    :readonly="true" 
+    :readonly="true"
     hide-submit
     />
 </div>
@@ -113,19 +179,20 @@ watch(data, () => {
 <style scoped></style>`;
 }
 
-export function indexPageTemplate(resource, tableColumns, routeName) {
-    return `<script setup>
+export function indexPageTemplate(resource, tableColumns, moduleName) {
+  return `<script setup>
 import { onMounted, ref, watch, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router';
 import { useApi } from '~/omnicore/helpers/useApi';
+import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 
 import DataTable from '~/themes/hopeui/components/organisms/DataTable.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter();
-const apiBaseUrl = \`/v1/${resource}\`;
+const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}\`;
   
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false);
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false);
 
 
 const tableData = ref({
@@ -166,17 +233,17 @@ const updateResponseData = () => {
 
 
 const handleView = (id) => {
-  router.push({ name: '${routeName}/view', params: { id } });
+  router.push({ name: '${resource}-view', params: { id } });
 };
 
 const handleEdit = (id) => {
-    router.push({ name: '${routeName}/update', params: { id } });
+    router.push({ name: '${resource}-update', params: { id } });
 }
 
 const handleDelete = async (id) => {
   const result = await proxy.$showAlert({
     title: 'Are you sure?',
-    text: 'You won’t be able to revert this!',
+    text: 'You are about to Delete this record. Do you want to proceed?',
     icon: 'warning',
     showConfirmButton: true,
     confirmButtonText: 'Yes, delete it!',
@@ -184,25 +251,45 @@ const handleDelete = async (id) => {
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     reverseButtons: true,
-  });
-
+  })
+ 
   if (result.isConfirmed) {
-    // Perform the delete action here
-    console.log('Deleting record with ID:', id);
-    
-    // Show success alert
-    await proxy.$showAlert({
-      title: 'Deleted!',
-      text: 'Record deleted successfully',
-      icon: 'success',
-      showCancelButton: false,
-    });
+    try {
+      console.log('Deleting record with ID:', id)
+     
+      // autoFetch.value = false
+      const { data, request, isLoading } = useApi(
+        \`/v1/scheduler/appointments/\${id}\`,
+        'DELETE',
+      )
 
-    // Refresh data or update UI if needed
+      await request()
+
+      if(data.value){
+        await proxy.$showAlert({
+        title: 'Deleted!',
+        text: data.value?.toastPayload?.toastMessage || 'Record deleted successfully',
+        icon: 'success',
+        showCancelButton: false,
+      })
+      }
+    } catch (err) {
+      console.error('Error deleting record:', error)
+      await proxy.$showAlert({
+        title: 'Error!',
+        text: \`Error deleting record: \${error.value}\`,
+        icon: 'error',
+        showCancelButton: false,
+      })
+    } finally {
+      await refresh()
+    }
   } else {
-    console.log('Deletion cancelled');
+    console.log('Deletion cancelled')
   }
-};
+  // await refresh()
+
+}
 
 const handleSearch = (query) => {
   request(null, {
@@ -233,7 +320,14 @@ onMounted(() => {
 </script>
 <template>
 <div class="container mt-4">
-  <h1 class="h1 mt-2">List of ${resource}</h1>
+  
+   <div class="row d-flex justify-content-between align-items-center mb-3">
+      <div class="col-auto">
+        <h1 class="h1 mt-2">List of ${resource}</h1>
+      </div>
+      <div class="col-auto">
+        <Button type="submit" customClass="btn btn-success" @click="() => {router.push({ name: '${resource}-create' });}"> New ${resource} </Button>
+      </div>
   <DataTable
         :data="tableData"
         :columns="tableColumns"
@@ -245,6 +339,8 @@ onMounted(() => {
         @update:perPage="updatePerPage"
       />
 </div>
+</div>
+
 </template>
   
 <style scoped></style>`;

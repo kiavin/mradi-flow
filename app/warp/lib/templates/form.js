@@ -9,7 +9,15 @@ import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
 const props = defineProps({
     formData: Object,
     error: Object, 
-    isLoading: Boolean 
+    isLoading: Boolean,
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
+    hideSubmit: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const emit = defineEmits(['submit', 'update']);
@@ -26,18 +34,18 @@ const onSubmit = () => {
                 ${Object.entries(properties).map(([key, value]) => `
                 <div class="mb-2 form-group">
                     <Label :labelFor="'${key}'"> ${value.title} </Label>
-                    <Input :id="'${key}'" :type="'${mapInputType(value.type)}'" v-model="formData.${key}" />
-                    <p v-if="error?.formData?.${key}" class="text-danger">{{ error.formData.${key} }}</p>
+                    <Input :id="'${key}'" :type="'${mapInputType(value.type)}'" v-model="formData.${key}" :disabled="readonly"/>
+                    <p v-if="error?.${key}" class="text-danger">{{ error.${key} }}</p>
                 </div>
                 `).join('')}
                 
-                <div class="text-center mt-3">
+                <div v-if="!hideSubmit" class="text-center mt-3">
             <Button 
                 type="submit" 
                 customClass="btn btn-success d-inline-block" 
                 :disabled="isLoading"
             >
-                {{ isLoading ? 'Submitting...' : '${name}' }}
+                {{ isLoading ? 'Submitting...' : 'Save' }}
             </Button>
         </div>
             </form>
