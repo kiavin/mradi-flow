@@ -1,11 +1,20 @@
 <script setup>
-import { ref, computed, defineEmits, watch } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted, nextTick } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faEye, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import SearchInput from '../molecules/SearchInput.vue'
 import PageDropDownSelect from '../molecules/PageDropDownSelect.vue'
-
+import { Tooltip } from 'bootstrap'
 const emit = defineEmits(['view', 'edit', 'delete', 'changePage', 'search', 'update:perPage'])
+
+onMounted(() => {
+  nextTick(() => {
+    // Select all elements with 'data-toggle="tooltip"' and initialize tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+      new Tooltip(el)
+    })
+  })
+})
 
 const props = defineProps({
   data: {
@@ -18,6 +27,19 @@ const props = defineProps({
   showView: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
   showDelete: { type: Boolean, default: true },
+  loading: { type: Boolean, default: false },
+  layouts: {
+    type: Object,
+    default: () => ({
+      center_text: 'text-center',
+      stickyHeader: true,
+      scrollY: true,
+    }),
+  },
+  sortableColumns: {
+    type: Array,
+    default: () => [], // Example: ['name', 'created_at']
+  },
   actions: {
     type: Array,
     default: () => [],
@@ -40,6 +62,7 @@ const actions = computed(() => {
       icon: faEye,
       callback: (row) => emit('view', row.id),
       show: (row) => props.showView && row.is_deleted !== 1,
+      colorClass: 'text-primary',
     },
     {
       label: 'Edit',
@@ -47,13 +70,15 @@ const actions = computed(() => {
       icon: ['fas', 'pen-to-square'],
       callback: (row) => emit('edit', row.id),
       show: (row) => props.showEdit && row.is_deleted !== 1,
+      colorClass: 'text-primary',
     },
     {
-      label: 'Delete',
-      key: 'delete',
-      icon: (row) => (row.is_deleted === 1 ? ['fas', 'rotate-left'] : faTrashCan),
-      callback: (row) => emit('delete', row.id),
+      label: (row) => (row?.is_deleted === 1 ? 'Restore' : 'Delete'),
+      key: (row) => (row?.is_deleted === 1 ? 'restore' : 'delete'),
+      icon: (row) => (row?.is_deleted === 1 ? ['fas', 'rotate-left'] : faTrashCan),
+      callback: (row) => emit('delete', row.id, row?.is_deleted),
       show: props.showDelete,
+      colorClass: (row) => (row?.is_deleted === 1 ? 'text-primary' : 'text-danger'),
     },
   ]
 
@@ -84,19 +109,45 @@ watch(
 
 const filteredData = computed(() => {
   if (props.searchInBackend) {
-    return props.data.data // Access data inside the object
+    return props.data.data.map((item) => ({ ...item }))
   }
 
-  return props.data.data.filter((row) =>
+  const filtered = props.data.data.filter((row) =>
     Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchQuery.value.toLowerCase()),
     ),
   )
+
+  return filtered.map((item) => ({ ...item }))
 })
 
-const paginatedData = computed(() => {
-  const start = (props.data.paginationData.currentPage - 1) * props.data.paginationData.perPage
-  return filteredData.value.slice(start, start + props.data.paginationData.perPage)
+const paginatedData = ref([])
+
+watch(
+  [
+    filteredData,
+    () => props.data.paginationData.currentPage,
+    () => props.data.paginationData.perPage,
+  ],
+  () => {
+    const start = (props.data.paginationData.currentPage - 1) * props.data.paginationData.perPage
+    const end = start + props.data.paginationData.perPage
+
+    if (filteredData.value.length > 0) {
+      paginatedData.value = filteredData.value.slice(start, end) || []
+    } else {
+      paginatedData.value = []
+    }
+  },
+)
+
+watchEffect(() => {
+  if (filteredData.value.length > 0 && paginatedData.value.length === 0) {
+    // console.log('Fixing paginated data since it was empty while filtered data has data')
+    const start = (props.data.paginationData.currentPage - 1) * props.data.paginationData.perPage
+    const end = start + props.data.paginationData.perPage
+    paginatedData.value = filteredData.value || []
+  }
 })
 
 const isMergedColumnHidden = (columnKey) => {
@@ -116,7 +167,6 @@ const handleSearch = () => {
 // Change page using paginationData
 const changePage = (page) => {
   if (page > 0 && page <= props.data.paginationData.totalPages) {
-    props.data.paginationData.currentPage = page
     emit('changePage', page)
   }
 }
@@ -124,7 +174,38 @@ const changePage = (page) => {
 // Handle per page change
 const handlePerPageChange = (newPerPage) => {
   emit('update:perPage', newPerPage)
-  props.data.paginationData.currentPage = 1 // Reset to first page when perPage changes
+  emit('changePage', 1) // Reset to first page when perPage changes
+}
+// sorting logic
+
+const sortColumn = ref(null) // Currently sorted column
+const sortOrder = ref('asc') // 'asc' or 'desc'
+
+const sortedData = computed(() => {
+  if (!sortColumn.value) return props.data.data
+
+  return [...props.data.data].sort((a, b) => {
+    const valA = a[sortColumn.value]
+    const valB = b[sortColumn.value]
+
+    if (typeof valA === 'string' && typeof valB === 'string') {
+      return sortOrder.value === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA)
+    }
+
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return sortOrder.value === 'asc' ? valA - valB : valB - valA
+    }
+
+    return 0
+  })
+})
+const toggleSort = (column) => {
+  if (sortColumn.value === column) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortColumn.value = column
+    sortOrder.value = 'asc'
+  }
 }
 </script>
 
@@ -140,10 +221,21 @@ const handlePerPageChange = (newPerPage) => {
   <!-- Table -->
   <div class="table-responsive table-wrapper">
     <table class="table table-sm table-hover">
-      <thead class="table-secondary">
+      <thead class="table-secondary" :class="{ 'sticky-header': props.layouts.stickyHeader }">
         <tr>
           <template v-for="col in columns" :key="col.key">
-            <th v-if="!isMergedColumnHidden(col.key)">{{ col.label }}</th>
+            <th v-if="!isMergedColumnHidden(col.key)" scope="col" @click="toggleSort(col.key)">
+              <span
+                v-if="col.label.length > 15"
+                data-toggle="tooltip"
+                :title="col.label"
+                class="d-inline-block text-truncate"
+                style="max-width: 120px"
+              >
+                {{ col.label }}
+              </span>
+              <span v-else>{{ col.label }}</span>
+            </th>
           </template>
           <template v-for="merged in mergedColumns" :key="merged.label">
             <th>{{ merged.label }}</th>
@@ -153,7 +245,17 @@ const handlePerPageChange = (newPerPage) => {
       </thead>
 
       <tbody>
-        <tr v-if="props.data.length === 0">
+        <tr v-if="loading">
+          <td :colspan="columns.length + (showActions ? 1 : 0)" class="text-center">
+            <!-- <div class="text-center">
+              <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div> -->
+            <div class="loader"></div>
+          </td>
+        </tr>
+        <tr v-else-if="props.data.data.length === 0">
           <td :colspan="columns.length + (showActions ? 1 : 0)" class="text-center">
             No results found
           </td>
@@ -161,7 +263,11 @@ const handlePerPageChange = (newPerPage) => {
         <template v-else>
           <tr v-for="(row, index) in paginatedData" :key="index">
             <template v-for="col in columns" :key="col.key">
-              <td v-if="!isMergedColumnHidden(col.key)" class="fs-6">
+              <td
+                v-if="!isMergedColumnHidden(col.key)"
+                class="fs-6"
+                :data-full-text="String(row[col.key])"
+              >
                 <template v-if="props.columnFormatters[col.key]">
                   <component
                     :is="
@@ -169,13 +275,23 @@ const handlePerPageChange = (newPerPage) => {
                         ? props.columnFormatters[col.key]()
                         : props.columnFormatters[col.key]
                     "
-                    :value="row[col.key]"
+                    :value="String(row[col.key])"
                     :row="row"
                     :data="row"
                   />
                 </template>
                 <template v-else>
-                  {{ row[col.key] }}
+                  <!-- {{ row[col.key] }} -->
+                  <span
+                    v-if="String(row[col.key]).length > 10"
+                    data-toggle="tooltip"
+                    :title="row[col.key]"
+                    class="d-inline-block text-truncate"
+                    style="max-width: 180px"
+                  >
+                    {{ row[col.key] }}
+                  </span>
+                  <span v-else>{{ row[col.key] }}</span>
                 </template>
               </td>
             </template>
@@ -196,10 +312,13 @@ const handlePerPageChange = (newPerPage) => {
                     :icon="typeof action.icon === 'function' ? action.icon(row) : action.icon"
                     @click="() => action.callback(row)"
                     class="icon"
-                    :class="{
-                      'text-primary': action.key !== 'delete',
-                      'text-danger': action.key === 'delete',
-                    }"
+                    :class="
+                      typeof action.colorClass === 'function'
+                        ? action.colorClass(row)
+                        : action.colorClass
+                    "
+                    data-bs-toggle="tooltip"
+                    :title="typeof action.label === 'function' ? action.label(row) : action.label"
                   />
                 </slot>
               </template>
@@ -240,6 +359,49 @@ const handlePerPageChange = (newPerPage) => {
 </template>
 
 <style scoped>
+th,
+td {
+  max-width: 150px; /* Adjust this based on your needs */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  position: relative;
+}
+.table.table-sm tbody tr {
+  height: 30px; /* Adjust this value as needed */
+}
+
+.table.table-sm tbody td {
+  padding: 4px 8px; /* Reduce cell padding */
+  font-size: 14px; /* Adjust font size */
+  line-height: 1.2; /* Reduce line height */
+  vertical-align: middle; /* Keep content centered */
+}
+
+th:hover::after,
+td:hover::after {
+  content: attr(data-full-text);
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  white-space: normal;
+  max-width: 300px;
+  z-index: 10;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+th:hover::after,
+td:hover::after {
+  opacity: 1;
+}
+
 .on-hover {
   cursor: pointer;
 }
@@ -253,7 +415,51 @@ const handlePerPageChange = (newPerPage) => {
 }
 .table-wrapper {
   overflow-x: auto;
+  max-height: 400px;
   white-space: nowrap;
   max-width: 100%;
+}
+
+.scroll-y {
+  overflow-y: auto;
+  max-height: 400px; /* Set a fixed height to allow scrolling */
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa; /* Ensure it's visible over content */
+  z-index: 1000;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow */
+}
+
+/* Ensure column headers have a background */
+th {
+  background-color: #f8f9fa;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+.loader {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 30px;
+  display: inline-grid;
+}
+.loader:before,
+.loader:after {
+  content: 'Loading...';
+  grid-area: 1/1;
+  -webkit-mask: linear-gradient(90deg, #000 50%, #0000 0) 0 50%/2ch 100%;
+  animation: l11 1s infinite cubic-bezier(0.5, 220, 0.5, -220);
+}
+.loader:after {
+  -webkit-mask-position: 1ch 50%;
+  --s: -1;
+}
+@keyframes l11 {
+  100% {
+    transform: translateY(calc(var(--s, 1) * 0.1%));
+  }
 }
 </style>

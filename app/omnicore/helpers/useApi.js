@@ -33,29 +33,26 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
     const error = ref(null)
     const status = ref('idle') // idle | loading | success | error | refreshed
     const lastFetched = ref(null)
-    let controller = null // AbortController instance
+    let controller = null 
 
     const request = async (payload = null, queryParams = {}) => {
         if (controller) {
             await new Promise(resolve => setTimeout(resolve, 50))
             controller.abort()
-        } // Cancel previous request
+        } 
         controller = new AbortController()
 
         status.value = 'loading'
         error.value = null
 
         try {
-            // Build URL with query parameters
             const queryString = Object.keys(queryParams).length ? `?${qs.stringify(queryParams)}` : ''
             const url = `${baseUrl}${queryString}`
 
-            // Clear cache before making a POST, PUT, DELETE request if caching is enabled
             if (enableCache && method.toUpperCase() !== 'GET') {
                 clearCacheForUrl(baseUrl)
             }
 
-            // Use cache for GET requests only if caching is enabled
             if (enableCache && method.toUpperCase() === 'GET') {
                 const cachedData = getCache(url)
                 if (cachedData) {
@@ -65,20 +62,18 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
                 }
             }
 
-            // Prepare request config
             const config = {
                 method,
                 url,
-                signal: controller.signal, // Attach signal for cancellation
+                signal: controller.signal, //signal for cancellation
                 ...options,
             }
 
-            if (payload) config.data = payload // Attach body if needed
+            if (payload) config.data = payload 
 
             const response = await axios(config)
             data.value = response.data
 
-            // Cache only GET requests if caching is enabled
             if (enableCache && method.toUpperCase() === 'GET') {
                 setCache(url, response.data)
             }
@@ -89,16 +84,11 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             if (axios.isCancel(err)) return
             error.value = err.response?.data?.errorPayload?.errors || err.response?.data || [err.message]
             status.value = 'error'
-            data.value = null // Ensure no old data is returned on error
+            data.value = null 
         }
     }
 
-    //Watch for changes in `data.value`
-    watchEffect(() => {
-        if (data.value) {
-            console.log('Updated data:', data.value) // Debugging
-        }
-    })
+     
 
     // Auto-fetch for GET requests when dependencies change
     watch(() => [baseUrl, method, options], () => {
@@ -123,7 +113,7 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
         error,
         status,
         lastFetched,
-        request, // Call this for POST, PUT, DELETE, etc.
+        request, 
         refresh,
         clear,
         isLoading: computed(() => status.value === 'loading'),

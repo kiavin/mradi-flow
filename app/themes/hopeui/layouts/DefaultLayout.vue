@@ -1,7 +1,10 @@
 <script setup>
+import Header from '~/themes/hopeui/components/molecules/DefaultHeader.vue'
 </script>
 <template>
-  <h1></h1>
+  <!-- <Header /> -->
+  <div class="container mt-4">
+    <slot></slot>
+  </div>
 </template>
-<style scoped>
-</style>
+<style scoped></style>

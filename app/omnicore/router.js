@@ -19,7 +19,7 @@ const router = createRouter({
       path: '/play',
       name: 'playground',
       component: PlayGroundView,
-      meta: { title: 'Omniface - Home' },
+      meta: { title: 'Omniface - Home', layout: 'default' },
     },
     {
       path: '/view-demo/:id',
@@ -42,7 +42,7 @@ const router = createRouter({
 })
 
 // router.beforeEach((to, from, next) => {
-  // document.title = to.meta.title || 'Omniface';
+// document.title = to.meta.title || 'Omniface';
 //   authMiddleware(to, from, next);
 // });
 

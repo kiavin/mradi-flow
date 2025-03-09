@@ -2,10 +2,20 @@
 import { onMounted, ref, watch, getCurrentInstance } from 'vue'
 import { useApi } from '../../../app/omnicore/helpers/useApi'
 import DataTable from '../../../app/themes/hopeui/components/organisms/DataTable.vue'
+import TableSkeleton from '../../../app/themes/hopeui/components/molecules/TableSkeleton.vue'
+import DemoForm from '../../../app/themes/hopeui/components/organisms/DemoForm.vue'
+import { useModalStore } from '~/omnicore/stores/modalStore.js'
 const { proxy } = getCurrentInstance()
 import Demo from './StatusFormater.vue'
 const username = ref('')
 const password = ref('')
+
+const modalStore = useModalStore();
+
+const showModal = () => {
+  modalStore.openModal(DemoForm, { message: 'Hello from Modal!' }, 'Demo Modal');
+};
+
 
 // const { data, request, isLoading, error } = useApi('/v1/auth/login', 'POST')
 const { data, request, isLoading, error } = useApi('/v1/scheduler/appointments', 'GET', {}, false)
@@ -44,12 +54,9 @@ const tableColumns = ref([
 watch(data, () => {
   updateResponseData()
 })
-
 const updateResponseData = () => {
   if (data.value?.dataPayload) {
-    tableData.value.data = /*[...data.value.dataPayload.data] */ Array.isArray(
-      data.value.dataPayload.data,
-    )
+    tableData.value.data = Array.isArray(data.value.dataPayload.data)
       ? data.value.dataPayload.data
       : []
     tableData.value.paginationData = {
@@ -60,10 +67,11 @@ const updateResponseData = () => {
       totalPages: data.value.dataPayload.totalPages,
       paginationLinks: data.value.dataPayload.paginationLinks,
     }
+    console.log('Updated tableData:', tableData.value)
   }
 }
-// const paginationData = computed(() => tableData.value.paginationData)
-// const paginationData = reactive(tableData.value.paginationData)
+
+ 
 
 // Handle Actions
 const handleView = (id) => {
@@ -109,26 +117,25 @@ const handleDelete = async (id) => {
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     reverseButtons: true,
-  });
+  })
 
   if (result.isConfirmed) {
     // Perform the delete action here
-    console.log('Deleting record with ID:', id);
-    
+    console.log('Deleting record with ID:', id)
+
     // Show success alert
     await proxy.$showAlert({
       title: 'Deleted!',
       text: 'Record deleted successfully',
       icon: 'success',
       showCancelButton: false,
-    });
+    })
 
     // Refresh data or update UI if needed
   } else {
-    console.log('Deletion cancelled');
+    console.log('Deletion cancelled')
   }
-};
-
+}
 
 const handleSearch = (query) => {
   request(null, {
@@ -138,18 +145,26 @@ const handleSearch = (query) => {
   })
 }
 
+ 
+
 const changePage = async (page) => {
-  await request(null, { page, 'per-page': tableData.value.paginationData.perPage }).then(() => {
-    updateResponseData()
-  })
+  await request(null, { page, 'per-page': tableData.value.paginationData.perPage })
+     
+  updateResponseData()
+
   console.log('Page changed to: ', data.value)
 }
 
 const updatePerPage = async (perPage) => {
   tableData.value.paginationData.perPage = perPage
-  await request(null, { page: tableData.value.paginationData.currentPage, 'per-page': perPage })
-  if (data?.dataPayload?.data) tableData.value = [...data.dataPayload.data]
+  await request(null, {
+    page: tableData.value.paginationData.currentPage,
+    'per-page': perPage,
+  })
+  updateResponseData()
+
 }
+ 
 
 onMounted(() => {
   request().then(() => {
@@ -159,13 +174,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mt-4">
+  <button class="btn btn-primary" @click="showModal">Open Modal</button>
+    
     <!-- <div v-if="isLoading">Loading...</div> -->
     <!-- <div v-if="error">Error: {{ error }}</div> -->
     <!-- <div class="bg-primary rounded" v-else> -->
     <!-- <pre>{{ data }}</pre> -->
     <!-- </div> -->
-    <button
+    <!-- <button
       @click="
         () => {
           proxy.$showToast()
@@ -174,40 +190,48 @@ onMounted(() => {
     >
       Refresh Data
     </button>
-    <button @click="handleEdit(23)">Refresh Data</button>
+    <button @click="handleEdit(23)">Refresh Data</button> -->
 
     <!-- <Label labelFor="email" customClass="form-label">Email</Label>
     <Input class="form-control" placeholder="demo input" />
     <Button customClass="btn btn-primary">Submit</Button> -->
 
-    <form @submit.prevent="submitForm">
+    <!-- <form @submit.prevent="submitForm">
       <input v-model="username" placeholder="Username" /><br />
       <div v-if="error" style="color: red">{{ error.username }}</div>
       <input v-model="password" type="password" placeholder="Password" /><br />
       <div v-if="error" style="color: red">{{ error.password }}</div>
 
       <button type="submit" :disabled="isLoading">Login</button>
-    </form>
+    </form> -->
 
     <!-- <div v-if="isLoading">Logging in...</div> -->
 
     <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
     <div>
-      <h2>Bootstrap Table</h2>
-      <DataTable
-        :data="tableData"
-        :columns="tableColumns"
-        @edit="handleEdit"
-        @search="handleSearch"
-        @delete="handleDelete"
-        @view="handleView"
-        @changePage="changePage"
-        @update:perPage="updatePerPage"
-        :columnFormatters="{
-          status: Demo,
-        }"
-        :mergedColumns="[{ keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' }]"
-      />
+      <h2 class="h2">Bootstrap Table</h2>
+      <Suspense>
+        <template #default>
+          <DataTable
+            :data="tableData"
+            :columns="tableColumns"
+            :loading="isLoading"
+            @edit="handleEdit"
+            @search="handleSearch"
+            @delete="handleDelete"
+            @view="handleView"
+            @changePage="changePage"
+            @update:perPage="updatePerPage"
+            :columnFormatters="{
+              status: Demo,
+            }"
+            :mergedColumns="[{ keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' }]"
+            :layouts="{ stickyHeader: true }"
+          />
+        </template>
+        <template #fallback>
+          <TableSkeleton />
+        </template>
+      </Suspense>
     </div>
-  </div>
 </template>

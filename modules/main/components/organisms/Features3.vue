@@ -1,4 +1,5 @@
 <script setup>
+
 </script>
 <template>
   <section class="c4lt2 c7rlc ca7yh cxk7g c62s6">
@@ -27,7 +28,8 @@
         class="cexs9 czr3h c1t5i cisme csvzg c7ptl cctzk c5z0b ckogm c8c0t c2fmr cvgwp ct4qk c3qgn cv8nf cboss c4lt2"
       >
         <div class="stellar-carousel swiper-container c73l4">
-          <div class="swiper-wrapper cjinm" data-highlighter=""></div>
+          <div class="swiper-wrapper cjinm" data-highlighter="">
+          </div>
         </div>
       </div>
     </div>

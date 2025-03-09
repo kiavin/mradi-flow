@@ -23,7 +23,7 @@ modules.forEach(module => {
     const routeFile = path.join(modulesPath, module, 'routes', 'index.js');
 
     if (fs.existsSync(routeFile)) {
-        const importStatement = `import ${module}Routes from '@/${module}/routes/index.js';`; // Use alias
+        const importStatement = `import ${module}Routes from '../modules/${module}/routes/index.js';`; // Adjusted path
         const routeArray = `${module}Routes`;
 
         if (!routes.find(r => r.routeArray === routeArray)) {

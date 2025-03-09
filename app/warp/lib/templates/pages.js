@@ -212,12 +212,9 @@ const tableColumns = ${JSON.stringify(tableColumns)}
 watch(data, () => {
   updateResponseData()
 })
-
 const updateResponseData = () => {
   if (data.value?.dataPayload) {
-    tableData.value.data = /*[...data.value.dataPayload.data] */ Array.isArray(
-      data.value.dataPayload.data,
-    )
+    tableData.value.data = Array.isArray(data.value.dataPayload.data)
       ? data.value.dataPayload.data
       : []
     tableData.value.paginationData = {
@@ -228,6 +225,7 @@ const updateResponseData = () => {
       totalPages: data.value.dataPayload.totalPages,
       paginationLinks: data.value.dataPayload.paginationLinks,
     }
+    // console.log('Updated tableData:', tableData.value)
   }
 }
 
@@ -240,13 +238,19 @@ const handleEdit = (id) => {
     router.push({ name: '${resource}-update', params: { id } });
 }
 
-const handleDelete = async (id) => {
+const handleDelete = async (id, is_deleted) => {
+   const action = is_deleted ? 'Restore' : 'Delete'
+
+  const confirmationText = is_deleted
+    ? 'You are about to restore this record. Do you want to proceed?'
+    : 'You are about to delete this record. Do you want to proceed?'
+
   const result = await proxy.$showAlert({
     title: 'Are you sure?',
-    text: 'You are about to Delete this record. Do you want to proceed?',
+    text: confirmationText,
     icon: 'warning',
     showConfirmButton: true,
-    confirmButtonText: 'Yes, delete it!',
+    confirmButtonText: \`Yes, \${action} it!\`,
     cancelButtonText: 'No, cancel!',
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
@@ -255,23 +259,25 @@ const handleDelete = async (id) => {
  
   if (result.isConfirmed) {
     try {
-      console.log('Deleting record with ID:', id)
+      // console.log('Deleting record with ID:', id)
      
       // autoFetch.value = false
       const { data, request, isLoading } = useApi(
-        \`/v1/scheduler/appointments/\${id}\`,
+        \`/v1/scheduler/${resource.toLowerCase()}/\${id}\`,
         'DELETE',
       )
 
       await request()
 
-      if(data.value){
+     if (data.value) {
         await proxy.$showAlert({
-        title: 'Deleted!',
-        text: data.value?.toastPayload?.toastMessage || 'Record deleted successfully',
-        icon: 'success',
-        showCancelButton: false,
-      })
+          title: \`\${action}d!\`,
+          text: data.value?.toastPayload?.toastMessage || 'Record deleted successfully',
+          icon: 'success',
+          showCancelButton: false,
+          showConfirmButton: false,
+          timer: 1500,
+        })
       }
     } catch (err) {
       console.error('Error deleting record:', error)
@@ -300,16 +306,21 @@ const handleSearch = (query) => {
 }
 
 const changePage = async (page) => {
-  await request(null, { page, 'per-page': tableData.value.paginationData.perPage }).then(() => {
-    updateResponseData()
-  })
+  await request(null, { page, 'per-page': tableData.value.paginationData.perPage })
+     
+  updateResponseData()
+
   console.log('Page changed to: ', data.value)
 }
 
 const updatePerPage = async (perPage) => {
   tableData.value.paginationData.perPage = perPage
-  await request(null, { page: tableData.value.paginationData.currentPage, 'per-page': perPage })
-  if (data?.dataPayload?.data) tableData.value = [...data.dataPayload.data]
+  await request(null, {
+    page: tableData.value.paginationData.currentPage,
+    'per-page': perPage,
+  })
+  updateResponseData()
+
 }
 
 onMounted(() => {
@@ -331,6 +342,7 @@ onMounted(() => {
   <DataTable
         :data="tableData"
         :columns="tableColumns"
+        :loading="isLoading"
         @edit="handleEdit"
         @search="handleSearch"
         @delete="handleDelete"

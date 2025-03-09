@@ -1,5 +1,4 @@
-<script setup>
-</script>
+<script setup></script>
 <template>
   <div class="cewgk cyuy9 cld13 c8230">
     <!-- Hero content -->
@@ -17,7 +16,9 @@
           </RouterLink>
         </div>
       </div>
-      <h1 class="chl73 c80q8 ch30f crgfn c9p57 cnt4i c6odu cgxy0" data-aos="fade-down">Omniface Frontend Automation</h1>
+      <h1 class="chl73 c80q8 ch30f crgfn c9p57 cnt4i c6odu cgxy0" data-aos="fade-down">
+        Omniface Frontend Automation
+      </h1>
       <p class="chu7q csqzg ci5zu" data-aos="fade-down" data-aos-delay="200">
         ✨ Let the code write itself—so you can focus on what really matters.
       </p>
@@ -51,6 +52,57 @@
           </RouterLink>
         </div>
       </div>
+      <p class="glowing-text chu7q csqzg ci5zu" data-aos="fade-down" data-aos-delay="200">
+        If you have to do it more than once, Automate it!
+      </p>
     </div>
   </div>
 </template>
+<style scoped>
+@keyframes flicker {
+  0% {
+    text-shadow:
+      0 0 3px #1f1231,
+      0 0 8px #1f1231,
+      0 0 15px #1f1231;
+  }
+  25% {
+    text-shadow:
+      0 0 6px #2a0f4a,
+      0 0 12px #1f1231,
+      0 0 20px #1f1231;
+  }
+  50% {
+    text-shadow:
+      0 0 8px #3b1763,
+      0 0 15px #2a0f4a,
+      0 0 25px #1f1231;
+  }
+  75% {
+    text-shadow:
+      0 0 10px #4d1d7d,
+      0 0 18px #3b1763,
+      0 0 30px #1f1231;
+  }
+  100% {
+    text-shadow:
+      0 0 5px #2a0f4a,
+      0 0 10px #1f1231,
+      0 0 18px #1f1231;
+  }
+}
+
+.glowing-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  color: #F5F3F8A6; /* Deep Purple */
+  text-transform: capitalize;
+  font-family: 'Orbitron', sans-serif; /* Sci-fi font */
+  /* text-shadow:
+    0 0 5px #2a0f4a,
+    0 0 10px #1f1231,
+    0 0 15px #1f1231; */
+  /* animation: flicker 5s infinite ease-in-out; */
+}
+</style>
