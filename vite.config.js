@@ -2,9 +2,11 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import omnifaceEnvPlugin from './app/omnicore/plugins/omniface-vite-plugin';
+import omnifaceEnvPlugin from './app/omnicore/plugins/omniface-vite-plugin'
+import dotenv from 'dotenv'
 
-// const selectedTheme = process.env.VITE_THEME || "hope-ui";
+// Load environment variables from omniface.cfg
+dotenv.config({ path: './omniface.cfg' });
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -26,19 +28,13 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./modules', import.meta.url)),
       '~': fileURLToPath(new URL('./app', import.meta.url)),
-      // "@theme": path.resolve(__dirname, `themes/${selectedTheme}`)
     },
   },
-  // build: {
-  //   rollupOptions: {
-  //     external: [`../themes/one-ui/`, `../themes/default/`],
-  //   }
-  // },
   server: {
     host: true,
     proxy: {
       '/v1': {
-        target: process.env.API_BASE_URL || 'http://localhost:9009',
+        target: process.env.API_BASE_URL,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
