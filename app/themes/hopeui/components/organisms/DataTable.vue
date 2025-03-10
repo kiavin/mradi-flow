@@ -215,7 +215,7 @@ const toggleSort = (column) => {
       :modelValue="props.data.paginationData.perPage"
       @update:modelValue="handlePerPageChange"
     />
-    <SearchInput v-model="searchQuery" @search="handleSearch" type="text"/>
+    <SearchInput v-model="searchQuery" @search="handleSearch" type="text" />
   </div>
 
   <!-- Table -->
@@ -451,10 +451,12 @@ th {
   content: 'Loading...';
   grid-area: 1/1;
   -webkit-mask: linear-gradient(90deg, #000 50%, #0000 0) 0 50%/2ch 100%;
+  mask: linear-gradient(90deg, #000 50%, #0000 0) 0 50%/2ch 100%; /* Standard property */
   animation: l11 1s infinite cubic-bezier(0.5, 220, 0.5, -220);
 }
 .loader:after {
   -webkit-mask-position: 1ch 50%;
+  mask-position: 1ch 50%; /* Standard property */
   --s: -1;
 }
 @keyframes l11 {
