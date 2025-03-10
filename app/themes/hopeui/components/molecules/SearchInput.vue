@@ -37,7 +37,7 @@ const handleSearchSubmit = () => {
     />
 
     <!-- Search Button (Bootstrap) -->
-    <button class="btn btn-primary search-btn" @click="handleSearchSubmit">
+    <button class="btn btn-primary search-btn" @click="handleSearchSubmit" :disabled="!searchQuery">
       <slot name="search-icon">
         Search
       </slot>
