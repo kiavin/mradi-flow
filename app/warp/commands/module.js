@@ -50,7 +50,7 @@ const moduleCreateCommand = new Command('create')
 
     let selectedFolders = allFolders;
 
-    //Check if inquiry is enabled
+    // Check if inquiry is enabled
     if (config.ENABLE_INQUIRY) {
       // If --all is NOT passed, prompt the user
       if (!all) {
@@ -93,14 +93,12 @@ const moduleCreateCommand = new Command('create')
         }
       }
     } else {
-      //If ENABLE_INQUIRY is false, always generate all folders and ignore --all option
+      // If ENABLE_INQUIRY is false, always generate all folders and ignore --all option
       console.log(chalk.yellow('⚠️ Inquiry is disabled. Generating all module folders automatically.'));
     }
 
-
     // Show a loading spinner while generating
     const spinner = ora('Generating module...').start();
-
 
     try {
       const success = await generateModule(name, selectedFolders);
@@ -110,7 +108,6 @@ const moduleCreateCommand = new Command('create')
     } catch (error) {
       spinner.fail(chalk.red(`❌ Error generating module: ${error.message}`));
     }
-
   });
 
 moduleCommand.addCommand(moduleCreateCommand);
