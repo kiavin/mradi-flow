@@ -263,7 +263,7 @@ const handleDelete = async (id, is_deleted) => {
      
       // autoFetch.value = false
       const { data, request, isLoading } = useApi(
-        \`/v1/scheduler/${resource.toLowerCase()}/\${id}\`,
+        \`/v1/${moduleName}/${resource.toLowerCase()}/\${id}\`,
         'DELETE',
       )
 
