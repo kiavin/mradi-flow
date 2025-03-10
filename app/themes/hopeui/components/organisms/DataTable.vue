@@ -215,7 +215,7 @@ const toggleSort = (column) => {
       :modelValue="props.data.paginationData.perPage"
       @update:modelValue="handlePerPageChange"
     />
-    <SearchInput v-model="searchQuery" @search="handleSearch" type="text" />
+    <SearchInput v-model="searchQuery" @search="handleSearch" type="text"/>
   </div>
 
   <!-- Table -->
