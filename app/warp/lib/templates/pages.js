@@ -1,3 +1,7 @@
+function formatResourceName(resource) {
+  return resource.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 export function createPageTemplate(resource, moduleName) {
   return `<script setup>
 import { ref, getCurrentInstance } from 'vue';
@@ -8,7 +12,7 @@ import Form from './form.vue';
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 
-const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}\`;
+const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
 
 const formData = ref({});
@@ -31,21 +35,22 @@ const handleSubmit = async (data) => {
     timerProgressBar: true,
 })
   setTimeout(() => {
-    router.push({ name: '${resource}' })
+    router.push({ name: '${moduleName}/${formatResourceName(resource)}' })
   }, 2000)
 }
 </script>
 
 <template>
-<div class="container">
-    <h1 class="h1 mt-2">Create ${resource}</h1>
+  <div class="card p-3">
+
+    <h1 class="h4 mt-2">Create ${resource}</h1>
     <Form 
     :formData="formData" 
     :error="error" 
     :isLoading="isLoading" 
     @submit="handleSubmit" 
     />
-</div>
+    </div>
 </template>
 
 <style scoped></style>`;
@@ -64,7 +69,7 @@ const router = useRouter()
 
 const route = useRoute();
 const id = route.params.id;
-const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}/\${id}\`;
+const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
 const formData = ref({});
@@ -105,21 +110,22 @@ const handleSubmit = async (updatedData) => {
     timerProgressBar: true,
   })
   setTimeout(() => {
-    router.push({ name: '${resource}' })
+    router.push({ name: '${moduleName}/${formatResourceName(resource)}' })
   }, 2000)
 }
 </script>
 
 <template>
-<div class="container">
-    <h1 class="h1 mt-2">Update ${resource}</h1>
+  <div class="card p-3">
+
+    <h1 class="h4 mt-2">Update ${resource}</h1>
     <Form 
     :formData="formData" 
     :error="errors" 
     :isLoading="isLoading" 
     @submit="handleSubmit" 
     />
-</div>
+    </div>
 </template>
 
 <style scoped></style>`;
@@ -137,7 +143,7 @@ import Form from './form.vue';
 const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
-const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}/\${id}\`;
+const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true);
 const formData = ref({});
@@ -156,13 +162,14 @@ watch(data, () => {
 </script>
 
 <template>
-<div class="container">
+  <div class="card p-3">
+
     <div class="row d-flex justify-content-between align-items-center">
       <div class="col-auto">
         <h1 class="h1 mt-2">View ${resource}</h1>
       </div>
       <div class="col-auto">
-        <Button type="submit" customClass="btn btn-success" @click="() => {router.push({ name: '${resource}-update', params: { id } });}"> Edit </Button>
+        <Button type="submit" customClass="btn btn-primary" @click="() => {router.push({ name: '${moduleName}/${resource.toLowerCase()}/update', params: { id } });}"> Edit </Button>
       </div>
     </div>
 
@@ -173,24 +180,30 @@ watch(data, () => {
     :readonly="true"
     hide-submit
     />
-</div>
+  </div>
 </template>
 
 <style scoped></style>`;
 }
 
-export function indexPageTemplate(resource, tableColumns, moduleName) {
+export function indexPageTemplate(resource, tableColumns, moduleName, endPoints) {
   return `<script setup>
-import { onMounted, ref, watch, getCurrentInstance } from 'vue'
+import { onMounted, ref, watch, getCurrentInstance, nextTick } from 'vue'
 import { useRouter } from 'vue-router';
 import { useApi } from '~/omnicore/helpers/useApi';
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+import { useModalStore } from '~/omnicore/stores/modalStore.js'
+import Form from './form.vue'
 
 import DataTable from '~/themes/hopeui/components/organisms/DataTable.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter();
-const apiBaseUrl = \`/v1/${moduleName}/${resource.toLowerCase()}\`;
+
+const modalStore = useModalStore()
+
+
+const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
   
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false);
 
@@ -230,13 +243,162 @@ const updateResponseData = () => {
 }
 
 
-const handleView = (id) => {
-  router.push({ name: '${resource}-view', params: { id } });
-};
+//const handleView = (id) => {
+// router.push({ name: '${moduleName}/${resource.toLowerCase()}/view', params: { id } });
+//};
 
-const handleEdit = (id) => {
-    router.push({ name: '${resource}-update', params: { id } });
+const handleView = async (id) => {
+  modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
+
+  await nextTick(); // ensure store state is updated
+
+  if (!modalStore.useModal) {
+    router.push({ name: '${moduleName}/${resource.toLowerCase()}/view', params: { id } });
+    return
+  }
+
+  const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
+
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+
+  await request()
+
+  modalStore.openModal(
+    Form,
+    {
+      formData: data.value?.dataPayload?.data || {},
+      error,
+      isLoading,
+      readonly: true,
+      hideSubmit: true,
+    },
+    'View ${resource}',
+  )
 }
+
+//const handleEdit = (id) => {
+//   router.push({ name: '${moduleName}/${resource.toLowerCase()}/update', params: { id } });
+//}
+
+
+const errors = ref({})
+
+const handleEdit = async (id) => {
+  errors.value = {}
+  
+  modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
+
+  await nextTick(); // ensure store state is updated
+
+  if (!modalStore.useModal) {
+    // Navigate to the update page
+    router.push({ name: '${moduleName}/${resource.toLowerCase()}/update', params: { id } });
+    return
+  }
+
+  // Fetch appointment data before opening the modal
+  const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+
+  await request() // Fetch data before opening modal
+
+  // Function to handle form submission (Update API Call)
+  const handleSubmit = async (updatedData) => {
+    const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+    await updateData(updatedData)
+    if (error.value) {
+      console.log('Error', error.value)
+      errors.value = error.value // Assign the error object to errors
+      return // Stop execution if error occurs
+    }
+
+    // Close modal on success
+    modalStore.closeModal()
+
+    // Show success message
+    proxy.$showAlert({
+      title: 'Success',
+      icon: 'success',
+      text: '${resource} Updated successfully',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
+
+    refresh()
+  }
+
+  // Open modal with Form component
+  modalStore.openModal(
+    Form,
+    {
+      formData: data.value?.dataPayload?.data || {},
+      error: errors,
+      isLoading,
+      readonly: false, // Allow editing
+      hideSubmit: false,
+      onSubmit: handleSubmit, // Pass the submission function
+    },
+    'Edit ${resource}',
+  )
+}
+
+
+const handleCreate = async() => {
+  errors.value = {}
+  modalStore.toggleModalUsage(true)
+
+  await nextTick(); // ensure store state is updated
+
+  if (!modalStore.useModal) {
+    router.push({ name: '${moduleName}/${resource.toLowerCase()}/create' })
+    return
+  }
+
+  // Define form submission handler
+  const handleSubmit = async (newData) => {
+    const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
+
+    const { request: createData, error } = useApi(apiBaseUrl, 'POST')
+
+    await createData(newData)
+
+    if (error.value) {
+      console.log('Error', error.value)
+      errors.value = error.value // Assign errors to be passed to the form
+      return
+    }
+
+    // Close modal and show success message
+    modalStore.closeModal()
+
+    proxy.$showAlert({
+      title: 'Success',
+      icon: 'success',
+      text: '${resource} Created successfully',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
+
+    refresh()
+  }
+
+  // Open modal with Form component
+  modalStore.openModal(
+    Form,
+    {
+      formData: {}, // Empty form for creation
+      error: errors, // Empty error object
+      isLoading: false,
+      readonly: false, // Allow input
+      hideSubmit: false,
+      onSubmit: handleSubmit, // Pass submission function
+    },
+    'Create ${resource}',
+  )
+}
+
 
 const handleDelete = async (id, is_deleted) => {
    const action = is_deleted ? 'Restore' : 'Delete'
@@ -263,7 +425,7 @@ const handleDelete = async (id, is_deleted) => {
      
       // autoFetch.value = false
       const { data, request, isLoading } = useApi(
-        \`/v1/${moduleName}/${resource.toLowerCase()}/\${id}\`,
+        \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`,
         'DELETE',
       )
 
@@ -330,14 +492,13 @@ onMounted(() => {
 })
 </script>
 <template>
-<div class="container mt-4">
-  
+  <div class="card p-3">
    <div class="row d-flex justify-content-between align-items-center mb-3">
       <div class="col-auto">
-        <h1 class="h1 mt-2">List of ${resource}</h1>
+        <h1 class="h4 mt-2">List of ${resource}</h1>
       </div>
-      <div class="col-auto">
-        <Button type="submit" customClass="btn btn-success" @click="() => {router.push({ name: '${resource}-create' });}"> New ${resource} </Button>
+      <div class="col-auto mb-4">
+        <Button type="submit" customClass="btn btn-primary" @click="handleCreate"> New ${resource} </Button>
       </div>
   <DataTable
         :data="tableData"
@@ -350,8 +511,9 @@ onMounted(() => {
         @changePage="changePage"
         @update:perPage="updatePerPage"
       />
+  </div>
 </div>
-</div>
+
 
 </template>
   

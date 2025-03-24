@@ -2,7 +2,7 @@
 import Header from '~/themes/hopeui/components/molecules/DefaultHeader.vue'
 </script>
 <template>
-  <!-- <Header /> -->
+  <Header />
   <div class="container mt-4">
     <slot></slot>
   </div>

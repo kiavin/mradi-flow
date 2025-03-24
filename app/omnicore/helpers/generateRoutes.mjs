@@ -5,36 +5,35 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const modulesPath = path.resolve(__dirname, '../../../modules'); // Adjust this if needed
-const outputFilePath = path.resolve(__dirname, '../generatedRoutes.js');
+const modulesPath = path.resolve(__dirname, '../../../modules'); // Ensure this path is correct
+const outputFilePath = path.join(__dirname, '../generatedRoutes.json');
 
 if (!fs.existsSync(modulesPath)) {
     console.warn('⚠️  Modules directory not found:', modulesPath);
+    fs.writeFileSync(outputFilePath, "export default [];\n", "utf-8");
     process.exit(1);
 }
 
+// Scan for modules containing a 'router/index.js' file
 const modules = fs.readdirSync(modulesPath).filter(folder => {
-    return fs.statSync(path.join(modulesPath, folder)).isDirectory();
+    const routeFile = path.join(modulesPath, folder, 'router', 'index.js'); // Correct variable usage
+    return fs.statSync(path.join(modulesPath, folder)).isDirectory() && fs.existsSync(routeFile);
 });
 
-let routes = [];
+if (modules.length === 0) {
+    console.warn('⚠️ No valid module routes found.');
+    fs.writeFileSync(outputFilePath, "export default [];\n", "utf-8");
+    process.exit(0);
+}
 
-modules.forEach(module => {
-    const routeFile = path.join(modulesPath, module, 'routes', 'index.js');
+const imports = modules.map(
+    module => `import ${module}Routes from '@/${module}/router/index.js';`
+).join('\n');
 
-    if (fs.existsSync(routeFile)) {
-        const importStatement = `import ${module}Routes from '../modules/${module}/routes/index.js';`; // Adjusted path
-        const routeArray = `${module}Routes`;
+const exports = `export default [\n  ${modules.map(module => `...${module}Routes`).join(',\n  ')}\n];`;
 
-        if (!routes.find(r => r.routeArray === routeArray)) {
-            routes.push({ importStatement, routeArray });
-        }
-    }
-});
-
-// Generate the final file
-const imports = routes.map(r => r.importStatement).join('\n');
-const exports = `export default [\n  ${routes.map(r => `...${r.routeArray}`).join(',\n  ')}\n];`;
-
+// Write to file
 fs.writeFileSync(outputFilePath, `${imports}\n\n${exports}`, 'utf-8');
-console.log('✅ Routes generated successfully at:', outputFilePath);
+
+console.log("✅ Routes generated successfully at:", outputFilePath);
+

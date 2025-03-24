@@ -6,6 +6,8 @@ export const useModalStore = defineStore('modalStore', () => {
     const component = ref(null);
     const props = ref({});
     const title = ref('');
+    const useModal = ref(true);
+    const modalSize = ref('');
 
     function openModal(modalComponent = null, modalProps = {}, modalTitle = 'Modal Title') {
         component.value = modalComponent ? markRaw(modalComponent) : null;
@@ -21,5 +23,9 @@ export const useModalStore = defineStore('modalStore', () => {
         title.value = '';
     }
 
-    return { isOpen, component, props, title, openModal, closeModal };
+    function toggleModalUsage(value) {
+        useModal.value = value;
+    }
+
+    return { isOpen, component, useModal, modalSize, props, title, openModal, closeModal, toggleModalUsage };
 });

@@ -1,4 +1,4 @@
-<script setup>
+here <script setup>
 import { ref, computed, watch, watchEffect, onMounted, nextTick } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faEye, faTrashCan } from '@fortawesome/free-solid-svg-icons'
@@ -9,7 +9,6 @@ const emit = defineEmits(['view', 'edit', 'delete', 'changePage', 'search', 'upd
 
 onMounted(() => {
   nextTick(() => {
-    // Select all elements with 'data-toggle="tooltip"' and initialize tooltips
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
       new Tooltip(el)
     })
@@ -22,6 +21,7 @@ const props = defineProps({
     default: () => ({ data: [], paginationData: {} }),
   },
   columns: Array,
+  filterableColumns: Array,
   searchInBackend: { type: Boolean, default: true },
   showActions: { type: Boolean, default: true },
   showView: { type: Boolean, default: true },
@@ -38,7 +38,7 @@ const props = defineProps({
   },
   sortableColumns: {
     type: Array,
-    default: () => [], // Example: ['name', 'created_at']
+    default: () => ['date'], // Example: ['name', 'created_at']
   },
   actions: {
     type: Array,
@@ -176,13 +176,14 @@ const handlePerPageChange = (newPerPage) => {
   emit('update:perPage', newPerPage)
   emit('changePage', 1) // Reset to first page when perPage changes
 }
+
 // sorting logic
 
-const sortColumn = ref(null) // Currently sorted column
-const sortOrder = ref('asc') // 'asc' or 'desc'
+const sortColumn = ref(null)
+const sortOrder = ref('asc')
 
 const sortedData = computed(() => {
-  if (!sortColumn.value) return props.data.data
+  if (!sortColumn.value) return props.data.data // No sorting applied initially
 
   return [...props.data.data].sort((a, b) => {
     const valA = a[sortColumn.value]
@@ -199,12 +200,15 @@ const sortedData = computed(() => {
     return 0
   })
 })
+
 const toggleSort = (column) => {
+  if (!props.sortableColumns.includes(column)) return // Ensure sorting is only applied to sortable columns
+
   if (sortColumn.value === column) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc' // Toggle order
   } else {
     sortColumn.value = column
-    sortOrder.value = 'asc'
+    sortOrder.value = 'asc' // Default to ascending order when switching columns
   }
 }
 </script>
@@ -224,7 +228,12 @@ const toggleSort = (column) => {
       <thead class="table-secondary" :class="{ 'sticky-header': props.layouts.stickyHeader }">
         <tr>
           <template v-for="col in columns" :key="col.key">
-            <th v-if="!isMergedColumnHidden(col.key)" scope="col" @click="toggleSort(col.key)">
+            <th
+              v-if="!isMergedColumnHidden(col.key)"
+              scope="col"
+              @click="toggleSort(col.key)"
+              class="sortable font-weight-bold"
+            >
               <span
                 v-if="col.label.length > 15"
                 data-toggle="tooltip"
@@ -235,6 +244,10 @@ const toggleSort = (column) => {
                 {{ col.label }}
               </span>
               <span v-else>{{ col.label }}</span>
+              <!-- Sorting Indicators -->
+              <span v-if="sortColumn === col.key">
+                <font-awesome-icon :icon="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'" />
+              </span>
             </th>
           </template>
           <template v-for="merged in mergedColumns" :key="merged.label">
@@ -247,12 +260,16 @@ const toggleSort = (column) => {
       <tbody>
         <tr v-if="loading">
           <td :colspan="columns.length + (showActions ? 1 : 0)" class="text-center">
-            <!-- <div class="text-center">
-              <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                <span class="sr-only">Loading...</span>
+            <div class="text-center">
+              <div
+                class="spinner-border text-primary"
+                role="status"
+                style="width: 3rem; height: 3rem"
+              >
+                <span class="sr-only"></span>
               </div>
-            </div> -->
-            <div class="loader"></div>
+            </div>
+            <!-- <div class="loader"></div> -->
           </td>
         </tr>
         <tr v-else-if="props.data.data.length === 0">
@@ -261,11 +278,11 @@ const toggleSort = (column) => {
           </td>
         </tr>
         <template v-else>
-          <tr v-for="(row, index) in paginatedData" :key="index">
+          <tr v-for="(row, index) in sortedData" :key="index">
             <template v-for="col in columns" :key="col.key">
               <td
                 v-if="!isMergedColumnHidden(col.key)"
-                class="fs-6"
+                class="fs-6 text-black"
                 :data-full-text="String(row[col.key])"
               >
                 <template v-if="props.columnFormatters[col.key]">
@@ -328,7 +345,7 @@ const toggleSort = (column) => {
       </tbody>
     </table>
   </div>
-
+  <!-- end Table  -->
   <!-- Pagination -->
   <nav>
     <ul class="pagination justify-content-end">
@@ -356,6 +373,7 @@ const toggleSort = (column) => {
       </li>
     </ul>
   </nav>
+  <!-- end pagination -->
 </template>
 
 <style scoped>
@@ -413,17 +431,12 @@ td:hover::after {
   font-size: 1.2rem;
   margin-right: 5px;
 }
-.table-wrapper {
+/* .table-wrapper {
   overflow-x: auto;
   max-height: 400px;
   white-space: nowrap;
   max-width: 100%;
-}
-
-.scroll-y {
-  overflow-y: auto;
-  max-height: 400px; /* Set a fixed height to allow scrolling */
-}
+} */
 
 .sticky-header {
   position: sticky;
@@ -440,6 +453,8 @@ th {
   text-align: left;
   border-bottom: 2px solid #ddd;
 }
+
+/* Loading animation  */
 .loader {
   font-weight: bold;
   font-family: monospace;
@@ -451,12 +466,12 @@ th {
   content: 'Loading...';
   grid-area: 1/1;
   -webkit-mask: linear-gradient(90deg, #000 50%, #0000 0) 0 50%/2ch 100%;
-  mask: linear-gradient(90deg, #000 50%, #0000 0) 0 50%/2ch 100%; /* Standard property */
+  mask: linear-gradient(90deg, #000 50%, #0000 0) 0 50%/2ch 100%;
   animation: l11 1s infinite cubic-bezier(0.5, 220, 0.5, -220);
 }
 .loader:after {
   -webkit-mask-position: 1ch 50%;
-  mask-position: 1ch 50%; /* Standard property */
+  mask-position: 1ch 50%;
   --s: -1;
 }
 @keyframes l11 {
@@ -464,4 +479,16 @@ th {
     transform: translateY(calc(var(--s, 1) * 0.1%));
   }
 }
+/* end loading anime  */
+
+/* sorting styles */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  background-color: #f0f0f0;
+}
+/*  end  */
 </style>

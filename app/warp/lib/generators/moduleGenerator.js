@@ -2,8 +2,9 @@ import { fetchSwaggerJson } from '../utils/apiUtils.js';
 import path from 'path';
 import chalk from 'chalk';
 import { console } from 'inspector';
-import { generateModuleRoutes, createFolders, generateStore, generateService } from '../utils/cliUtils.js';
+import { generateModuleRoutes, createFolders, generateStore, generateService, getApiEndpoints} from '../utils/cliUtils.js';
 import { createFormTemplate } from './helpers.js';
+import { exit } from 'process';
 
 export async function generateModule(moduleName, selectedFolders) {
 
@@ -21,6 +22,9 @@ export async function generateModule(moduleName, selectedFolders) {
         throw new Error(`No schema found for module: ${moduleName}`);
     }
 
+    // Extract valid API endpoints
+    const apiEndpoints = getApiEndpoints(moduleData, moduleName); 
+
     const modulePath = path.resolve(`modules/${moduleName}`);
 
     console.log(chalk.green(`🚀 Generating module: ${moduleName}...`));
@@ -30,7 +34,7 @@ export async function generateModule(moduleName, selectedFolders) {
 
     // Generate Routes (if "router" is selected)
     if (selectedFolders.includes('router')) {
-        generateModuleRoutes(moduleData, modulePath, moduleName);
+        generateModuleRoutes(moduleData, modulePath, moduleName, apiEndpoints);
         console.log(chalk.yellow(`📌 Routes generated`));
     }
 

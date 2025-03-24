@@ -1,8 +1,14 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+import fs from 'fs';
+import path from 'path';
 import ora from 'ora';
 import { generateModule } from '../lib/generators/moduleGenerator.js';
+import { handleExistingModule } from '../lib/utils/handleModuleExistence.js';
+import { generateRoutes } from '../lib/utils/generateRoutes.js';
+
+
 import { config } from '../lib/config/default.config.js';
 
 const moduleCommand = new Command('module')
@@ -49,6 +55,10 @@ const moduleCreateCommand = new Command('create')
     ];
 
     let selectedFolders = allFolders;
+
+    // Check if module already exists
+    const canProceed = await handleExistingModule(name);
+    if (!canProceed) return;
 
     // Check if inquiry is enabled
     if (config.ENABLE_INQUIRY) {
@@ -104,6 +114,7 @@ const moduleCreateCommand = new Command('create')
       const success = await generateModule(name, selectedFolders);
       if (success) {
         spinner.succeed(chalk.green(`✅ Module successfully generated at: ${name}`));
+        generateRoutes();
       }
     } catch (error) {
       spinner.fail(chalk.red(`❌ Error generating module: ${error.message}`));

@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-function createouteFile(routePath, module, route, componentName) {
+function createRouteFile(routePath, module, route, componentName) {
     let newRouteEntry = `{
     path: '/${module}/${route}',
     name: '${componentName}',

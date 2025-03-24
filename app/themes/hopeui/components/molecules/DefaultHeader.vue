@@ -5,7 +5,7 @@ import { RouterLink, useRouter } from 'vue-router'
   <header class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
       <RouterLink to="/" class="navbar-brand">
-        <img src="../../assets/logo.svg" alt="Logo" class="logo" />
+        <img src="../../../../../modules/main/assets/logo.svg" alt="Logo" class="logo" />
       </RouterLink>
 
       <button

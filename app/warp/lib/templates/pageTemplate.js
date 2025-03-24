@@ -1,6 +1,6 @@
 import { createPageTemplate, updatePageTemplate, viewPageTemplate, indexPageTemplate } from './pages.js';
 
-export default function pageTemplate(route, type, tableColumns, moduleName) {
+export default function pageTemplate(route, type, tableColumns, moduleName, endpoints) {
   switch (type) {
     case 'create':
       return createPageTemplate(route, moduleName);
@@ -9,7 +9,7 @@ export default function pageTemplate(route, type, tableColumns, moduleName) {
     case 'view':
       return viewPageTemplate(route, moduleName);
     case 'index':
-      return indexPageTemplate(route, tableColumns, moduleName);
+      return indexPageTemplate(route, tableColumns, moduleName, endpoints);
     default:
       throw new Error(`Unknown page type: ${type}`);
   }

@@ -14,9 +14,9 @@ function lowercase(str) {
   return str.toLowerCase();
 }
 
- /**
- * Creates the folders for a new module.
- */
+/**
+* Creates the folders for a new module.
+*/
 export function createFolders(modulePath, selectedFolders, moduleName) {
   selectedFolders.forEach(folder => {
     const fullPath = path.join(modulePath, folder);
@@ -109,7 +109,7 @@ export default {
  * @param {Object} schema - The Swagger module schema.
  * @param {string} modulePath - Path to the module directory.
  */
-export const generateModuleRoutes = (schema, modulePath, moduleName) => {
+export const generateModuleRoutes = (schema, modulePath, moduleName, apiEndpoints) => {
   if (!schema || !schema.components || !schema.components.schemas) {
     console.error(chalk.red('❌ Invalid schema: Missing components or schemas.'));
     return;
@@ -123,7 +123,7 @@ export const generateModuleRoutes = (schema, modulePath, moduleName) => {
 
   Object.keys(schema.components.schemas).forEach(route => {
     const schemaProperties = schema.components.schemas[route]?.properties || {};
-
+    // const endpoints = apiEndpoints[route] || {}
     // Generate tableColumns dynamically
     const tableColumns = Object.keys(schemaProperties).map(key => ({
       key,
@@ -136,9 +136,13 @@ export const generateModuleRoutes = (schema, modulePath, moduleName) => {
 
     // Create Vue files using the page template
     ['index', 'create', 'update', 'view'].forEach(file => {
+    //   if (!endpoints[file]) {
+    //     console.log(chalk.gray(`🚫 Skipping ${file}.vue for ${route}, no API endpoint.`));
+    //     return;
+    // }
       const filePath = path.join(routePath, `${file}.vue`);
       // const routeName = lowercase(route);
-      const pageContent = pageTemplate(route, file, tableColumns, moduleName); // Generate based on type
+      const pageContent = pageTemplate(route, file, tableColumns, moduleName, apiEndpoints); // Generate based on type
 
       fs.writeFileSync(filePath, pageContent);
       console.log(chalk.blue(`📄 Created: ${filePath}`));
@@ -155,28 +159,33 @@ export const generateModuleRoutes = (schema, modulePath, moduleName) => {
 
     // Generate router file for each route
     const routerContent = `
+const layout = 'hopeui'
 export default [
   {
-    path: '/${route}/create',
-    name: '${route}-create',
+    path: '/${moduleName}/${route.toLowerCase()}/create',
+    name: '${moduleName}/${route.toLowerCase()}/create',
     component: () => import('../views/${route}/create.vue'),
+    meta: { title: 'Omniface - Create', layout: layout }
   },
   {
-    path: '/${route}/view/:id',
-    name: '${route}-view',
+    path: '/${moduleName}/${route.toLowerCase()}/view/:id',
+    name: '${moduleName}/${route.toLowerCase()}/view',
     component: () => import('../views/${route}/view.vue'),
-    props: true
+    props: true,
+    meta: { title: 'Omniface - View', layout: layout }
   },
   {
-    path: '/${route}/update/:id',
-    name: '${route}-update',
+    path: '/${moduleName}/${route.toLowerCase()}/update/:id',
+    name: '${moduleName}/${route.toLowerCase()}/update',
     component: () => import('../views/${route}/update.vue'),
-    props: true
+    props: true,
+    meta: { title: 'Omniface - Update', layout: layout }
   },
   {
-    path: '/${route}',
-    name: '${route}',
+    path: '/${moduleName}/${route.toLowerCase()}',
+    name: '${moduleName}/${route.toLowerCase()}',
     component: () => import('../views/${route}/index.vue'),
+    meta: { title: 'Omniface - Index', layout: layout }
   }
 ];
 `;
@@ -198,3 +207,46 @@ export default [
   fs.writeFileSync(routesIndexPath, indexContent.trim());
   console.log(chalk.green(`✅ Generated router index: ${routesIndexPath}`));
 };
+
+
+export const getApiEndpoints = (openApiSpec) => {
+  const paths = openApiSpec.paths || {};
+  const schemas = new Set(Object.keys(openApiSpec.components?.schemas || {}));
+
+  let endPoints = {};
+
+  Object.keys(paths).forEach(path => {
+    Object.keys(paths[path]).forEach(method => {
+      const operation = paths[path][method];
+
+      if (!operation.tags || operation.tags.length === 0) return;
+
+      const resourceName = operation.tags[0]; // Assuming the first tag is the main resource
+
+      if (schemas.has(resourceName)) {
+        if (!endPoints[resourceName]) {
+          endPoints[resourceName] = {};
+        }
+
+        // Determine CRUD operation
+        let action = "";
+        if (method === "post") {
+          action = "create";
+        } else if (method === "get") {
+          action = path.includes("{id}") ? "view" : "list";
+        } else if (method === "put") {
+          action = "update";
+        } else if (method === "delete") {
+          action = "delete";
+        }
+
+        endPoints[resourceName][action] = path;
+      }
+    });
+  });
+
+  return endPoints;
+}
+
+
+

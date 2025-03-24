@@ -18,6 +18,7 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    onSubmit: Function
 });
 
 const emit = defineEmits(['submit', 'update']);
