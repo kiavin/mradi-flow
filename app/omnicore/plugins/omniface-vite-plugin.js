@@ -1,4 +1,3 @@
-// vite-plugin-omniface-env.js
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';

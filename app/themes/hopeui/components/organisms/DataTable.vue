@@ -1,4 +1,4 @@
-here <script setup>
+<script setup>
 import { ref, computed, watch, watchEffect, onMounted, nextTick } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faEye, faTrashCan } from '@fortawesome/free-solid-svg-icons'

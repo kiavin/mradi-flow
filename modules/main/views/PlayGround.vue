@@ -208,8 +208,8 @@ onMounted(() => {
     <!-- <div v-if="isLoading">Logging in...</div> -->
 
     <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
-    <div>
-      <h2 class="h2">Bootstrap Table</h2>
+    <div class="card p-3">
+      <!-- <h2 class="h2">Bootstrap Table</h2> -->
       <Suspense>
         <template #default>
           <DataTable

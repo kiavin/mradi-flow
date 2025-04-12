@@ -9,11 +9,12 @@ export const useModalStore = defineStore('modalStore', () => {
     const useModal = ref(true);
     const modalSize = ref('');
 
-    function openModal(modalComponent = null, modalProps = {}, modalTitle = 'Modal Title') {
+    function openModal(modalComponent = null, modalProps = {}, modalTitle = 'Modal Title', size = 'xl') {
         component.value = modalComponent ? markRaw(modalComponent) : null;
         props.value = modalProps;
         title.value = modalTitle;
         isOpen.value = true;
+        modalSize.value = size;
     }
 
     function closeModal() {

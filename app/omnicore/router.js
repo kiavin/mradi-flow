@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '@/main/views/Index.vue'
 import PlayGroundView from '@/main/views/PlayGround.vue'
 import moduleRoutes from './moduleRoutes.js';
-import View from '@/main/views/View.vue'
 
 
 const router = createRouter({
@@ -18,15 +17,9 @@ const router = createRouter({
       path: '/playground',
       name: 'playground',
       component: PlayGroundView,
-      meta: { title: 'Omniface - Home', layout: 'default' },
+      meta: { title: 'Omniface - Home', layout: 'hopeui' },
     },
-    {
-      path: '/view-demo/:id',
-      name: 'view',
-      component: View,
-      meta: { title: 'Omniface - Home' },
-      props: true
-    },
+
     ...moduleRoutes,
     // {
     //   path: "/:pathMatch(.*)*",

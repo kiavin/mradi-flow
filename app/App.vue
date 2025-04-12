@@ -18,7 +18,6 @@ const CurrentLayout = computed(() => layoutStore.layout || 'div')
 </script>
 
 <template>
-  <!-- <component :is="layoutStore.layout"> -->
   <component :is="CurrentLayout">
     <RouterView />
   </component>
