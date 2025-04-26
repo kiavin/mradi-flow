@@ -1,14 +1,7 @@
 # Omniface
 
 This template should help get you started developing with OMNIFACE powerd by Vue 3 in Vite and warp code generator.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+ 
 
 ## Project Setup
 
@@ -16,10 +9,8 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 npm install
 ```
 
-Create .env file and copy the contents of .env.example
-
 ## NOTE:
-### For warp CLI code generator to run you must configure .env with sample configuration in .env.example
+### For warp CLI code generator to run you must configure omniface.cfg
 
 ## Warp CLI Commands
 

@@ -5,7 +5,6 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import omnifaceEnvPlugin from './app/omnicore/plugins/omniface-vite-plugin'
 import dotenv from 'dotenv'
 
-// Load environment variables from omniface.cfg
 dotenv.config({ path: './omniface.cfg' });
 
 // https://vite.dev/config/

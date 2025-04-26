@@ -1,41 +1,17 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
+import MainAssets from '../bundles/MainAssets'
 
-// import '../assets/style.css'
-import Hero from '@/main/components/organisms/Hero.vue'
-import Header from '@/main/components/organisms/Header.vue'
-import Features from '@/main/components/organisms/Features.vue'
-import Features2 from '@/main/components/organisms/Features2.vue'
-import Features3 from '@/main/components/organisms/Features3.vue'
-import Warpcard from '../components/molecules/Warpcard.vue'
-import Footer from '../components/organisms/Footer.vue'
-
-
-
-onMounted(() => {
-  import('../assets/style.css');
-});
-
-onUnmounted(() => {
-  document.querySelectorAll('link[href*="style.css"]').forEach(link => link.remove());
-});
+const { Hero, Features, Features2, Features3, Warpcard } = MainAssets.getComponents()
 </script>
 
 <template>
-  <body class="c54cm ctzj3 cp877 cbh0c c9xyi">
-    <div class="clfoz cxmgp cwkat cg9hr citnk">
-      <Header />
-      <main class="cih8s">
-        <Hero />
-        <Features />
-        <Features2 />
-        <Features3 />
-        <Warpcard />
-      </main>
-      <Footer />
-    </div>
-  </body>
+  <main class="cih8s">
+    <Hero />
+    <Features />
+    <Features2 />
+    <Features3 />
+    <Warpcard />
+  </main>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

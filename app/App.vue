@@ -23,12 +23,3 @@ const CurrentLayout = computed(() => layoutStore.layout || 'div')
   </component>
   <Modal />
 </template>
-
-<style lang="scss">
-// @import '@/assets/custom-vue/scss/styles.scss';
-@import '~/themes/hopeui/assets/scss/hope-ui.scss';
-@import '~/themes/hopeui/assets/scss/pro.scss';
-@import '~/themes/hopeui/assets/scss/custom.scss';
-@import '~/themes/hopeui/assets/scss/customizer.scss';
-@import '~/themes/hopeui/assets/custom-vue/scss/plugins.scss';
-</style>

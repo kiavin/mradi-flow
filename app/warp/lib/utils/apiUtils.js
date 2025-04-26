@@ -4,7 +4,7 @@ dotenv.config();
 
 export const fetchSwaggerJson = async (moduleName, routeName = '', isModule = false) => {
     try {
-        const baseUrl = process.env.API_BASE_URL || 'http://localhost:9009/';
+        const baseUrl = process.env.API_BASE_URL;
 
         const url = `${baseUrl}v1/docs/openapi-json-resource.json?mod=${moduleName}`;
         console.log(`Fetching Swagger JSON from: ${url}`);

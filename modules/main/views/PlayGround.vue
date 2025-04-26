@@ -6,16 +6,29 @@ import TableSkeleton from '../../../app/themes/hopeui/components/molecules/Table
 import DemoForm from '../../../app/themes/hopeui/components/organisms/DemoForm.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 const { proxy } = getCurrentInstance()
-import Demo from './StatusFormater.vue'
+import Demo from '../components/StatusFormater.vue'
+import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+import OmniGridView from '../../../app/themes/hopeui/components/organisms/OmniGridView.vue'
+
 const username = ref('')
 const password = ref('')
 
-const modalStore = useModalStore();
+const modalStore = useModalStore()
 
 const showModal = () => {
-  modalStore.openModal(DemoForm, { message: 'Hello from Modal!' }, 'Demo Modal');
-};
+  modalStore.openModal(null, { message: 'Hello from Modal!' }, 'Demo Modal', 'sm', false, {
+    centered: false,
+    scrollable: false,
+  })
+}
 
+const showModalCenter = () => {
+  modalStore.openModal(null, { message: 'Hello from Modal!' }, 'Demo Modal', 'xl', false, {
+    centered: true,
+    scrollable: true,
+    fullscreen: true,
+  })
+}
 
 // const { data, request, isLoading, error } = useApi('/v1/auth/login', 'POST')
 const { data, request, isLoading, error } = useApi('/v1/scheduler/appointments', 'GET', {}, false)
@@ -51,6 +64,79 @@ const tableColumns = ref([
   { key: 'relative_time', label: 'Booked since' },
 ])
 
+const tableColumns2 = ref([
+  { key: 'userName', label: 'Chair Person' },
+  { key: 'subject', label: 'Subject' },
+  { key: 'email_address', label: 'Email' },
+  { key: 'contact_name', label: 'Contact Name' },
+  { key: 'appointment_date', label: 'Date' },
+  { key: 'status', label: 'Status' },
+  { key: 'mobile_number', label: 'Phone' },
+  { key: 'department', label: 'Department' }, // New column 1
+  { key: 'location', label: 'Location' }, // New column 2
+  { key: 'duration', label: 'Duration (hours)' }, // New column 3
+])
+
+const data2 = ref({
+  data: [
+    {
+      userName: 'Prof. John Doe',
+      subject: 'Meeting on AI Research',
+      email_address: 'john.doe@university.edu',
+      contact_name: 'Jane Smith',
+      appointment_date: '2025-04-20',
+      mobile_number: '+1234567890',
+      status: 1,
+      department: 'Computer Science', // New data for column 1
+      location: 'Building A, Room 101', // New data for column 2
+      duration: 2, // New data for column 3
+    },
+    {
+      userName: 'Dr. Alice Walker',
+      subject: 'Review New Curriculum',
+      email_address: 'alice.walker@university.edu',
+      contact_name: 'Tom Hanks',
+      appointment_date: '2025-04-22',
+      mobile_number: '+1987654321',
+      status: 2,
+      department: 'Education', // New data for column 1
+      location: 'Administration Building', // New data for column 2
+      duration: 1.5, // New data for column 3
+    },
+    {
+      userName: 'Mr. Sam Carter',
+      subject: 'Infrastructure Proposal',
+      email_address: 'sam.carter@university.edu',
+      contact_name: 'Lucy Hale',
+      appointment_date: '2025-04-23',
+      mobile_number: '+1123456789',
+      status: 1,
+      department: 'Facilities Management', // New data for column 1
+      location: 'Main Conference Room', // New data for column 2
+      duration: 3, // New data for column 3
+    },
+    {
+      userName: 'Dr. Emily Chen',
+      subject: 'Research Funding Discussion',
+      email_address: 'emily.chen@university.edu',
+      contact_name: 'Robert Johnson',
+      appointment_date: '2025-04-25',
+      mobile_number: '+1555123456',
+      status: 2,
+      department: 'Biochemistry', // New data for column 1
+      location: 'Science Building, Room 205', // New data for column 2
+      duration: 1, // New data for column 3
+    },
+  ],
+  paginationData: {
+    countOnPage: 0,
+    currentPage: 1,
+    perPage: 20,
+    totalCount: 0,
+    totalPages: 0,
+    paginationLinks: {},
+  },
+})
 watch(data, () => {
   updateResponseData()
 })
@@ -71,8 +157,6 @@ const updateResponseData = () => {
   }
 }
 
- 
-
 // Handle Actions
 const handleView = (id) => {
   // alert(`Viewing record with ID: ${id}`)
@@ -86,6 +170,23 @@ const handleView = (id) => {
     cancelButtonColor: '#d33',
     confirmButtonTextColor: '#3085d6',
     cancelButtonTextColor: '#3085d6',
+    reverseButtons: true,
+  })
+}
+
+const handleView2 = (row) => {
+  // if (!row || typeof row !== 'object') {
+  //   console.warn('handleView2 called with invalid row:', row)
+  //   return
+  // }
+  console.trace('handleView2 triggered with row:', row)
+  console.log(row.subject)
+  proxy.$showAlert({
+    showConfirmButton: true,
+    confirmButtonText: 'Yes, view it!',
+    cancelButtonText: 'No, stay here',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
     reverseButtons: true,
   })
 }
@@ -145,11 +246,17 @@ const handleSearch = (query) => {
   })
 }
 
- 
+const handleSearch2 = (query) => {
+  request(null, {
+    page: data2.value.paginationData.currentPage,
+    'per-page': data2.value.paginationData.perPage,
+    _search: query,
+  })
+}
 
 const changePage = async (page) => {
   await request(null, { page, 'per-page': tableData.value.paginationData.perPage })
-     
+
   updateResponseData()
 
   console.log('Page changed to: ', data.value)
@@ -162,9 +269,7 @@ const updatePerPage = async (perPage) => {
     'per-page': perPage,
   })
   updateResponseData()
-
 }
- 
 
 onMounted(() => {
   request().then(() => {
@@ -174,14 +279,45 @@ onMounted(() => {
 </script>
 
 <template>
-  <button class="btn btn-primary" @click="showModal">Open Modal</button>
-    
-    <!-- <div v-if="isLoading">Loading...</div> -->
-    <!-- <div v-if="error">Error: {{ error }}</div> -->
-    <!-- <div class="bg-primary rounded" v-else> -->
-    <!-- <pre>{{ data }}</pre> -->
-    <!-- </div> -->
-    <!-- <button
+  <!-- <button class="btn btn-primary" @click="showModal">Open Modal</button><br /> -->
+  <Button
+    variant="primary"
+    size="md"
+    rounded
+    pill
+    type="button"
+    customClass="btn btn-primary"
+    @click="showModal"
+  >
+    <template #icon>
+      <font-awesome-icon :icon="['fas', 'thumbs-up']" />
+
+      <i class="bi bi-plus"></i>
+    </template>
+    modal
+  </Button>
+  <Button
+    variant="success"
+    size="md"
+    rounded
+    pill
+    type="button"
+    customClass="btn btn-primary"
+    @click="showModalCenter"
+  >
+    <template #icon>
+      <font-awesome-icon :icon="['fas', 'thumbs-up']" />
+
+      <i class="bi bi-plus"></i>
+    </template>
+    centered modal
+  </Button>
+  <!-- <div v-if="isLoading">Loading...</div> -->
+  <!-- <div v-if="error">Error: {{ error }}</div> -->
+  <!-- <div class="bg-primary rounded" v-else> -->
+  <!-- <pre>{{ data }}</pre> -->
+  <!-- </div> -->
+  <!-- <button
       @click="
         () => {
           proxy.$showToast()
@@ -192,11 +328,11 @@ onMounted(() => {
     </button>
     <button @click="handleEdit(23)">Refresh Data</button> -->
 
-    <!-- <Label labelFor="email" customClass="form-label">Email</Label>
+  <!-- <Label labelFor="email" customClass="form-label">Email</Label>
     <Input class="form-control" placeholder="demo input" />
     <Button customClass="btn btn-primary">Submit</Button> -->
 
-    <!-- <form @submit.prevent="submitForm">
+  <!-- <form @submit.prevent="submitForm">
       <input v-model="username" placeholder="Username" /><br />
       <div v-if="error" style="color: red">{{ error.username }}</div>
       <input v-model="password" type="password" placeholder="Password" /><br />
@@ -205,33 +341,78 @@ onMounted(() => {
       <button type="submit" :disabled="isLoading">Login</button>
     </form> -->
 
-    <!-- <div v-if="isLoading">Logging in...</div> -->
+  <!-- <div v-if="isLoading">Logging in...</div> -->
+  //TODO: complete the searching functionality, add paginations, emit crud events
+  @update:perPage="handlePerPageChange" @changePage="handlePageChange"
 
-    <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
-    <div class="card p-3">
-      <!-- <h2 class="h2">Bootstrap Table</h2> -->
-      <Suspense>
-        <template #default>
-          <DataTable
-            :data="tableData"
-            :columns="tableColumns"
-            :loading="isLoading"
-            @edit="handleEdit"
-            @search="handleSearch"
-            @delete="handleDelete"
-            @view="handleView"
-            @changePage="changePage"
-            @update:perPage="updatePerPage"
-            :columnFormatters="{
-              status: Demo,
-            }"
-            :mergedColumns="[{ keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' }]"
-            :layouts="{ stickyHeader: true }"
-          />
-        </template>
-        <template #fallback>
-          <TableSkeleton />
-        </template>
-      </Suspense>
-    </div>
+  <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
+  <div class="card p-1">
+    <!-- <h2 class="h2">Bootstrap Table</h2> -->
+    <Suspense>
+      <template #default>
+        <DataTable
+          :data="tableData"
+          :columns="tableColumns"
+          :loading="isLoading"
+          @edit="handleEdit"
+          @search="handleSearch"
+          @delete="handleDelete"
+          @view="handleView"
+          @changePage="changePage"
+          @update:perPage="updatePerPage"
+          :columnFormatters="{
+            status: Demo,
+          }"
+          :mergedColumns="[{ keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' }]"
+          :layouts="{ stickyHeader: true }"
+        />
+      </template>
+      <template #fallback>
+        <TableSkeleton />
+      </template>
+    </Suspense>
+  </div>
+  <div class="card p-3 w-100">
+    <OmniGridView
+      :columns="tableColumns2"
+      :data="data2"
+      action-layout="inline"
+      :mergedColumns1="[{ keys: ['contact_name', 'mobile_number'], label: 'Test', separator: ' ' }]"
+      :pagination-config="{
+        variant: 'circle',
+        position: 'right',
+        bgColor: '#4f46e5',
+        hoverBgColor: '#6366f1',
+        textColor: '#374151',
+        activeTextColor: '#ffffff',
+        showFirstLast: true,
+        showNumbers: true,
+        showTotal: true,
+        showRange: true,
+      }"
+      :expandable-rows="false"
+      :filtering="true"
+      :multi-select="false"
+      :radio-select="false"
+      :break-extra-columns="true"
+      :search-in-backend="false"
+      @view="handleView2"
+      @edit="handleEdit"
+      @delete="handleDelete"
+      @search="handleSearch2"
+    >
+      <template #column-status="{ value }">
+        <span
+          :style="{ background: value === 1 ? 'green' : 'red' }"
+          :class="{
+            'badge-success': value === 1,
+            'badge-danger': value === 2,
+          }"
+          class="badge"
+        >
+          {{ value === 1 ? 'Active' : 'Inactive' }}
+        </span>
+      </template>
+    </OmniGridView>
+  </div>
 </template>

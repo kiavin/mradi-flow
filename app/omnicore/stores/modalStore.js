@@ -1,3 +1,4 @@
+import { faLessThanEqual } from '@fortawesome/free-solid-svg-icons';
 import { defineStore } from 'pinia';
 import { ref, markRaw } from 'vue';
 
@@ -8,13 +9,25 @@ export const useModalStore = defineStore('modalStore', () => {
     const title = ref('');
     const useModal = ref(true);
     const modalSize = ref('');
+    const showFooter = ref(false)
 
-    function openModal(modalComponent = null, modalProps = {}, modalTitle = 'Modal Title', size = 'xl') {
+    const fullscreen = ref(false)
+    const centered = ref(false)
+    const scrollable = ref(false)
+
+    function openModal(modalComponent = null, modalProps = {}, modalTitle = 'Modal Title', size = 'lg', footer = false, options = { centered: false, scrollable: false, fullscreen: false }) {
         component.value = modalComponent ? markRaw(modalComponent) : null;
         props.value = modalProps;
         title.value = modalTitle;
         isOpen.value = true;
-        modalSize.value = size;
+        showFooter.value = footer;
+
+        fullscreen.value = options.fullscreen;
+        centered.value = options.centered;
+        scrollable.value = options.scrollable;
+
+        const allowedSizes = ['sm', 'lg', 'xl'];
+        modalSize.value = allowedSizes.includes(size) ? size : '';
     }
 
     function closeModal() {
@@ -22,11 +35,12 @@ export const useModalStore = defineStore('modalStore', () => {
         component.value = null;
         props.value = {};
         title.value = '';
+        showFooter.value = false;
     }
 
     function toggleModalUsage(value) {
         useModal.value = value;
     }
 
-    return { isOpen, component, useModal, modalSize, props, title, openModal, closeModal, toggleModalUsage };
+    return { isOpen, showFooter, component, useModal, modalSize, props, centered, fullscreen, scrollable, title, openModal, closeModal, toggleModalUsage };
 });

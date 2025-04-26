@@ -1,33 +1,32 @@
 <script setup>
-import BaseInput from '../atoms/input/BaseInput.vue';
-import { ref } from 'vue';
+import BaseInput from '../atoms/input/BaseInput.vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   modelValue: [String, Number],
   placeholder: { type: String, default: 'Search...' },
   id: { type: String, default: '' },
-});
+})
 
-const emit = defineEmits(['update:modelValue', 'search']);
+const emit = defineEmits(['update:modelValue', 'search'])
 
-const searchQuery = ref(props.modelValue);
+const searchQuery = ref(props.modelValue)
 
 // Emit search event on input change (live search)
 const handleInputChange = (value) => {
-  searchQuery.value = value;
-  emit('update:modelValue', value);
-  emit('search', value); // Auto search as user types
-};
+  searchQuery.value = value
+  emit('update:modelValue', value)
+  emit('search', value)
+}
 
 // Emit search event on button click (manual search)
 const handleSearchSubmit = () => {
-  emit('search', searchQuery.value);
-};
+  emit('search', searchQuery.value)
+}
 </script>
 
 <template>
   <div class="search-container">
-    <!-- Search Input -->
     <BaseInput
       v-bind="$props"
       type="text"
@@ -35,11 +34,9 @@ const handleSearchSubmit = () => {
       @update:modelValue="handleInputChange"
       class="search-input"
     />
-
-    <!-- Search Button (Bootstrap) -->
-    <button class="btn btn-primary search-btn" @click="handleSearchSubmit" :disabled="!searchQuery">
+    <button class="search-btn" @click="handleSearchSubmit" :disabled="!searchQuery">
       <slot name="search-icon">
-        Search
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
       </slot>
     </button>
   </div>
@@ -49,6 +46,7 @@ const handleSearchSubmit = () => {
 .search-container {
   display: flex;
   align-items: center;
+  border: 1px solid #ced4da;
   border-radius: 5px;
   width: 100%;
   max-width: 300px;
@@ -59,17 +57,33 @@ const handleSearchSubmit = () => {
 .search-input {
   flex: 1;
   border: none;
-  /* border-bottom: 1px dotted black; */
   outline: none;
-  padding: 8px;
+  padding: 8px 12px;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .search-btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  border: none;
+  background: transparent;
+  padding: 0 12px;
+  color: #6c757d;
   display: flex;
   align-items: center;
-  justify-content: center;
   cursor: pointer;
+  height: 100%;
+}
+
+.search-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.search-btn:focus {
+  outline: none;
+  box-shadow: none;
 }
 </style>
