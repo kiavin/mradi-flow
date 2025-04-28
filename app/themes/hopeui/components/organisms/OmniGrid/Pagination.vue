@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from 'vue'
 
-const emit = defineEmits(['changePage'])
+const emit = defineEmits(['changePage', 'update:perPage'])
 
 const props = defineProps({
   data: {
     type: Object,
-    default: () => ({ paginationData: {} }),
+    required: true,
   },
   position: {
     type: String,
@@ -34,41 +34,34 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  bgColor: {
-    type: String,
-    default: null,
-  },
-  hoverBgColor: {
-    type: String,
-    default: null,
-  },
-  textColor: {
-    type: String,
-    default: null,
-  },
-  activeTextColor: {
-    type: String,
-    default: null,
-  },
-
+  bgColor: String,
+  hoverBgColor: String,
+  textColor: String,
+  activeTextColor: String,
   maxVisiblePages: {
     type: Number,
     default: 5,
   },
 })
 
-const currentPage = computed(() => props.data.paginationData.currentPage || 1)
-const perPage = computed(() => props.data.paginationData.perPage || 10)
-const totalCount = computed(() => props.data.paginationData.totalCount || 0)
-const totalPages = computed(() =>
-  Math.max(1, props.data.paginationData.totalPages || Math.ceil(totalCount.value / perPage.value)),
-)
+const currentPage = computed(() => props.data.currentPage || 1)
+const perPage = computed(() => props.data.perPage || 10)
+const totalCount = computed(() => props.data.totalCount || 0)
+
+const totalPages = computed(() => {
+  if (props.data.totalPages) {
+    return props.data.totalPages
+  }
+  // return Math.max(1, Math.ceil(totalCount.value / perPage.value))
+  return props.data.totalPages
+
+})
 
 const startItem = computed(() => (currentPage.value - 1) * perPage.value + 1)
 const endItem = computed(() => Math.min(currentPage.value * perPage.value, totalCount.value))
 
 const changePage = (page) => {
-  if (page > 0 && page <= totalPages.value) {
+  if (page >= 1 && page <= props.data.totalPages) {
     emit('changePage', page)
   }
 }
@@ -80,12 +73,10 @@ const visiblePages = computed(() => {
   const maxVisible = props.maxVisiblePages
 
   if (total <= maxVisible) {
-    // Show all pages if total is less than max visible
     for (let i = 1; i <= total; i++) {
       pages.push(i)
     }
   } else {
-    // Calculate range with ellipsis
     const half = Math.floor(maxVisible / 2)
     let start = current - half
     let end = current + half
@@ -93,25 +84,27 @@ const visiblePages = computed(() => {
     if (start < 1) {
       start = 1
       end = maxVisible
-    } else if (end > total) {
+    }
+    if (end > total) {
       end = total
       start = total - maxVisible + 1
     }
 
-    // Always show first page
     if (start > 1) {
       pages.push(1)
-      if (start > 2) pages.push('...')
+      if (start > 2) {
+        pages.push('...')
+      }
     }
 
-    // Middle range
     for (let i = start; i <= end; i++) {
-      if (i > 0 && i <= total) pages.push(i)
+      pages.push(i)
     }
 
-    // Always show last page
     if (end < total) {
-      if (end < total - 1) pages.push('...')
+      if (end < total - 1) {
+        pages.push('...')
+      }
       pages.push(total)
     }
   }
@@ -144,21 +137,12 @@ const visiblePages = computed(() => {
         </li>
 
         <!-- Numbered Pagination -->
-        <!-- <template v-if="showNumbers">
-          <li
-            class="page-item"
-            v-for="count in totalPages"
-            :key="count"
-            :class="{ active: count === currentPage }"
-          >
-            <a class="page-link" @click="changePage(count)">{{ count }}</a>
-          </li>
-        </template> -->
-        <!-- Numbered Pagination -->
         <template v-if="showNumbers">
           <template v-for="(count, index) in visiblePages" :key="index">
             <li v-if="count === '...'" class="page-item disabled">
-              <span class="page-link">...</span>
+              <span class="page-link">
+                <slot name="dots">...</slot>
+              </span>
             </li>
             <li v-else class="page-item" :class="{ active: count === currentPage }">
               <a class="page-link" @click="changePage(count)">{{ count }}</a>

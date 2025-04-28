@@ -7,7 +7,7 @@ import FilteringOptions from './FilteringOptions.vue'
 import TableHeader from './TableHeader.vue'
 import Pagination from './Pagination.vue'
 
-const emit = defineEmits(['action-triggered', 'search', 'update:perPage', 'changePage'])
+const emit = defineEmits(['action-triggered', 'search', 'update:perPage', 'changePage', 'column-search'])
 
 const props = defineProps({
   columns: {
@@ -29,6 +29,7 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  loading: { type: Boolean },
   searchInBackend: { type: Boolean, default: true },
   paginationData: { type: Object, default: () => ({}) },
   paginationConfig: {
@@ -70,6 +71,25 @@ const props = defineProps({
   },
   filtering: {
     type: Boolean,
+  },
+  animations: {
+    type: Object,
+    default: () => ({
+      enabled: true,
+      search: {
+        duration: 300,
+        easing: 'ease-in-out',
+      },
+      sort: {
+        duration: 400,
+        easing: 'ease-out',
+      },
+      pagination: {
+        duration: 300,
+        easing: 'ease-in',
+      },
+      rowHeight: 50,
+    }),
   },
 })
 
@@ -195,7 +215,10 @@ const handlePerPageChange = (newPerPage) => {
     props.paginationData.currentPage = 1 // Reset to first page
   }
 }
-
+// const handleColumnSearch = () => emit('columnSearch')
+const onColumnSearch = (searchQuery) => {
+  emit('column-search', searchQuery.value);
+};
 /**end data search and pagination */
 
 const columnWidths = ref({})
@@ -372,7 +395,6 @@ onBeforeUnmount(() => {
 // column options logic
 const activeColumnKey = ref(null)
 const menuPosition = ref({ top: 0, left: 0 })
-// const showPinSubmenu = ref(false)
 
 const onEllipsisClick = (columnKey, event) => {
   event.stopPropagation()
@@ -461,16 +483,13 @@ const handleColumnFilter = ({ columnKey, values }) => {
 }
 
 /**pagination data and config */
-// Inject the config (fallback to empty object if not provided)
+
+/*Loading Animations */
+const loading = ref(false)
+
 const paginationConfig = inject('paginationConfig', {})
-const paginationData = computed(() => ({
-  paginationData: {
-    currentPage: props.paginationData.currentPage,
-    perPage: props.paginationData.perPage,
-    totalPages: Math.ceil(filteredData.length / props.paginationData.perPage),
-    totalCount: filteredData.length,
-  },
-}))
+
+
 </script>
 <template>
   <div :class="{ 'table-responsive table-wrapper': !breakExtraColumns }" style="position: relative">
@@ -494,11 +513,13 @@ const paginationData = computed(() => ({
         @clear-radio-selection="clearRadioSelection"
         @toggle-all="toggleAll"
         @toggle-sort="toggleSort"
-        @ellipsis-click="onEllipsisClick"
-        @filter-click="onFilterClick"
+        @ellipsis-click="(colKey, event) => onEllipsisClick(colKey, event)"
+        @filter-click="(colKey, event) => onFilterClick(colKey, event)"
         @toggle-select-all="toggleSelectAllRows"
         @start-resizing="startResizing"
+        @column-search="onColumnSearch"
       />
+
       <tbody>
         <Row
           v-for="(row, index) in paginatedData"
@@ -560,7 +581,7 @@ const paginationData = computed(() => ({
   <!-- pagination component  -->
   <Pagination
     v-if="paginationConfig.show !== false"
-    :data="paginationData"
+    :data="props.paginationData"
     :position="paginationConfig.position || 'center'"
     :variant="paginationConfig.variant || 'default'"
     :show-first-last="paginationConfig.showFirstLast !== false"
@@ -612,4 +633,21 @@ const paginationData = computed(() => ({
   position: relative;
   z-index: 1;
 }
+
+/* In your main component's style */
+.table-wrapper {
+  position: relative;
+  overflow: visible !important;
+  z-index: auto;
+}
+
+.column-dropdown,
+.filter-panel {
+  z-index: 1050 !important;
+  position: fixed !important;
+}
+
+/* Loading Animations Css */
+ 
+
 </style>

@@ -248,8 +248,8 @@ const handleSearch = (query) => {
 
 const handleSearch2 = (query) => {
   request(null, {
-    page: data2.value.paginationData.currentPage,
-    'per-page': data2.value.paginationData.perPage,
+    page: tableData.value.paginationData.currentPage,
+    'per-page': tableData.value.paginationData.perPage,
     _search: query,
   })
 }
@@ -307,8 +307,6 @@ onMounted(() => {
   >
     <template #icon>
       <font-awesome-icon :icon="['fas', 'thumbs-up']" />
-
-      <i class="bi bi-plus"></i>
     </template>
     centered modal
   </Button>
@@ -342,13 +340,11 @@ onMounted(() => {
     </form> -->
 
   <!-- <div v-if="isLoading">Logging in...</div> -->
-  //TODO: complete the searching functionality, add paginations, emit crud events
-  @update:perPage="handlePerPageChange" @changePage="handlePageChange"
 
   <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
   <div class="card p-1">
     <!-- <h2 class="h2">Bootstrap Table</h2> -->
-    <Suspense>
+    <!-- <Suspense>
       <template #default>
         <DataTable
           :data="tableData"
@@ -370,12 +366,12 @@ onMounted(() => {
       <template #fallback>
         <TableSkeleton />
       </template>
-    </Suspense>
+    </Suspense> -->
   </div>
   <div class="card p-3 w-100">
     <OmniGridView
-      :columns="tableColumns2"
-      :data="data2"
+      :columns="tableColumns"
+      :data="tableData"
       action-layout="inline"
       :mergedColumns1="[{ keys: ['contact_name', 'mobile_number'], label: 'Test', separator: ' ' }]"
       :pagination-config="{
@@ -390,17 +386,33 @@ onMounted(() => {
         showTotal: true,
         showRange: true,
       }"
+      :toolbar="{
+        show: true,
+        showCreateButton: true,
+      }"
       :expandable-rows="false"
       :filtering="true"
       :multi-select="false"
       :radio-select="false"
       :break-extra-columns="true"
-      :search-in-backend="false"
+      :search-in-backend="true"
       @view="handleView2"
       @edit="handleEdit"
       @delete="handleDelete"
       @search="handleSearch2"
+      @changePage="changePage"
+      @update:perPage="updatePerPage"
+      @refresh="updateResponseData"
     >
+      // demo slot component
+      <template #left-buttons>
+        <BaseButton class="btn btn-success btn-sm" @click="showModal" style="font-size: 1.2rem">
+          <template #icon>
+            <font-awesome-icon :icon="['fas', 'plus']"/>
+          </template>
+          Custom Left
+        </BaseButton>
+      </template>
       <template #column-status="{ value }">
         <span
           :style="{ background: value === 1 ? 'green' : 'red' }"

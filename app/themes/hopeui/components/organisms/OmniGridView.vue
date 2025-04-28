@@ -2,7 +2,7 @@
 import { ref, computed, watch, watchEffect, onMounted, nextTick, useSlots, provide } from 'vue'
 import GridHeader from './OmniGrid/GridHeader.vue'
 import TableBody from './OmniGrid/TableBody.vue'
-import { filter } from 'lodash'
+import BaseButton from '../atoms/button/BaseButton.vue'
 
 const emit = defineEmits([
   'action',
@@ -17,12 +17,17 @@ const emit = defineEmits([
   'changePage',
   'search',
   'update:perPage',
+  'refresh',
 ])
 
 const props = defineProps({
   data: {
     type: Object,
     default: () => ({ data: [], paginationData: {} }),
+  },
+  loading: {
+    type: Boolean,
+    default: false,
   },
   columns: {
     type: Array,
@@ -71,6 +76,17 @@ const props = defineProps({
   layoutTheme: {
     type: String,
     default: '', // options: 'bootstrap', 'tailwind', 'primevue', etc.
+  },
+  toolbar: {
+    type: Object,
+    default: () => ({
+      show: false,
+      showCreateButton: false,
+      showExportButton: false,
+    }),
+  },
+  showCreateButton: {
+    type: Boolean,
   },
   searchInBackend: { type: Boolean, default: true },
   showActions: { type: Boolean, default: true },
@@ -245,7 +261,6 @@ const onActionTriggered = (payload) => {
   }
 }
 
-// const onSearch = (query) => emit('search', query);
 const searchQuery = ref('')
 
 const onSearch = (query) => {
@@ -257,9 +272,11 @@ const onSearch = (query) => {
 const onPerPageChange = (newPerPage) => emit('update:perPage', newPerPage)
 const onChangePage = (page) => emit('changePage', page)
 
-const displayData = computed(() => {
-  return props.searchInBackend ? props.data.data : props.data.data // Will be filtered in TableBody
-})
+// const displayData = computed(() => {
+//   return props.searchInBackend ? props.data.data : props.data.data // Will be filtered in TableBody
+// }).
+const onRefresh = () => emit('refresh')
+
 </script>
 <template>
   <!-- <div class="card p-3"> -->
@@ -269,10 +286,23 @@ const displayData = computed(() => {
       <slot name="header">
         <GridHeader
           :data="props.data"
+          :toolbar="toolbar"
+          :show-create-button="true"
+          :show-refresh-button="true"
+          :show-show-all-toggle="true"
+          :show-export-button="true"
           @search="onSearch"
           @update:perPage="onPerPageChange"
           @changePage="onChangePage"
-        />
+          @create="handleCreate"
+          @refresh="onRefresh"
+          @toggleShowAll="handleToggleShowAll"
+          @export="handleExport"
+        >
+          <template #left-buttons>
+            <slot name="left-buttons"></slot>
+          </template>
+        </GridHeader>
       </slot>
     </div>
 
@@ -282,10 +312,12 @@ const displayData = computed(() => {
         <TableBody
           :columns="columns"
           :data="props?.data.data"
+          :loading="loading"
           :paginationData="props.data?.paginationData"
           :searchInBackend="searchInBackend"
           :searchQuery="searchQuery"
           @search="onSearch"
+          @column-search="onSearch"
           @update:perPage="onPerPageChange"
           @changePage="onChangePage"
           :actions="actions"

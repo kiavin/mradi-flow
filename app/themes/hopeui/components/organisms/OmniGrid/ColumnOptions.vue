@@ -16,13 +16,25 @@ const emit = defineEmits(['action', 'close'])
 
 const showPinSubmenu = ref(false)
 
+// const handleAction = (action) => {
+//   if (action.startsWith('pin-')) {
+//     showPinSubmenu.value = false
+//   }
+//   emit('action', action)
+//   emit('close')
+// }
+
 const handleAction = (action) => {
   if (action.startsWith('pin-')) {
-    showPinSubmenu.value = false
+    showPinSubmenu.value = false;
   }
-  emit('action', action)
-  emit('close')
-}
+  emit('action', {
+    type: action,
+    columnKey: props.activeColumnKey // Include the column key
+  });
+  emit('close');
+};
+
 </script>
 <template>
   <div

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   columns: Array,
@@ -16,7 +16,7 @@ const props = defineProps({
   sortOrder: String,
   areAllRowsSelected: Boolean,
   layouts: Object,
-  allExpanded: Boolean
+  allExpanded: Boolean,
 })
 
 const emit = defineEmits([
@@ -26,8 +26,11 @@ const emit = defineEmits([
   'ellipsis-click',
   'filter-click',
   'toggle-select-all',
-  'start-resizing'
+  'start-resizing',
+  'column-search',
 ])
+
+const searchQueries = ref({})
 
 const toggleSort = (key) => {
   emit('toggle-sort', key)
@@ -48,6 +51,14 @@ const toggleSelectAllRows = (event) => {
 const startResizing = (event, colKey) => {
   emit('start-resizing', event, colKey)
 }
+
+const handleSearchInput = (colKey, value) => {
+  searchQueries.value[colKey] = value;
+  emit('column-search', {
+    column: colKey,
+    value: value
+  });
+};
 </script>
 
 <template>
@@ -113,7 +124,7 @@ const startResizing = (event, colKey) => {
             v-if="col.key !== 'actions' && col.key !== 'id'"
             class="position-absolute end-0 top-50 translate-middle-y me-2 ellipsis-wrapper"
             style="cursor: pointer"
-            @click.stop="onEllipsisClick(col.key, $event)"
+            @click.stop="(e) => onEllipsisClick(col.key, e)"
           >
             <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
           </span>
@@ -121,7 +132,7 @@ const startResizing = (event, colKey) => {
           <div class="resize-handle" @mousedown="startResizing($event, col.key)"></div>
         </th>
       </template>
-      
+
       <!-- Merged Columns -->
       <template v-for="merged in mergedColumns" :key="merged.label">
         <th :colspan="merged.colspan || 1" class="text-center">
@@ -182,6 +193,8 @@ const startResizing = (event, colKey) => {
               class="form-control form-control-sm rounded"
               :placeholder="`Search ${col.label}`"
               style="width: 100%; max-width: 90%"
+              :value="searchQueries[col.key]"
+              @input="handleSearchInput(col.key, $event.target.value)"
             />
             <span
               class="ms-2 text-secondary filter-icon-wrapper"
