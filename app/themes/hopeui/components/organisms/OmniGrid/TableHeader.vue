@@ -227,7 +227,7 @@ const handleSearchInput = (colKey, value) => {
       <th
         v-if="multiSelect"
         :class="['text-center align-middle', { 'sticky-col': multiSelect }]"
-        style="width: 50px; right: 0; background: #fff"
+        style="background: #fff"
       ></th>
     </tr>
   </thead>

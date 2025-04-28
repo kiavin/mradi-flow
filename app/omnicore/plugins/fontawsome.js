@@ -2,7 +2,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 import {
-  faEdit, faTrash, faEye, faTrashCan, faCircleChevronRight, faCircleChevronDown,
+  faEdit, faTrash, faEye, faTrashCan, faCircleChevronRight, faCircleChevronDown,faCircleCheck,
   faTrashCan, faRotateLeft, faArrowUp, faUpRightFromSquare,
   faArrowDown, faUser, faThumbsUp as fasThumbsUp,
   faArrowUpShortWide, faArrowDownWideShort,
@@ -13,7 +13,7 @@ import { faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons"; // Bra
 
 library.add(
   faEdit, faTrash, faEye, faFilter, faPlus, faMinus, faCircleXmark, faCircleChevronRight, faCircleChevronDown, faAnglesLeft, faAnglesRight, faExpand, faCompress,
-  faTrashCan, faRotateLeft, faMagnifyingGlass, faUpRightFromSquare,
+  faTrashCan, faRotateLeft, faMagnifyingGlass, faUpRightFromSquare,faCircleCheck,
   faArrowUp, faArrowDown, faUser, fasThumbsUp,
   faArrowUpShortWide, faArrowDownWideShort,
   faEllipsisVertical, faEllipsisHorizontal,

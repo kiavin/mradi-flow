@@ -140,7 +140,7 @@ const visiblePages = computed(() => {
         <template v-if="showNumbers">
           <template v-for="(count, index) in visiblePages" :key="index">
             <li v-if="count === '...'" class="page-item disabled">
-              <span class="page-link">
+              <span class="page-link dots">
                 <slot name="dots">...</slot>
               </span>
             </li>
@@ -180,10 +180,11 @@ const visiblePages = computed(() => {
 <style scoped>
 .pagination-wrapper {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   width: 100%;
   margin: 1rem 0;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .justify-left {
@@ -198,13 +199,17 @@ const visiblePages = computed(() => {
 
 .pagination-info {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   font-size: 0.9rem;
   color: #6c757d;
 }
 
 .pagination-nav {
   display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px; /* Space for scrollbar */
 }
 
 .pagination {
@@ -212,10 +217,13 @@ const visiblePages = computed(() => {
   list-style: none;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.125rem;
 }
 
 .page-item {
-  margin: 0 0.125rem;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .page-link {
@@ -226,6 +234,8 @@ const visiblePages = computed(() => {
   color: v-bind('props.textColor || "inherit"');
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  min-width: 2rem;
+  text-align: center;
 }
 
 .page-link:hover {
@@ -245,11 +255,11 @@ const visiblePages = computed(() => {
 
 /* Variant Styles */
 .pagination-default .page-link {
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.5rem;
 }
 
 .pagination-compact .page-link {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   font-size: 0.8rem;
 }
 
@@ -258,20 +268,77 @@ const visiblePages = computed(() => {
 }
 
 .pagination-circle .page-item {
-  margin: 0 0.25rem;
+  margin: 0 0.125rem;
 }
 
 .pagination-circle .page-link {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   padding: 0;
 }
 
 /* ellipsis */
-.page-item.disabled .page-link {
+.page-item.disabled .page-link.dots {
   background: transparent;
   border-color: transparent;
   cursor: default;
+  min-width: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .pagination-wrapper {
+    gap: 0.25rem;
+  }
+  
+  .pagination-info {
+    font-size: 0.8rem;
+    gap: 0.25rem;
+  }
+  
+  .pagination-default .page-link {
+    padding: 0.25rem 0.375rem;
+    font-size: 0.85rem;
+  }
+  
+  .pagination-compact .page-link {
+    padding: 0.15rem 0.3rem;
+    font-size: 0.75rem;
+  }
+  
+  .pagination-circle .page-link {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  
+  .page-link {
+    min-width: 1.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .pagination-default .page-link {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-compact .page-link {
+    padding: 0.1rem 0.2rem;
+    font-size: 0.7rem;
+  }
+  
+  .pagination-circle .page-link {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .page-link {
+    min-width: 1.5rem;
+  }
+  
+  .showFirstLast {
+    display: none;
+  }
 }
 </style>

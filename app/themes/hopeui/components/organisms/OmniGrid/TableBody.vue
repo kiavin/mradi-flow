@@ -7,7 +7,13 @@ import FilteringOptions from './FilteringOptions.vue'
 import TableHeader from './TableHeader.vue'
 import Pagination from './Pagination.vue'
 
-const emit = defineEmits(['action-triggered', 'search', 'update:perPage', 'changePage', 'column-search'])
+const emit = defineEmits([
+  'action-triggered',
+  'search',
+  'update:perPage',
+  'changePage',
+  'column-search',
+])
 
 const props = defineProps({
   columns: {
@@ -165,8 +171,17 @@ const sortedData = computed(() => {
     }
   })
 })
+ 
 
-const toggleSort = (key) => {
+const toggleSort = (key, explicitDirection = null) => {
+  if (explicitDirection) {
+    // If direction is explicitly provided (from dropdown)
+    sortColumn.value = key
+    sortOrder.value = explicitDirection
+    return
+  }
+
+  // Original toggle logic for header clicks
   if (sortColumn.value === key) {
     if (sortOrder.value === 'asc') {
       sortOrder.value = 'desc'
@@ -217,8 +232,8 @@ const handlePerPageChange = (newPerPage) => {
 }
 // const handleColumnSearch = () => emit('columnSearch')
 const onColumnSearch = (searchQuery) => {
-  emit('column-search', searchQuery.value);
-};
+  emit('column-search', searchQuery.value)
+}
 /**end data search and pagination */
 
 const columnWidths = ref({})
@@ -349,19 +364,52 @@ const updateScreenWidth = () => {
   screenWidth.value = window.innerWidth
 }
 
+// const maxVisibleColumns = computed(() => {
+//   console.log('Calculating maxVisibleColumns for width:', screenWidth.value)
+//   if (screenWidth.value < 576) {
+//     return 1
+//   } else if (screenWidth.value < 768) {
+//     return 2
+//   } else if (screenWidth.value < 992) {
+//     return 2
+//   } else if (screenWidth.value < 1200) {
+//     return 4
+//   } else {
+//     return 7
+//   }
+// })
 const maxVisibleColumns = computed(() => {
   console.log('Calculating maxVisibleColumns for width:', screenWidth.value)
-  if (screenWidth.value < 576) {
-    return 1
-  } else if (screenWidth.value < 768) {
-    return 2
-  } else if (screenWidth.value < 992) {
-    return 2
-  } else if (screenWidth.value < 1200) {
-    return 4
-  } else {
-    return 7
+  
+  // Count how many special columns are active
+  const specialColumnsCount = [
+    props.multiSelect,
+    props.radioSelect,
+    props.expandableRows,
+    props.showActions
+  ].filter(Boolean).length
+  
+  // Base visible columns based on screen size
+  let baseColumns
+  if (screenWidth.value < 576) { // Mobile
+    baseColumns = 1
+  } else if (screenWidth.value < 768) { // Small tablet
+    baseColumns = 2
+  } else if (screenWidth.value < 992) { // Tablet
+    baseColumns = 3
+  } else if (screenWidth.value < 1200) { // Small desktop
+    baseColumns = 4
+  } else { // Large desktop
+    baseColumns = 7
   }
+  
+  // Adjust for special columns
+  // On mobile, we want to prioritize showing at least 1 data column
+  if (screenWidth.value < 576) {
+    return Math.max(1, baseColumns - specialColumnsCount)
+  }
+  // On larger screens, we can be more generous
+  return Math.max(1, baseColumns - Math.min(specialColumnsCount, 2))
 })
 
 const dynamicColumns = computed(() => {
@@ -438,11 +486,16 @@ const handleOutsideClick = (event) => {
   }
 }
 
-const handleColumnAction = (action) => {
-  console.log(`Action ${action} on column ${activeColumnKey.value}`)
-  // Handle the actual action logic here
+ 
+const handleColumnAction = ({ type, columnKey }) => {
+  if (type.startsWith('sort-')) {
+    const direction = type === 'sort-asc' ? 'asc' : 'desc'
+
+    // Call your existing toggleSort function with the column key and direction
+    toggleSort(columnKey, direction)
+  }
+  // Handle other actions (pin, etc.)
   activeColumnKey.value = null
-  document.removeEventListener('click', handleOutsideClick)
 }
 
 // Close dropdown when component unmounts
@@ -488,8 +541,6 @@ const handleColumnFilter = ({ columnKey, values }) => {
 const loading = ref(false)
 
 const paginationConfig = inject('paginationConfig', {})
-
-
 </script>
 <template>
   <div :class="{ 'table-responsive table-wrapper': !breakExtraColumns }" style="position: relative">
@@ -560,6 +611,8 @@ const paginationConfig = inject('paginationConfig', {})
     <ColumnOptions
       :menu-position="menuPosition"
       :active-column-key="activeColumnKey"
+      :sort-column="sortColumn"
+      :sort-order="sortOrder"
       @action="handleColumnAction"
       @close="activeColumnKey = null"
     />
@@ -637,7 +690,8 @@ const paginationConfig = inject('paginationConfig', {})
 /* In your main component's style */
 .table-wrapper {
   position: relative;
-  overflow: visible !important;
+  overflow-x: auto !important; /* Enable horizontal scroll */
+  overflow-y: hidden;
   z-index: auto;
 }
 
@@ -648,6 +702,4 @@ const paginationConfig = inject('paginationConfig', {})
 }
 
 /* Loading Animations Css */
- 
-
 </style>

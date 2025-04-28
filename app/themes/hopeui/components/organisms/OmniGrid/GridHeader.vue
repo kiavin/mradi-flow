@@ -126,7 +126,120 @@ const onExport = (type) => emit('export', type)
   </div>
 </template>
 <style scoped>
-.icon-cs {
-  font-size: 1.2rem;
+.toolbar-container {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Toolbar layout */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.left-section {
+  flex: 1 1 100%;
+  margin-bottom: 0.5rem;
+}
+
+.right-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Search and pagination row */
+.search-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Action buttons styling */
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.icon {
+  font-size: 1rem;
+}
+
+.button-text {
+  display: inline;
+}
+
+.export-dropdown .dropdown-menu {
+  min-width: auto;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .left-section {
+    margin-bottom: 0.75rem;
+    width: 100%;
+  }
+
+  .right-section {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .search-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .page-selector,
+  .search-input {
+    width: 100%;
+  }
+
+  /* Hide button text on small screens */
+  .button-text {
+    display: none;
+  }
+
+  .action-button {
+    padding: 0.375rem;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 992px) {
+  .action-button {
+    padding: 0.375rem 0.5rem;
+  }
+
+  .button-text {
+    display: none;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 993px) {
+  .left-section {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  .toolbar {
+    flex-wrap: nowrap;
+  }
 }
 </style>

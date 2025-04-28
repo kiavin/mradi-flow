@@ -368,7 +368,7 @@ onMounted(() => {
       </template>
     </Suspense> -->
   </div>
-  <div class="card p-3 w-100">
+  <div class="card p-3">
     <OmniGridView
       :columns="tableColumns"
       :data="tableData"
@@ -390,7 +390,7 @@ onMounted(() => {
         show: true,
         showCreateButton: true,
       }"
-      :expandable-rows="false"
+      :expandable-rows="true"
       :filtering="true"
       :multi-select="false"
       :radio-select="false"

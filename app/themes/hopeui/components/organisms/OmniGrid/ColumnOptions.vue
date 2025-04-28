@@ -10,6 +10,14 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  sortColumn: {
+    type: String,
+    default: null,
+  },
+  sortOrder: {
+    type: String,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['action', 'close'])
@@ -26,15 +34,14 @@ const showPinSubmenu = ref(false)
 
 const handleAction = (action) => {
   if (action.startsWith('pin-')) {
-    showPinSubmenu.value = false;
+    showPinSubmenu.value = false
   }
   emit('action', {
     type: action,
-    columnKey: props.activeColumnKey // Include the column key
-  });
-  emit('close');
-};
-
+    columnKey: props.activeColumnKey, // Include the column key
+  })
+  emit('close')
+}
 </script>
 <template>
   <div
@@ -51,12 +58,18 @@ const handleAction = (action) => {
 
     <!-- Sort Asc -->
     <div class="column-dropdown-item" @click="handleAction('sort-asc')">
+      <span v-if="sortColumn === activeColumnKey && sortOrder === 'asc'">
+        <font-awesome-icon :icon="['fas', 'circle-check']" beat />
+      </span>
       Sort Ascending
       <font-awesome-icon icon="arrow-up" />
     </div>
 
     <!-- Sort Desc -->
     <div class="column-dropdown-item" @click="handleAction('sort-desc')">
+      <span v-if="sortColumn === activeColumnKey && sortOrder === 'desc'">
+        <font-awesome-icon :icon="['fas', 'circle-check']" beat />
+      </span>
       Sort Descending
       <font-awesome-icon icon="arrow-down" />
     </div>
