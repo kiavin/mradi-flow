@@ -10,7 +10,7 @@ const props = defineProps({
 
 const emit = defineEmits(['filter', 'close'])
 
-const showFilter = ref(false)
+// const showFilter = ref(false)
 const searchQuery = ref('')
 const selectedValues = ref([])
 const selectAll = ref(true)
@@ -90,6 +90,12 @@ const applyFilter = () => {
     values: selectedValues.value,
   })
 }
+
+const clearFilters = () => {
+  selectedValues.value = []
+  selectAll.value = false
+  applyFilter()
+}
 </script>
 
 <template>
@@ -116,6 +122,7 @@ const applyFilter = () => {
           <input type="checkbox" :checked="selectAll" class="form-check-input me-2" />
           <span>Select All</span>
         </div>
+        <button class="btn btn-sm btn-link p-0" @click="clearFilters">Clear</button>
       </div>
       <div class="filter-values">
         <div
@@ -131,6 +138,7 @@ const applyFilter = () => {
           />
           <span>{{ value }}</span>
         </div>
+        <div v-if="uniqueValues.length === 0" class="text-muted small p-2">No matching values</div>
       </div>
     </div>
   </div>

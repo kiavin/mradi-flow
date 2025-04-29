@@ -151,8 +151,38 @@ const sortColumn = ref(null)
 const sortOrder = ref(null) // 'asc' | 'desc' | null
 
 const sortedData = computed(() => {
-  const dataToSort = filteredData.value
+  let dataToSort = filteredData.value
 
+  // Apply column filters if any are active
+  const hasActiveFilters = Object.values(selectedFilterValues.value).some(
+    (vals) => vals && vals.length > 0,
+  )
+
+  if (hasActiveFilters) {
+    dataToSort = dataToSort.filter((row) => {
+      return Object.entries(selectedFilterValues.value).every(([key, filterValues]) => {
+        if (!filterValues || filterValues.length === 0) return true
+
+        const cellValue = row[key]
+
+        if (cellValue === null || cellValue === undefined) {
+          return filterValues.includes(null) || filterValues.includes(undefined)
+        }
+
+        return filterValues.some((val) => {
+          if (typeof val === 'string' && typeof cellValue === 'number') {
+            return val === cellValue.toString()
+          }
+          if (typeof val === 'number' && typeof cellValue === 'string') {
+            return val.toString() === cellValue
+          }
+          return val === cellValue
+        })
+      })
+    })
+  }
+
+  // Apply sorting if active
   if (!sortColumn.value || !sortOrder.value) return dataToSort
 
   return [...dataToSort].sort((a, b) => {
@@ -171,7 +201,6 @@ const sortedData = computed(() => {
     }
   })
 })
- 
 
 const toggleSort = (key, explicitDirection = null) => {
   if (explicitDirection) {
@@ -230,7 +259,6 @@ const handlePerPageChange = (newPerPage) => {
     props.paginationData.currentPage = 1 // Reset to first page
   }
 }
-// const handleColumnSearch = () => emit('columnSearch')
 const onColumnSearch = (searchQuery) => {
   emit('column-search', searchQuery.value)
 }
@@ -364,45 +392,36 @@ const updateScreenWidth = () => {
   screenWidth.value = window.innerWidth
 }
 
-// const maxVisibleColumns = computed(() => {
-//   console.log('Calculating maxVisibleColumns for width:', screenWidth.value)
-//   if (screenWidth.value < 576) {
-//     return 1
-//   } else if (screenWidth.value < 768) {
-//     return 2
-//   } else if (screenWidth.value < 992) {
-//     return 2
-//   } else if (screenWidth.value < 1200) {
-//     return 4
-//   } else {
-//     return 7
-//   }
-// })
 const maxVisibleColumns = computed(() => {
   console.log('Calculating maxVisibleColumns for width:', screenWidth.value)
-  
+
   // Count how many special columns are active
   const specialColumnsCount = [
     props.multiSelect,
     props.radioSelect,
     props.expandableRows,
-    props.showActions
+    props.showActions,
   ].filter(Boolean).length
-  
+
   // Base visible columns based on screen size
   let baseColumns
-  if (screenWidth.value < 576) { // Mobile
+  if (screenWidth.value < 576) {
+    // Mobile
     baseColumns = 1
-  } else if (screenWidth.value < 768) { // Small tablet
+  } else if (screenWidth.value < 768) {
+    // Small tablet
     baseColumns = 2
-  } else if (screenWidth.value < 992) { // Tablet
+  } else if (screenWidth.value < 992) {
+    // Tablet
     baseColumns = 3
-  } else if (screenWidth.value < 1200) { // Small desktop
+  } else if (screenWidth.value < 1200) {
+    // Small desktop
     baseColumns = 4
-  } else { // Large desktop
+  } else {
+    // Large desktop
     baseColumns = 7
   }
-  
+
   // Adjust for special columns
   // On mobile, we want to prioritize showing at least 1 data column
   if (screenWidth.value < 576) {
@@ -486,7 +505,6 @@ const handleOutsideClick = (event) => {
   }
 }
 
- 
 const handleColumnAction = ({ type, columnKey }) => {
   if (type.startsWith('sort-')) {
     const direction = type === 'sort-asc' ? 'asc' : 'desc'
@@ -524,22 +542,84 @@ const onFilterClick = (colKey, event) => {
   }
 }
 
-const handleColumnFilter = ({ columnKey, values }) => {
-  if (values.length === 0) {
-    sortedData.value = [...props.data]
-  } else {
-    sortedData.value = props.data.filter((row) => {
-      const cellValue = row[columnKey]
-      return cellValue !== undefined && cellValue !== null && values.includes(cellValue)
-    })
-  }
+const selectedFilterValues = ref({})
+const availableUniqueValues = ref({})
+
+function updateUniqueValues() {
+  props.columns.forEach((col) => {
+    if (col.key !== 'actions' && col.key !== 'id') {
+      const unique = [...new Set(props.data.map((row) => row[col.key]))]
+      availableUniqueValues.value[col.key] = unique
+      // Initialize selected values if not already set
+      if (!selectedFilterValues.value[col.key]) {
+        selectedFilterValues.value[col.key] = []
+      }
+    }
+  })
 }
 
+watch(() => props.data, updateUniqueValues, { immediate: true })
+
+watch(
+  () => props.data,
+  (newData) => {
+    console.log('DataTable received new data:', newData)
+    // Reset filters when new data arrives
+    clearAllFilters()
+    updateUniqueValues()
+  },
+  { deep: true },
+)
+
+const handleColumnFilter = ({ columnKey, values }) => {
+  // Update the selected filter values
+  selectedFilterValues.value[columnKey] = values
+
+  // If no filters are active (all values selected or no filters at all), reset to original data
+  const hasActiveFilters = Object.values(selectedFilterValues.value).some(
+    (vals) => vals && vals.length > 0,
+  )
+
+  if (!hasActiveFilters) {
+    sortedData.value = [...props.data]
+    return
+  }
+
+  // Apply all active filters
+  sortedData.value = props.data.filter((row) => {
+    return Object.entries(selectedFilterValues.value).every(([key, filterValues]) => {
+      // Skip if no filters for this column
+      if (!filterValues || filterValues.length === 0) return true
+
+      const cellValue = row[key]
+
+      // Handle null/undefined values
+      if (cellValue === null || cellValue === undefined) {
+        return filterValues.includes(null) || filterValues.includes(undefined)
+      }
+
+      // Check if the value is included (with type coercion if needed)
+      return filterValues.some((val) => {
+        if (typeof val === 'string' && typeof cellValue === 'number') {
+          return val === cellValue.toString()
+        }
+        if (typeof val === 'number' && typeof cellValue === 'string') {
+          return val.toString() === cellValue
+        }
+        return val === cellValue
+      })
+    })
+  })
+}
+
+const clearAllFilters = () => {
+  Object.keys(selectedFilterValues.value).forEach((key) => {
+    selectedFilterValues.value[key] = []
+  })
+  // Reset the data
+  sortedData.value = [...props.data]
+}
 /**pagination data and config */
-
-/*Loading Animations */
-const loading = ref(false)
-
 const paginationConfig = inject('paginationConfig', {})
 </script>
 <template>
@@ -561,6 +641,8 @@ const paginationConfig = inject('paginationConfig', {})
         :are-all-rows-selected="areAllRowsSelected"
         :layouts="layouts"
         :all-expanded="allExpanded"
+        :selected-values="selectedFilterValues"
+        :unique-values="availableUniqueValues"
         @clear-radio-selection="clearRadioSelection"
         @toggle-all="toggleAll"
         @toggle-sort="toggleSort"
@@ -572,38 +654,74 @@ const paginationConfig = inject('paginationConfig', {})
       />
 
       <tbody>
-        <Row
-          v-for="(row, index) in paginatedData"
-          :key="row.id ?? index"
-          :row="row"
-          :index="index"
-          :columns="visibleColumns"
-          :all-columns="columns"
-          :break-extra-columns="breakExtraColumns"
-          :expandable-rows="expandableRows"
-          :column-formatters="{}"
-          :actions="actions"
-          :show-actions="showActions"
-          :merged-columns="mergedColumns"
-          :merged-fn="getMergedValue"
-          :action-layout="actionLayout"
-          :multi-select="multiSelect"
-          :radio-select="radioSelect"
-          :open-row="openRow"
-          :is-selected="isSelected"
-          :toggle-actions-panel="toggleActionsPanel"
-          :selected-radio-id="selectedRadioId"
-          :toggle-row-selection="toggleRowSelection"
-          :handle-radio-select="handleRadioSelect"
-          :max-visible-columns="maxVisibleColumns"
-          :extra-dynamic-columns="extraDynamicColumns"
-          @action-triggered="onActionTriggered"
+        <tr v-if="loading" style="pointer-events: none">
+          <td :colspan="visibleColumns.length + (showActions ? 1 : 0)" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 mb-0">Loading data...</p>
+          </td>
+        </tr>
+        <tr
+          style="pointer-events: none"
+          v-else-if="!props.loading && paginatedData.length === 0"
+          key="empty"
         >
-          <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
-            <slot :name="slotName" v-bind="slotProps" />
-          </template>
-          <template #expanded> </template>
-        </Row>
+          <td :colspan="visibleColumns.length + (showActions ? 1 : 0)" class="text-center py-4">
+            <div class="empty-state">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <h5 class="mt-3">No records found</h5>
+            </div>
+          </td>
+        </tr>
+        <template v-else>
+          <Row
+            v-for="(row, index) in paginatedData"
+            :key="row.id ?? index"
+            :row="row"
+            :index="index"
+            :columns="visibleColumns"
+            :all-columns="columns"
+            :break-extra-columns="breakExtraColumns"
+            :expandable-rows="expandableRows"
+            :column-formatters="{}"
+            :actions="actions"
+            :show-actions="showActions"
+            :merged-columns="mergedColumns"
+            :merged-fn="getMergedValue"
+            :action-layout="actionLayout"
+            :multi-select="multiSelect"
+            :radio-select="radioSelect"
+            :open-row="openRow"
+            :is-selected="isSelected"
+            :toggle-actions-panel="toggleActionsPanel"
+            :selected-radio-id="selectedRadioId"
+            :toggle-row-selection="toggleRowSelection"
+            :handle-radio-select="handleRadioSelect"
+            :max-visible-columns="maxVisibleColumns"
+            :extra-dynamic-columns="extraDynamicColumns"
+            @action-triggered="onActionTriggered"
+          >
+            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+              <slot :name="slotName" v-bind="slotProps" />
+            </template>
+            <template #expanded> </template>
+          </Row>
+        </template>
       </tbody>
     </table>
 
@@ -627,6 +745,7 @@ const paginationConfig = inject('paginationConfig', {})
       :is-active="!!activeFilterColumn"
       @filter="handleColumnFilter"
       @close="activeFilterColumn = null"
+      @clear-all-filters="clearAllFilters"
     />
     <!-- filtering component here -->
   </div>

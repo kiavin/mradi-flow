@@ -17,6 +17,16 @@ const props = defineProps({
   areAllRowsSelected: Boolean,
   layouts: Object,
   allExpanded: Boolean,
+
+  // selected values form fltering compnent
+  selectedValues: {
+    type: Object,
+    default: () => ({}),
+  },
+  uniqueValues: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits([
@@ -53,12 +63,12 @@ const startResizing = (event, colKey) => {
 }
 
 const handleSearchInput = (colKey, value) => {
-  searchQueries.value[colKey] = value;
+  searchQueries.value[colKey] = value
   emit('column-search', {
     column: colKey,
-    value: value
-  });
-};
+    value: value,
+  })
+}
 </script>
 
 <template>
@@ -199,9 +209,23 @@ const handleSearchInput = (colKey, value) => {
             <span
               class="ms-2 text-secondary filter-icon-wrapper"
               style="flex-shrink: 0; cursor: pointer"
+              :class="{
+                'filter-icon-active':
+                  selectedValues[col.key]?.length > 0 &&
+                  selectedValues[col.key]?.length < uniqueValues[col.key]?.length,
+              }"
               @click.stop="onFilterClick(col.key, $event)"
             >
               <font-awesome-icon :icon="['fas', 'filter']" />
+              <span
+                v-if="
+                  selectedValues[col.key]?.length > 0 &&
+                  selectedValues[col.key]?.length < uniqueValues[col.key]?.length
+                "
+                class="filter-badge"
+              >
+                {{ selectedValues[col.key]?.length }}
+              </span>
             </span>
           </div>
           <div v-else class="d-flex justify-content-end align-items-center" />
@@ -254,5 +278,22 @@ const handleSearchInput = (colKey, value) => {
 .filter-icon-wrapper {
   position: relative;
   z-index: 1;
+}
+
+/* filtering */
+
+.filter-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--bs-primary);
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

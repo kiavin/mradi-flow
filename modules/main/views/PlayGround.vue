@@ -372,6 +372,7 @@ onMounted(() => {
     <OmniGridView
       :columns="tableColumns"
       :data="tableData"
+      :loading="isLoading"
       action-layout="inline"
       :mergedColumns1="[{ keys: ['contact_name', 'mobile_number'], label: 'Test', separator: ' ' }]"
       :pagination-config="{
@@ -408,7 +409,7 @@ onMounted(() => {
       <template #left-buttons>
         <BaseButton class="btn btn-success btn-sm" @click="showModal" style="font-size: 1.2rem">
           <template #icon>
-            <font-awesome-icon :icon="['fas', 'plus']"/>
+            <font-awesome-icon :icon="['fas', 'plus']" />
           </template>
           Custom Left
         </BaseButton>

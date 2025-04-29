@@ -272,9 +272,6 @@ const onSearch = (query) => {
 const onPerPageChange = (newPerPage) => emit('update:perPage', newPerPage)
 const onChangePage = (page) => emit('changePage', page)
 
-// const displayData = computed(() => {
-//   return props.searchInBackend ? props.data.data : props.data.data // Will be filtered in TableBody
-// }).
 const onRefresh = () => emit('refresh')
 
 </script>
