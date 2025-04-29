@@ -9,6 +9,7 @@ const { proxy } = getCurrentInstance()
 import Demo from '../components/StatusFormater.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import OmniGridView from '../../../app/themes/hopeui/components/organisms/OmniGridView.vue'
+import { BFormRow } from 'bootstrap-vue-next'
 
 const username = ref('')
 const password = ref('')
@@ -276,6 +277,27 @@ onMounted(() => {
     updateResponseData()
   })
 })
+
+// testing inline edting
+const editableColumns = [
+  // 'subject',
+  {
+    key: 'subject',
+    onSave: async ({ row, value }) => {
+      alert('Saving')
+      // console.log("INLINED EDIT ROW", row)
+       // write the saving logic here 
+    }
+  },
+  {
+    key: 'email_address',
+    onSave: async ({ row, value }) => {
+      alert('Saving')
+       // write the savng logic here 
+    }
+  }
+]
+
 </script>
 
 <template>
@@ -371,6 +393,7 @@ onMounted(() => {
   <div class="card p-3">
     <OmniGridView
       :columns="tableColumns"
+      :editable-columns="editableColumns"
       :data="tableData"
       :loading="isLoading"
       action-layout="inline"

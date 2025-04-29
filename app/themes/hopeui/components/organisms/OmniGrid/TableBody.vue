@@ -20,6 +20,7 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  editableColumns: Array,
   columnSlots: Array,
   mergedColumns: {
     type: Array,
@@ -695,6 +696,7 @@ const paginationConfig = inject('paginationConfig', {})
             :row="row"
             :index="index"
             :columns="visibleColumns"
+            :editable-columns="editableColumns"
             :all-columns="columns"
             :break-extra-columns="breakExtraColumns"
             :expandable-rows="expandableRows"

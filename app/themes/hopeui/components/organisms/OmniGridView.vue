@@ -38,6 +38,13 @@ const props = defineProps({
     default: () => [],
     // Example: [{ keys: ['start_time', 'end_time'], label: 'Time Range', separator: ' - ' }]
   },
+  editableColumns: {
+    type: Array,
+    default: () => [],
+    validator: (value) => {
+      return value.every(col => typeof col === 'string' || (col && typeof col.key === 'string'))
+    }
+  },
   searchInBackend: { type: Boolean, default: true },
   options: {
     type: Object,
@@ -70,7 +77,7 @@ const props = defineProps({
     }),
   },
   layout: {
-    type: Object,
+    type: Object, String,
     default: '',
   },
   layoutTheme: {
@@ -308,6 +315,7 @@ const onRefresh = () => emit('refresh')
       <slot name="body">
         <TableBody
           :columns="columns"
+          :editable-columns="editableColumns"
           :data="props?.data.data"
           :loading="loading"
           :paginationData="props.data?.paginationData"

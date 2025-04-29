@@ -1,12 +1,14 @@
 <script setup>
-import { ref, watch, computed, onMounted, onBeforeUnmount, useSlots } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
+import EditPanel from './EditPanel.vue'
 
 const emit = defineEmits(['toggle-expand', 'update-all-expanded', 'action-triggered'])
 
 const props = defineProps({
   row: Object,
   columns: Array,
+  editableColumns: Array,
   allColumns: Array,
   columnSlots: Array,
   columnFormatters: Object,
@@ -138,7 +140,6 @@ const handleClick = (action, row) => {
     emit('action-triggered', {
       actionKey: getActionKey(action, row),
       row: row,
-      // Remove originalCallback from here - handle it separately
     })
 
     // Call the callback directly if it exists
@@ -180,6 +181,80 @@ const isFirstVisibleColumn = (currentIndex) => {
   }
   return false
 }
+
+/** INLINE EDITING LOGIC */
+const editing = ref(false)
+const editPosition = ref(null)
+const currentEditColumn = ref(null)
+const currentEditValue = ref('')
+
+const isEditable = (columnKey) => {
+  return props.editableColumns.some((col) =>
+    typeof col === 'string' ? col === columnKey : col.key === columnKey,
+  )
+}
+
+const startEditing = async (column, event) => {
+  if (!isEditable(column.key)) return
+
+  const cell = event.currentTarget
+  const rect = cell.getBoundingClientRect()
+
+  editPosition.value = {
+    top: rect.top,
+    left: rect.left,
+    width: rect.width,
+    height: rect.height,
+  }
+
+  currentEditColumn.value = column
+  currentEditValue.value = props.row[column.key]
+  editing.value = true
+
+  // Focus the input when editing starts
+  await nextTick()
+  const inputs = document.querySelectorAll('.edit-panel input')
+  if (inputs.length > 0) {
+    inputs[0].focus()
+  }
+}
+
+const saveEdit = async (value) => {
+  try {
+    // Find the editable column config
+    const colConfig = props.editableColumns.find(
+      (col) =>
+        (typeof col === 'string' && col === currentEditColumn.value.key) ||
+        col.key === currentEditColumn.value.key,
+    )
+
+    if (typeof colConfig === 'object' && colConfig.onSave) {
+      const result = await colConfig.onSave({
+        row: props.row,
+        column: currentEditColumn.value,
+        value,
+      })
+
+      if (result?.error) {
+        return { error: result.error }
+      }
+    }
+
+    editing.value = false
+    emit('edit', {
+      row: props.row,
+      column: currentEditColumn.value,
+      value,
+    })
+  } catch (e) {
+    return { error: e.message }
+  }
+}
+
+const cancelEdit = () => {
+  editing.value = false
+}
+/** END INLINE EDITING LOGIC */
 </script>
 
 <template>
@@ -218,6 +293,10 @@ const isFirstVisibleColumn = (currentIndex) => {
       <td
         v-if="!isMergedColumnHidden?.(col.key)"
         class="fs-6 text-black"
+        :class="{
+          'text-primary': isEditable(col.key) && editing && currentEditColumn?.key === col.key,
+        }"
+        @click="(e) => startEditing(col, e)"
         :data-full-text="String(row[col.key])"
       >
         <font-awesome-icon
@@ -235,8 +314,20 @@ const isFirstVisibleColumn = (currentIndex) => {
           :row="row"
           :value="row[col.key]"
         />
-        <span v-else>{{ row[col.key] }}</span>
+        <span v-else :class="{ 'is-editable': isEditable(col.key) }">{{ row[col.key] }}</span>
       </td>
+
+      <teleport to="body">
+        <EditPanel
+          v-if="editing"
+          :row="row"
+          :column="currentEditColumn"
+          :value="currentEditValue"
+          :position="editPosition"
+          @save="saveEdit"
+          @cancel="cancelEdit"
+        />
+      </teleport>
     </template>
 
     <!-- Merged Columns -->
@@ -442,4 +533,38 @@ const isFirstVisibleColumn = (currentIndex) => {
 }
 
 /* end sticky colums */
+
+/* INLINE EDITING CSS */
+.editable-cell {
+  position: relative;
+  cursor: pointer;
+}
+
+.editable-cell:hover {
+  background-color: #f8f9fa; /* Light gray background on hover */
+}
+
+.is-editable {
+  cursor: pointer;
+  color: #0d6efd !important; /* Blue text color */
+  border-bottom: 1px dashed #0d6efd !important; /* Blue dashed underline */
+  transition: all 0.2s ease;
+  display: inline-block; /* To make border-bottom work inline */
+  padding-bottom: 1px; /* Adjust padding as needed */
+}
+
+.editable-cell.text-primary .is-editable {
+  border-bottom-style: solid !important; /* Solid underline when editing */
+  font-weight: 500;
+}
+
+.editable-cell.text-primary {
+  background-color: #e7f1ff; /* Light blue background when editing */
+}
+
+/* Make sure the edit panel appears above everything */
+.edit-panel {
+  z-index: 10000;
+}
+/* END INLINE EDITING CSS */
 </style>
