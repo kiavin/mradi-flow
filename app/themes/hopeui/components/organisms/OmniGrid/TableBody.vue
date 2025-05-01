@@ -110,6 +110,10 @@ const toggleAll = () => {
   allExpanded.value = !allExpanded.value
 }
 
+// Get pinned columns from store
+const pinnedLeftColumns = computed(() => store.getPinnedColumns('left'))
+const pinnedRightColumns = computed(() => store.getPinnedColumns('right'))
+
 watch(
   () => props.toggleAllSignal,
   (newVal) => {
@@ -128,7 +132,8 @@ const onActionTriggered = (payload) => {
 watch(
   () => props.data,
   (newData) => {
-    console.log('DataTable received new data:', newData)
+    // console.log('DataTable received new data:', newData)
+    return
   },
   { deep: true },
 )
@@ -437,15 +442,100 @@ const dynamicColumns = computed(() => {
   return props.columns.filter((col) => !staticKeys.has(col.key))
 })
 
+ 
+// const visibleColumns = computed(() => {
+//   if (!props.breakExtraColumns) return props.columns
+
+//   const staticCols = props.columns.filter((col) =>
+//     ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key),
+//   )
+
+//   const dynamicCols = props.columns.filter(
+//     (col) => !['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key),
+//   )
+
+//   // Get pinned columns
+//   const pinnedLeft = dynamicCols.filter((col) => pinnedLeftColumns.value.includes(col.key))
+//   const pinnedRight = dynamicCols.filter((col) => pinnedRightColumns.value.includes(col.key))
+
+//   // Ensure pinned columns are not duplicated in unpinned
+//   const pinnedKeys = [...pinnedLeft, ...pinnedRight].map((col) => col.key)
+
+//   const unpinned = dynamicCols.filter((col) => !pinnedKeys.includes(col.key))
+
+//   // Calculate how many unpinned columns can still be shown
+//   const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length
+//   const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots))
+
+//   // Final result in order: pinnedLeft, visibleUnpinned, pinnedRight, staticCols
+//   return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols]
+// })
+
+
+//******* */
+// const visibleColumns = computed(() => {
+//   // Always separate static columns
+//   const staticCols = props.columns.filter((col) =>
+//     ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
+//   );
+
+//   const dynamicCols = props.columns.filter(
+//     (col) => !['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
+//   );
+
+//   // Get pinned columns regardless of breakExtraColumns
+//   const pinnedLeft = dynamicCols.filter((col) => pinnedLeftColumns.value.includes(col.key));
+//   const pinnedRight = dynamicCols.filter((col) => pinnedRightColumns.value.includes(col.key));
+  
+//   if (!props.breakExtraColumns) {
+//     // When not breaking extra columns, just maintain pinned column order
+//     const pinnedKeys = [...pinnedLeft, ...pinnedRight].map(col => col.key);
+//     const unpinned = dynamicCols.filter(col => !pinnedKeys.includes(col.key));
+    
+//     return [...pinnedLeft, ...unpinned, ...pinnedRight, ...staticCols];
+//   }
+
+//   // Original logic for breakExtraColumns=true
+//   const pinnedKeys = [...pinnedLeft, ...pinnedRight].map(col => col.key);
+//   const unpinned = dynamicCols.filter(col => !pinnedKeys.includes(col.key));
+//   const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length;
+//   const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots));
+
+//   return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols];
+// });
+
+
 const visibleColumns = computed(() => {
-  if (!props.breakExtraColumns) return props.columns
-
   const staticCols = props.columns.filter((col) =>
-    ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key),
-  )
+    ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
+  );
 
-  return [...staticCols, ...dynamicColumns.value.slice(0, maxVisibleColumns.value)]
-})
+  const dynamicCols = props.columns.filter(
+    (col) => !['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
+  );
+
+  // Get pinned columns in their stored order
+  const pinnedLeft = pinnedLeftColumns.value
+    .map(key => dynamicCols.find(col => col.key === key))
+    .filter(Boolean);
+    
+  const pinnedRight = pinnedRightColumns.value
+    .map(key => dynamicCols.find(col => col.key === key))
+    .filter(Boolean);
+
+  if (!props.breakExtraColumns) {
+    const pinnedKeys = new Set([...pinnedLeftColumns.value, ...pinnedRightColumns.value]);
+    const unpinned = dynamicCols.filter(col => !pinnedKeys.has(col.key));
+    return [...pinnedLeft, ...unpinned, ...pinnedRight, ...staticCols];
+  }
+
+  const pinnedKeys = new Set([...pinnedLeftColumns.value, ...pinnedRightColumns.value]);
+  const unpinned = dynamicCols.filter(col => !pinnedKeys.has(col.key));
+  const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length;
+  const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots));
+
+  return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols];
+});
 
 const extraDynamicColumns = computed(() =>
   props.breakExtraColumns ? dynamicColumns.value.slice(maxVisibleColumns.value) : [],
@@ -506,7 +596,50 @@ const handleOutsideClick = (event) => {
   }
 }
 
+const autoSizeAllColumns = () => {
+  columns.value = columns.value.map((col) => ({
+    ...col,
+    width: 'auto',
+  }))
+}
+
+const autoSizeColumn = (key) => {
+  const column = columns.value.find((col) => col.key === key)
+  if (column) {
+    column.width = 'auto'
+  }
+}
+
+const resetAllColumnSettings = () => {
+  visibleColumns.value = visibleColumns.value.map((col) => ({
+    ...col,
+    pinned: false,
+    width: null,
+    sortOrder: null,
+  }))
+  sortColumn.value = null
+  sortOrder.value = null
+
+  store.resetPinnedColumns()
+}
+
 const handleColumnAction = ({ type, columnKey }) => {
+  if (type === 'reset') {
+    resetAllColumnSettings()
+    activeColumnKey.value = null
+    return
+  }
+
+  if (type === 'auto-size-all') {
+    autoSizeAllColumns()
+    activeColumnKey.value = null
+    return
+  }
+  if (type === 'auto-size-this') {
+    autoSizeColumn(columnKey)
+    activeColumnKey.value = null
+    return
+  }
   if (type.startsWith('sort-')) {
     const direction = type === 'sort-asc' ? 'asc' : 'desc'
 
@@ -624,7 +757,8 @@ const clearAllFilters = () => {
 const paginationConfig = inject('paginationConfig', {})
 </script>
 <template>
-  <div :class="{ 'table-responsive table-wrapper': !breakExtraColumns }" style="position: relative">
+  <!-- <div :class="{ 'table-responsive table-wrapper': !breakExtraColumns }" style="position: relative"> -->
+    <div :class="{ 'table-responsive': !breakExtraColumns, 'table-wrapper': true }" style="position: relative">
     <table class="table table-sm table-hover w-100">
       <TableHeader
         :columns="columns"
@@ -696,6 +830,7 @@ const paginationConfig = inject('paginationConfig', {})
             :row="row"
             :index="index"
             :columns="visibleColumns"
+            :column-widths="columnWidths"
             :editable-columns="editableColumns"
             :all-columns="columns"
             :break-extra-columns="breakExtraColumns"
@@ -783,7 +918,7 @@ const paginationConfig = inject('paginationConfig', {})
 
 /* sticky columns */
 .sticky-col {
-  position: sticky;
+  position: sticky !important;
   right: 0;
   background-color: inherit;
   z-index: 10;
@@ -800,6 +935,12 @@ const paginationConfig = inject('paginationConfig', {})
   padding: 0;
   margin: 0;
   max-width: 100% !important;
+
+  position: relative;
+  width: max-content; /* Let table expand beyond viewport */
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 /* filtering panel css  */
@@ -814,6 +955,9 @@ const paginationConfig = inject('paginationConfig', {})
   overflow-x: auto !important; /* Enable horizontal scroll */
   overflow-y: hidden;
   z-index: auto;
+
+  width: 100%;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .column-dropdown,

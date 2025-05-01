@@ -67,6 +67,12 @@ const props = defineProps({
   // action panel
   openRow: Number,
   toggleActionsPanel: Function,
+
+  // column pining
+  columnWidths: {
+    type: Object,
+    required: true,
+  },
 })
 
 const store = useOmnigridStore()
@@ -255,6 +261,45 @@ const cancelEdit = () => {
   editing.value = false
 }
 /** END INLINE EDITING LOGIC */
+
+const getPinnedLeftOffset = (colKey) => {
+  const pinnedLeft = store.getPinnedColumns('left')
+  const index = pinnedLeft.indexOf(colKey)
+  if (index === -1) return 'auto'
+
+  let offset = 0
+  for (let i = 0; i < index; i++) {
+    const prevColKey = pinnedLeft[i]
+    const width = props.columnWidths[prevColKey] || '150px' // Consistent default width
+    offset += parseInt(width)
+  }
+
+  // Add fixed widths for special columns
+  if (props.radioSelect) offset += 50
+  if (props.expandableRows) offset += 50
+
+  return `${offset}px`
+}
+
+const getPinnedRightOffset = (colKey) => {
+  const pinnedRight = store.getPinnedColumns('right')
+  const index = pinnedRight.indexOf(colKey)
+  if (index === -1) return 'auto'
+
+  let offset = 0
+  // Calculate widths of columns to the right of this one
+  for (let i = index + 1; i < pinnedRight.length; i++) {
+    const nextColKey = pinnedRight[i]
+    const width = props.columnWidths[nextColKey] || '150px'
+    offset += parseInt(width)
+  }
+
+  // Add fixed widths for special columns
+  if (props.showActions) offset += 100
+  if (props.multiSelect) offset += 50
+
+  return `${offset}px`
+}
 </script>
 
 <template>
@@ -273,7 +318,11 @@ const cancelEdit = () => {
     </td>
 
     <!-- Expand Toggle Cell -->
-    <td v-if="expandableRows" class="text-center align-middle" style="width: 50px">
+    <td
+      v-if="expandableRows"
+      class="text-center align-middle sticky-col"
+      style="width: 50px; left: 0"
+    >
       <button
         class="btn btn-sm btn-light p-0 d-flex align-items-center justify-content-center"
         style="width: 20px; height: 20px"
@@ -292,9 +341,20 @@ const cancelEdit = () => {
     <template v-for="(col, index) in columns" :key="col.key">
       <td
         v-if="!isMergedColumnHidden?.(col.key)"
-        class="fs-6 text-black"
+        :style="{
+          left:store.getColumnPinPosition(col.key) === 'left' ? getPinnedLeftOffset(col.key) : 'auto',
+          right:store.getColumnPinPosition(col.key) === 'right' ? getPinnedRightOffset(col.key) : 'auto',
+          position: store.getColumnPinPosition(col.key) ? 'sticky' : 'relative',
+          zIndex: store.getColumnPinPosition(col.key) ? 10 + store.getPinnedColumnIndex(col.key): 'auto',
+          // width: columnWidths[col.key] || '250px', // Ensure fixed width
+          // minWidth: columnWidths[col.key] || '250px', // Prevent collapsing
+          // maxWidth: columnWidths[col.key] || '250px', // Prevent expanding
+          // willChange: 'transform',
+        }"
         :class="{
-          'text-primary': isEditable(col.key) && editing && currentEditColumn?.key === col.key,
+          'sticky-col-left': store.getColumnPinPosition(col.key) === 'left',
+          'sticky-col-right': store.getColumnPinPosition(col.key) === 'right',
+          'fs-6 text-black': true,
         }"
         @click="(e) => startEditing(col, e)"
         :data-full-text="String(row[col.key])"
@@ -420,7 +480,6 @@ const cancelEdit = () => {
   </tr>
 
   <!-- extra columns wen breakextra coulm  is true -->
-  <!-- this is rendered wehn break extra columns is set to true  -->
   <tr
     v-if="breakExtraColumns && showExtra"
     class="bg-light text-black"
@@ -505,24 +564,22 @@ const cancelEdit = () => {
 
 /* ellipsis action layout */
 
-/** selected row bg color */
-/* .selected-row {
-  background-color: #e5c7ca !important;
-} */
-
 .selected-row,
 .selected-row td,
 .selected-row .sticky-col {
   background-color: #e5c7ca !important;
-  z-index: 5;
+  z-index: 10;
 }
 
 /* sticky columns */
 .sticky-col {
-  position: sticky;
+  position: sticky !important;
   right: 0;
   background-color: white;
   z-index: 10;
+
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .sticky-col:nth-child(1) {
@@ -567,4 +624,13 @@ const cancelEdit = () => {
   z-index: 10000;
 }
 /* END INLINE EDITING CSS */
+
+.sticky-pinned {
+  position: sticky !important;
+  background-color: lightgrey;
+
+  top: 0;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
 </style>

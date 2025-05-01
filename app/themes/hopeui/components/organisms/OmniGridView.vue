@@ -1,8 +1,7 @@
 <script setup>
-import { ref, computed, watch, watchEffect, onMounted, nextTick, useSlots, provide } from 'vue'
+import { ref, computed,  useSlots, provide } from 'vue'
 import GridHeader from './OmniGrid/GridHeader.vue'
 import TableBody from './OmniGrid/TableBody.vue'
-import BaseButton from '../atoms/button/BaseButton.vue'
 
 const emit = defineEmits([
   'action',

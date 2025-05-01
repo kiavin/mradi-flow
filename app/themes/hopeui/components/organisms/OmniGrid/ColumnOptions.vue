@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
 
 const props = defineProps({
   menuPosition: {
@@ -20,25 +21,28 @@ const props = defineProps({
   },
 })
 
+const store = useOmnigridStore()
+
 const emit = defineEmits(['action', 'close'])
 
 const showPinSubmenu = ref(false)
 
-// const handleAction = (action) => {
-//   if (action.startsWith('pin-')) {
-//     showPinSubmenu.value = false
-//   }
-//   emit('action', action)
-//   emit('close')
-// }
+
+// Computed property to get current pin status
+const currentPinStatus = computed(() => {
+  if (!props.activeColumnKey) return 'none'
+  return store.getColumnPinPosition(props.activeColumnKey) || 'none'
+})
 
 const handleAction = (action) => {
   if (action.startsWith('pin-')) {
+    const position = action.split('-')[1] // 'none', 'left', or 'right'
+    store.pinColumn(props.activeColumnKey, position)
     showPinSubmenu.value = false
   }
   emit('action', {
     type: action,
-    columnKey: props.activeColumnKey, // Include the column key
+    columnKey: props.activeColumnKey,
   })
   emit('close')
 }
@@ -96,9 +100,24 @@ const handleAction = (action) => {
         @mouseenter="showPinSubmenu = true"
         @mouseleave="showPinSubmenu = false"
       >
-        <div class="column-dropdown-item" @click="handleAction('pin-none')">No Pin</div>
-        <div class="column-dropdown-item" @click="handleAction('pin-left')">Pin Left</div>
-        <div class="column-dropdown-item" @click="handleAction('pin-right')">Pin Right</div>
+        <div class="column-dropdown-item" @click="handleAction('pin-none')">
+          <span v-if="currentPinStatus === 'none'">
+            <font-awesome-icon :icon="['fas', 'circle-check']" beat />
+          </span>
+          No Pin
+        </div>
+        <div class="column-dropdown-item" @click="handleAction('pin-left')">
+          <span v-if="currentPinStatus === 'left'">
+            <font-awesome-icon :icon="['fas', 'circle-check']" beat />
+          </span>
+          Pin Left
+        </div>
+        <div class="column-dropdown-item" @click="handleAction('pin-right')">
+          <span v-if="currentPinStatus === 'right'">
+            <font-awesome-icon :icon="['fas', 'circle-check']" beat />
+          </span>
+          Pin Right
+        </div>
       </div>
     </div>
 
@@ -119,6 +138,7 @@ const handleAction = (action) => {
   </div>
 </template>
 <style scoped>
+
 .column-dropdown {
   position: fixed;
   z-index: 1050;
@@ -138,9 +158,9 @@ const handleAction = (action) => {
   padding: 0.5rem 1rem;
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   white-space: nowrap;
+  gap: 8px; /* Add consistent gap between icon and text */
 }
 
 .column-dropdown-item:hover {

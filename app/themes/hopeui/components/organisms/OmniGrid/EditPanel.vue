@@ -19,7 +19,7 @@ const panelStyle = computed(() => ({
   top: `${props.position.top + props.position.height}px`, // Position below the cell
   left: `${props.position.left}px`, // Align with cell left edge
   zIndex: 10000,
-  marginTop: '5px', // Small gap from the cell
+  marginTop: '5px',
 }))
 
 const save = async () => {
@@ -91,7 +91,7 @@ onMounted(() => {
     </div>
     <div class="edit-panel-footer">
       <div v-if="isLoading" class="me-auto">
-        <span class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="spinner-border spinner-border-sm text-success" role="status">
           <span class="visually-hidden">Loading...</span>
         </span>
         <span class="ms-1 small">Saving...</span>

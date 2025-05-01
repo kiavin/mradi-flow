@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
 
 const props = defineProps({
   columns: Array,
@@ -27,6 +28,15 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  // column pining
+  columnWidths: {
+    type: Object,
+    required: true,
+  },
+  scrollLeft: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const emit = defineEmits([
@@ -39,6 +49,8 @@ const emit = defineEmits([
   'start-resizing',
   'column-search',
 ])
+
+const store = useOmnigridStore()
 
 const searchQueries = ref({})
 
@@ -69,6 +81,53 @@ const handleSearchInput = (colKey, value) => {
     value: value,
   })
 }
+
+watch(
+  () => props.columnWidths,
+  () => {
+    // Force update when column widths change
+  },
+  { deep: true },
+)
+ 
+const getPinnedLeftOffset = (colKey) => {
+  const pinnedLeft = store.getPinnedColumns('left')
+  const index = pinnedLeft.indexOf(colKey)
+  if (index === -1) return 'auto'
+
+  let offset = 0
+  for (let i = 0; i < index; i++) {
+    const prevColKey = pinnedLeft[i]
+    const width = props.columnWidths[prevColKey] || '150px' // Consistent default width
+    offset += parseInt(width)
+  }
+
+  // Add fixed widths for special columns
+  if (props.radioSelect) offset += 50
+  if (props.expandableRows) offset += 50
+
+  return `${offset}px`
+}
+
+const getPinnedRightOffset = (colKey) => {
+  const pinnedRight = store.getPinnedColumns('right')
+  const index = pinnedRight.indexOf(colKey)
+  if (index === -1) return 'auto'
+
+  let offset = 0
+  // Calculate widths of columns to the right of this one
+  for (let i = index + 1; i < pinnedRight.length; i++) {
+    const nextColKey = pinnedRight[i]
+    const width = props.columnWidths[nextColKey] || '150px'
+    offset += parseInt(width)
+  }
+
+  // Add fixed widths for special columns
+  if (props.showActions) offset += 100
+  if (props.multiSelect) offset += 50
+
+  return `${offset}px`
+}
 </script>
 
 <template>
@@ -76,7 +135,11 @@ const handleSearchInput = (colKey, value) => {
     <!-- Header Row -->
     <tr>
       <!-- Radio Select Header -->
-      <th v-if="radioSelect" class="text-center align-middle" style="width: 50px">
+      <th
+        v-if="radioSelect"
+        class="text-center align-middle sticky-col"
+        style="width: 50px; left: 0"
+      >
         <font-awesome-icon
           :icon="['fas', 'circle-xmark']"
           style="cursor: pointer; font-size: 1.2rem; color: #1a1a34"
@@ -86,7 +149,11 @@ const handleSearchInput = (colKey, value) => {
       </th>
 
       <!-- Expand/Collapse All Column as a button -->
-      <th v-if="expandableRows" class="text-center align-middle" style="width: 50px">
+      <th
+        v-if="expandableRows"
+        class="text-center align-middle sticky-col"
+        style="width: 50px; left: 0; z-index: 15px"
+      >
         <button
           class="btn btn-sm btn-light p-0 d-flex align-items-center justify-content-center"
           style="width: 20px; height: 20px"
@@ -104,15 +171,30 @@ const handleSearchInput = (colKey, value) => {
       <template v-for="(col, index) in visibleColumns" :key="col.key">
         <th
           v-if="!isMergedColumnHidden(col.key)"
-          :style="{ width: columnWidths[col.key] || 'auto' }"
+          :style="{
+            left: store.getColumnPinPosition(col.key) === 'left' ? getPinnedLeftOffset(col.key) : 'auto',
+            right: store.getColumnPinPosition(col.key) === 'right' ? getPinnedRightOffset(col.key) : 'auto',
+            position: store.getColumnPinPosition(col.key) ? 'sticky' : 'relative',
+            zIndex: store.getColumnPinPosition(col.key) ? 10 + store.getPinnedColumnIndex(col.key) : 'auto',
+            // width: columnWidths[col.key] || '250px', 
+            // minWidth: columnWidths[col.key] || '250px', 
+            // maxWidth: columnWidths[col.key] || '250px', 
+            // willChange: 'transform',
+          }"
           :class="[
-            'position-relative text-nowrap align-middle',
-            index < columns.length - 1 ? 'border-end custom-header-divider' : '',
+            'text-nowrap align-middle',
+            {
+              'sticky-pinned': store.getColumnPinPosition(col.key),
+              'border-end custom-header-divider': index < columns.length - 1,
+            },
           ]"
         >
-          <div class="d-flex justify-content-center align-items-center text-center w-100">
+          <!-- <div class="d-flex justify-content-center align-items-center text-center w-100">
+             -->
+          <div class="d-flex justify-content-between align-items-center w-100">
             <!-- Column Label with Click to Toggle Sort -->
             <span
+              class="flex-grow-1"
               :style="col.key !== 'actions' && col.key !== 'id' ? 'cursor: pointer' : ''"
               @click="col.key !== 'actions' && col.key !== 'id' && toggleSort(col.key)"
             >
@@ -180,18 +262,39 @@ const handleSearchInput = (colKey, value) => {
     <!-- Filter Row -->
     <tr v-if="filtering">
       <!-- Empty Cell for radio Column -->
-      <th v-if="radioSelect" style="visibility: hidden"></th>
+      <th
+        v-if="radioSelect"
+        style="visibility: hidden; left: 0"
+        class="sticky-col bg-white text-center align-middle"
+      ></th>
 
       <!-- Empty Cell for Expand/Collapse Column -->
-      <th v-if="expandableRows" style="background: #fff" class=""></th>
+      <th
+        v-if="expandableRows"
+        style="background: #fff; left: 0"
+        class="sticky-col bg-white text-center align-middle"
+      ></th>
 
       <!-- Filter Inputs for Regular Columns -->
       <template v-for="(col, index) in visibleColumns" :key="col.key + '-filter'">
         <th
           v-if="!isMergedColumnHidden(col.key)"
+          :style="{
+            left: store.getColumnPinPosition(col.key) === 'left' ? getPinnedLeftOffset(col.key) : 'auto',
+            right: store.getColumnPinPosition(col.key) === 'right' ? getPinnedRightOffset(col.key): 'auto',
+            position: store.getColumnPinPosition(col.key) ? 'sticky' : 'relative',
+            zIndex: store.getColumnPinPosition(col.key) ? 10 + store.getPinnedColumnIndex(col.key) : 'auto',
+            width: columnWidths[col.key] || '250px',
+            minWidth: columnWidths[col.key] || '250px',
+            maxWidth: columnWidths[col.key] || '250px',
+            willChange: 'transform',
+          }"
           :class="[
             'bg-white position-relative',
-            index < columns.length - 1 ? 'border-end custom-header-divider' : '',
+            {
+              'sticky-pinned': store.getColumnPinPosition(col.key),
+              'border-end custom-header-divider': index < columns.length - 1,
+            },
           ]"
         >
           <div
@@ -295,5 +398,51 @@ const handleSearchInput = (colKey, value) => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+/* colun pinning */
+
+.sticky-col-left {
+  position: sticky !important;
+  left: 0;
+  background-color: #d3d3d3;
+  z-index: 10;
+}
+
+.sticky-col-right {
+  position: sticky !important;
+  right: 0;
+  background-color: #d3d3d3;
+  z-index: 10;
+}
+
+.sticky-pinned {
+  position: sticky !important;
+  background-color: lightgrey;
+
+  top: 0;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.resize-handle {
+  z-index: 20;
+  transform: translateZ(0);
+}
+
+/* .sticky-pinned[style*="left"]:not(:last-of-type) {
+  box-shadow: 4px 0 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-pinned[style*="right"]:not(:last-of-type) {
+  box-shadow: -4px 0 4px -2px rgba(0, 0, 0, 0.1);
+} */
+
+/* Special styling for the first pinned columns */
+.sticky-pinned[style*='left']:first-of-type {
+  box-shadow: none;
+}
+
+.sticky-pinned[style*='right']:first-of-type {
+  box-shadow: none;
 }
 </style>

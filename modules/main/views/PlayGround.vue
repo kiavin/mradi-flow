@@ -9,7 +9,6 @@ const { proxy } = getCurrentInstance()
 import Demo from '../components/StatusFormater.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import OmniGridView from '../../../app/themes/hopeui/components/organisms/OmniGridView.vue'
-import { BFormRow } from 'bootstrap-vue-next'
 
 const username = ref('')
 const password = ref('')
@@ -63,19 +62,6 @@ const tableColumns = ref([
   { key: 'end_time', label: 'End Time' },
   { key: 'status', label: 'Status' },
   { key: 'relative_time', label: 'Booked since' },
-])
-
-const tableColumns2 = ref([
-  { key: 'userName', label: 'Chair Person' },
-  { key: 'subject', label: 'Subject' },
-  { key: 'email_address', label: 'Email' },
-  { key: 'contact_name', label: 'Contact Name' },
-  { key: 'appointment_date', label: 'Date' },
-  { key: 'status', label: 'Status' },
-  { key: 'mobile_number', label: 'Phone' },
-  { key: 'department', label: 'Department' }, // New column 1
-  { key: 'location', label: 'Location' }, // New column 2
-  { key: 'duration', label: 'Duration (hours)' }, // New column 3
 ])
 
 const data2 = ref({
@@ -138,6 +124,7 @@ const data2 = ref({
     paginationLinks: {},
   },
 })
+
 watch(data, () => {
   updateResponseData()
 })
@@ -286,18 +273,30 @@ const editableColumns = [
     onSave: async ({ row, value }) => {
       alert('Saving')
       // console.log("INLINED EDIT ROW", row)
-       // write the saving logic here 
-    }
+      // write the saving logic here
+    },
   },
   {
     key: 'email_address',
     onSave: async ({ row, value }) => {
       alert('Saving')
-       // write the savng logic here 
-    }
-  }
+      // write the savng logic here
+    },
+  },
 ]
 
+const getStatusClass = (theme) => {
+  const themeMap = {
+    info: 'bg-info text-white badge',
+    success: 'bg-success text-white badge',
+    warning: 'bg-warning text-dark badge',
+    danger: 'bg-danger text-white badge',
+    primary: 'bg-primary text-white badge',
+    secondary: 'bg-secondary text-white badge',
+    dark: 'bg-dark text-white badge',
+  }
+  return themeMap[theme] || 'bg-light text-dark badge'
+}
 </script>
 
 <template>
@@ -364,7 +363,7 @@ const editableColumns = [
   <!-- <div v-if="isLoading">Logging in...</div> -->
 
   <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
-  <div class="card p-1">
+  <div class="cardq p-1">
     <!-- <h2 class="h2">Bootstrap Table</h2> -->
     <!-- <Suspense>
       <template #default>
@@ -437,16 +436,9 @@ const editableColumns = [
           Custom Left
         </BaseButton>
       </template>
-      <template #column-status="{ value }">
-        <span
-          :style="{ background: value === 1 ? 'green' : 'red' }"
-          :class="{
-            'badge-success': value === 1,
-            'badge-danger': value === 2,
-          }"
-          class="badge"
-        >
-          {{ value === 1 ? 'Active' : 'Inactive' }}
+      <template #column-status="{ row }">
+        <span :class="getStatusClass(row.recordStatus?.theme)">
+          {{ row.recordStatus.label }}
         </span>
       </template>
     </OmniGridView>
