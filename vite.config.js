@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import omnifaceEnvPlugin from './app/omnicore/plugins/omniface-vite-plugin'
 import dotenv from 'dotenv'
+import AutoImport from 'unplugin-auto-import/vite'
 
 dotenv.config({ path: './omniface.cfg' });
 
@@ -20,7 +21,19 @@ export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
-    omnifaceEnvPlugin()
+    omnifaceEnvPlugin(),
+    AutoImport({
+      imports: [
+        'vue',
+        {
+          from: '~/omnicore/helpers/useApi',
+          imports: ['useApi'],
+        }
+      ],
+      dts: 'src/auto-imports.d.ts', 
+      dirs: [], // Clear default directories
+      vueTemplate: true // Enable for <template> usage
+    })
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.vue', '.ts', '.tsx'],
