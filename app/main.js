@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import registerPlugins from './omnicore/plugins/plugin';
 import App from './App.vue'
+
 import router from './omnicore/router'
  
 
