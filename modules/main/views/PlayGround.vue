@@ -1,14 +1,12 @@
 <script setup>
 import { onMounted, ref, watch, getCurrentInstance } from 'vue'
-import { useApi } from '../../../app/omnicore/helpers/useApi'
 import DataTable from '../../../app/themes/hopeui/components/organisms/DataTable.vue'
-import TableSkeleton from '../../../app/themes/hopeui/components/molecules/TableSkeleton.vue'
 import DemoForm from '../../../app/themes/hopeui/components/organisms/DemoForm.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 const { proxy } = getCurrentInstance()
 import Demo from '../components/StatusFormater.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
-import OmniGridView from '../../../app/themes/hopeui/components/organisms/OmniGridView.vue'
+
 
 const username = ref('')
 const password = ref('')
@@ -425,7 +423,7 @@ const getStatusClass = (theme) => {
       @search="handleSearch2"
       @changePage="changePage"
       @update:perPage="updatePerPage"
-      @refresh="updateResponseData"
+      @refresh="request"
     >
       // demo slot component
       <template #left-buttons>

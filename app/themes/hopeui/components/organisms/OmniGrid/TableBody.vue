@@ -442,68 +442,6 @@ const dynamicColumns = computed(() => {
   return props.columns.filter((col) => !staticKeys.has(col.key))
 })
 
- 
-// const visibleColumns = computed(() => {
-//   if (!props.breakExtraColumns) return props.columns
-
-//   const staticCols = props.columns.filter((col) =>
-//     ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key),
-//   )
-
-//   const dynamicCols = props.columns.filter(
-//     (col) => !['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key),
-//   )
-
-//   // Get pinned columns
-//   const pinnedLeft = dynamicCols.filter((col) => pinnedLeftColumns.value.includes(col.key))
-//   const pinnedRight = dynamicCols.filter((col) => pinnedRightColumns.value.includes(col.key))
-
-//   // Ensure pinned columns are not duplicated in unpinned
-//   const pinnedKeys = [...pinnedLeft, ...pinnedRight].map((col) => col.key)
-
-//   const unpinned = dynamicCols.filter((col) => !pinnedKeys.includes(col.key))
-
-//   // Calculate how many unpinned columns can still be shown
-//   const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length
-//   const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots))
-
-//   // Final result in order: pinnedLeft, visibleUnpinned, pinnedRight, staticCols
-//   return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols]
-// })
-
-
-//******* */
-// const visibleColumns = computed(() => {
-//   // Always separate static columns
-//   const staticCols = props.columns.filter((col) =>
-//     ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
-//   );
-
-//   const dynamicCols = props.columns.filter(
-//     (col) => !['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
-//   );
-
-//   // Get pinned columns regardless of breakExtraColumns
-//   const pinnedLeft = dynamicCols.filter((col) => pinnedLeftColumns.value.includes(col.key));
-//   const pinnedRight = dynamicCols.filter((col) => pinnedRightColumns.value.includes(col.key));
-  
-//   if (!props.breakExtraColumns) {
-//     // When not breaking extra columns, just maintain pinned column order
-//     const pinnedKeys = [...pinnedLeft, ...pinnedRight].map(col => col.key);
-//     const unpinned = dynamicCols.filter(col => !pinnedKeys.includes(col.key));
-    
-//     return [...pinnedLeft, ...unpinned, ...pinnedRight, ...staticCols];
-//   }
-
-//   // Original logic for breakExtraColumns=true
-//   const pinnedKeys = [...pinnedLeft, ...pinnedRight].map(col => col.key);
-//   const unpinned = dynamicCols.filter(col => !pinnedKeys.includes(col.key));
-//   const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length;
-//   const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots));
-
-//   return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols];
-// });
-
 
 const visibleColumns = computed(() => {
   const staticCols = props.columns.filter((col) =>
