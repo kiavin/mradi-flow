@@ -30,9 +30,9 @@ export default defineConfig({
           imports: ['useApi'],
         }
       ],
-      dts: 'src/auto-imports.d.ts', 
-      dirs: [], // Clear default directories
-      vueTemplate: true // Enable for <template> usage
+      // dts: 'app/auto-imports.d.ts', Disabled,, enable if uisng typoescript 
+      //dirs: [], // Clear default directories
+      //vueTemplate: true // Enable for <template> usage
     })
   ],
   resolve: {
