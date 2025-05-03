@@ -8,7 +8,6 @@ import Demo from '../components/StatusFormater.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import BaseButton from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 
-// import { useApi } from '~/omnicore/helpers/useApi';
 
 
 const username = ref('')

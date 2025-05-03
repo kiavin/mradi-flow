@@ -1,16 +1,27 @@
 # Omniface
-
 This template should help get you started developing with OMNIFACE powerd by Vue 3 in Vite and warp code generator.
  
-
 ## Project Setup
 
 ```sh
+git clone https://github.com/yiitron/omniface-vue.git
+cd omniface
 npm install
 ```
 
 ## NOTE:
 ### For warp CLI code generator to run you must configure omniface.cfg
+
+## Documentation
+To read the documentation for omniface __run__
+
+```sh
+npm run docs:dev //open a new terminal in omniface app
+```
+Access the doc via
+```sh
+http localhost:3000/docs
+http localhost:5174/docs
 
 ## Warp CLI Commands
 
