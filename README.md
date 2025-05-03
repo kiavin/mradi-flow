@@ -22,6 +22,7 @@ Access the doc via
 ```sh
 http localhost:3000/docs
 http localhost:5174/docs
+```
 
 ## Warp CLI Commands
 
