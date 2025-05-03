@@ -5,7 +5,6 @@ function formatResourceName(resource) {
 export function createPageTemplate(resource, moduleName) {
   return `<script setup>
 import { ref, getCurrentInstance } from 'vue';
-import { useApi } from '~/omnicore/helpers/useApi';
 import { useRouter } from 'vue-router'
 import Form from './form.vue';
 
@@ -61,7 +60,6 @@ export function updatePageTemplate(resource, moduleName) {
   return `<script setup>
 import { ref, onMounted, watch, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useApi } from '~/omnicore/helpers/useApi';
 import Form from './form.vue';
 
 const { proxy } = getCurrentInstance()
@@ -136,7 +134,6 @@ export function viewPageTemplate(resource, moduleName) {
   return `<script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useApi } from '~/omnicore/helpers/useApi';
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Form from './form.vue';
 
@@ -190,12 +187,9 @@ export function indexPageTemplate(resource, tableColumns, moduleName, endPoints)
   return `<script setup>
 import { onMounted, ref, watch, getCurrentInstance, nextTick } from 'vue'
 import { useRouter } from 'vue-router';
-import { useApi } from '~/omnicore/helpers/useApi';
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
-
-import DataTable from '~/themes/hopeui/components/organisms/DataTable.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter();
@@ -243,7 +237,7 @@ const updateResponseData = () => {
 }
 
 
-//const handleView = (id) => {
+//const handleView = (id = row.id) => {
 // router.push({ name: '${moduleName}/${resource.toLowerCase()}/view', params: { id } });
 //};
 
@@ -283,7 +277,7 @@ const handleView = async (id) => {
 
 const errors = ref({})
 
-const handleEdit = async (id) => {
+const handleEdit = async (id = row.id) => {
   errors.value = {}
   
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
@@ -400,7 +394,7 @@ const handleCreate = async() => {
 }
 
 
-const handleDelete = async (id, is_deleted) => {
+const handleDelete = async (id = row.id, is_deleted = row. is_deleted) => {
    const action = is_deleted ? 'Restore' : 'Delete'
 
   const confirmationText = is_deleted
@@ -500,17 +494,51 @@ onMounted(() => {
       <div class="col-auto mb-4">
         <Button type="submit" customClass="btn btn-primary" @click="handleCreate"> New ${resource} </Button>
       </div>
-  <DataTable
-        :data="tableData"
-        :columns="tableColumns"
-        :loading="isLoading"
-        @edit="handleEdit"
-        @search="handleSearch"
-        @delete="handleDelete"
-        @view="handleView"
-        @changePage="changePage"
-        @update:perPage="updatePerPage"
-      />
+
+      <OmniGridView
+      :columns="tableColumns"
+      :data="tableData"
+      :loading="isLoading"
+      action-layout="inline"
+      :pagination-config="{
+        variant: 'circle',
+        position: 'right',
+        bgColor: '#4f46e5',
+        hoverBgColor: '#6366f1',
+        textColor: '#374151',
+        activeTextColor: '#ffffff',
+        showFirstLast: true,
+        showNumbers: true,
+        showTotal: true,
+        showRange: true,
+      }"
+      :toolbar="{
+        show: true,
+        showCreateButton: true,
+      }"
+      :expandable-rows="true"
+      :filtering="true"
+      :multi-select="false"
+      :radio-select="false"
+      :break-extra-columns="true"
+      :search-in-backend="true"
+      @view="handleView"
+      @edit="handleEdit"
+      @delete="handleDelete"
+      @search="handleSearch"
+      @changePage="changePage"
+      @update:perPage="updatePerPage"
+      @refresh="request"
+    >
+      <template #left-buttons>
+        <Button class="btn btn-success btn-sm" @click="handleCreate" style="font-size: 1.2rem">
+          <template #icon>
+            <font-awesome-icon :icon="['fas', 'plus']" />
+          </template>
+         New ${resource}
+        </Button>
+      </template>
+    </OmniGridView>
   </div>
 </div>
 
