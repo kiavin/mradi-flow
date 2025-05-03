@@ -6,17 +6,14 @@ import TableBody from './OmniGrid/TableBody.vue'
 const emit = defineEmits([
   'action',
   'view',
-  'view-legacy',
   'edit',
-  'edit-legacy',
   'delete',
-  'delete-legacy',
   'restore',
-  'restore-legacy',
   'changePage',
   'search',
   'update:perPage',
   'refresh',
+  
 ])
 
 const props = defineProps({
@@ -76,8 +73,8 @@ const props = defineProps({
     }),
   },
   layout: {
-    type: Object, String,
-    default: '',
+    type: [Object, String],
+    default: () => ({}),
   },
   layoutTheme: {
     type: String,
@@ -94,12 +91,10 @@ const props = defineProps({
   showCreateButton: {
     type: Boolean,
   },
-  searchInBackend: { type: Boolean, default: true },
   showActions: { type: Boolean, default: true },
   showView: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
   showDelete: { type: Boolean, default: true },
-  loading: { type: Boolean, default: false },
   showPagination: { type: Boolean, default: true },
   showFilter: { type: Boolean, default: true },
   showSearch: { type: Boolean, default: true },
@@ -135,10 +130,6 @@ const props = defineProps({
   breakExtraColumns: {
     type: Boolean,
     default: false, // false = scroll horizontally, true = row break
-  },
-
-  maxVisibleColumns: {
-    type: Number,
   },
 
   // Pagination options
@@ -230,32 +221,10 @@ const columnSlots = computed(() => {
 })
 
 /* emiting events */
-
-// const onActionTriggered = (payload) => {
-//   const { actionKey, row, originalCallback } = payload
-
-//   // Always emit as an object for consistency
-//   emit('action', { action: actionKey, row })
-
-//   // For specific actions, emit both ways for backward compatibility
-//   if (['view', 'edit', 'delete', 'restore'].includes(actionKey)) {
-//     emit(actionKey, row) // Primary emission (recommended)
-//     emit(`${actionKey}-legacy`, row?.id, row) // Secondary emission
-//   }
-
-//   if (typeof originalCallback === 'function') {
-//     originalCallback(row)
-//   }
-// }
+ 
 const onActionTriggered = (payload) => {
-  const { actionKey, row, index, originalCallback } = payload
-
-  if (!row) {
-    console.warn(`No row provided for action: ${actionKey}`)
-    return
-  }
-
-  // emit('action', { action: actionKey, row })
+  const { actionKey, row, originalCallback } = payload
+   
   emit('action', actionKey, row)
 
   if (['view', 'edit', 'delete', 'restore'].includes(actionKey)) {
@@ -279,6 +248,7 @@ const onPerPageChange = (newPerPage) => emit('update:perPage', newPerPage)
 const onChangePage = (page) => emit('changePage', page)
 
 const onRefresh = () => emit('refresh')
+const createButton = () => emit('handleCreate')
 
 </script>
 <template>
@@ -297,10 +267,8 @@ const onRefresh = () => emit('refresh')
           @search="onSearch"
           @update:perPage="onPerPageChange"
           @changePage="onChangePage"
-          @create="handleCreate"
+          @create="createButton"
           @refresh="onRefresh"
-          @toggleShowAll="handleToggleShowAll"
-          @export="handleExport"
         >
           <template #left-buttons>
             <slot name="left-buttons"></slot>
@@ -334,7 +302,6 @@ const onRefresh = () => emit('refresh')
           :multi-select="multiSelect"
           :radio-select="radioSelect"
           :break-extra-columns="breakExtraColumns"
-          :maxVisibleColumns="maxVisibleColumns"
           @action-triggered="onActionTriggered"
         >
           <!-- Dynamic column slots -->
@@ -354,7 +321,7 @@ const onRefresh = () => emit('refresh')
     <!-- footer -->
     <div class="mt-2">
       <slot name="footer">
-        <div class="">footer</div>
+        <div class=""></div>
       </slot>
     </div>
     <!-- end footer -->

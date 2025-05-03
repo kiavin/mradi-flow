@@ -56,7 +56,7 @@ const props = defineProps({
 
   // radio select
   selectedRadioId: {
-    type: Object,
+    type: [Object, String, Number, null],
     required: true,
   },
   handleRadioSelect: Function,
@@ -320,8 +320,8 @@ const getPinnedRightOffset = (colKey) => {
     <!-- Expand Toggle Cell -->
     <td
       v-if="expandableRows"
-      class="text-center align-middle sticky-col"
-      style="width: 50px; left: 0"
+      class="text-center align-middle"
+      style="width: 50px; left: 0; position: sticky !important; z-index: 10; "
     >
       <button
         class="btn btn-sm btn-light p-0 d-flex align-items-center justify-content-center"
@@ -342,10 +342,16 @@ const getPinnedRightOffset = (colKey) => {
       <td
         v-if="!isMergedColumnHidden?.(col.key)"
         :style="{
-          left:store.getColumnPinPosition(col.key) === 'left' ? getPinnedLeftOffset(col.key) : 'auto',
-          right:store.getColumnPinPosition(col.key) === 'right' ? getPinnedRightOffset(col.key) : 'auto',
+          left:
+            store.getColumnPinPosition(col.key) === 'left' ? getPinnedLeftOffset(col.key) : 'auto',
+          right:
+            store.getColumnPinPosition(col.key) === 'right'
+              ? getPinnedRightOffset(col.key)
+              : 'auto',
           position: store.getColumnPinPosition(col.key) ? 'sticky' : 'relative',
-          zIndex: store.getColumnPinPosition(col.key) ? 10 + store.getPinnedColumnIndex(col.key): 'auto',
+          zIndex: store.getColumnPinPosition(col.key)
+            ? 10 + store.getPinnedColumnIndex(col.key)
+            : 'auto',
           // width: columnWidths[col.key] || '250px', // Ensure fixed width
           // minWidth: columnWidths[col.key] || '250px', // Prevent collapsing
           // maxWidth: columnWidths[col.key] || '250px', // Prevent expanding
@@ -577,9 +583,6 @@ const getPinnedRightOffset = (colKey) => {
   right: 0;
   background-color: white;
   z-index: 10;
-
-  will-change: transform;
-  backface-visibility: hidden;
 }
 
 .sticky-col:nth-child(1) {

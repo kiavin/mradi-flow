@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 library.add(fas)
 
-// omnigrid view registering globaly
+// registering globaly omnigrid view registering globaly
 import OmniGridView from '~/themes/hopeui/components/organisms/OmniGridView.vue'
 
 export default function registerPlugins(app) {

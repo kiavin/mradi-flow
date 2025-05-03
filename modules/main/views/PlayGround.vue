@@ -6,6 +6,9 @@ import { useModalStore } from '~/omnicore/stores/modalStore.js'
 const { proxy } = getCurrentInstance()
 import Demo from '../components/StatusFormater.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+import BaseButton from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+
+// import { useApi } from '~/omnicore/helpers/useApi';
 
 
 const username = ref('')
@@ -161,12 +164,9 @@ const handleView = (id) => {
 }
 
 const handleView2 = (row) => {
-  // if (!row || typeof row !== 'object') {
-  //   console.warn('handleView2 called with invalid row:', row)
-  //   return
-  // }
-  console.trace('handleView2 triggered with row:', row)
-  console.log(row.subject)
+ 
+  console.trace('handleView2 triggered with row:', row.id)
+  console.log("ROW DATA",row.subject)
   proxy.$showAlert({
     showConfirmButton: true,
     confirmButtonText: 'Yes, view it!',
@@ -232,13 +232,7 @@ const handleSearch = (query) => {
   })
 }
 
-const handleSearch2 = (query) => {
-  request(null, {
-    page: tableData.value.paginationData.currentPage,
-    'per-page': tableData.value.paginationData.perPage,
-    _search: query,
-  })
-}
+
 
 const changePage = async (page) => {
   await request(null, { page, 'per-page': tableData.value.paginationData.perPage })
@@ -394,7 +388,6 @@ const getStatusClass = (theme) => {
       :data="tableData"
       :loading="isLoading"
       action-layout="inline"
-      :mergedColumns1="[{ keys: ['contact_name', 'mobile_number'], label: 'Test', separator: ' ' }]"
       :pagination-config="{
         variant: 'circle',
         position: 'right',
@@ -420,7 +413,7 @@ const getStatusClass = (theme) => {
       @view="handleView2"
       @edit="handleEdit"
       @delete="handleDelete"
-      @search="handleSearch2"
+      @search="handleSearch"
       @changePage="changePage"
       @update:perPage="updatePerPage"
       @refresh="request"

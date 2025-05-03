@@ -152,7 +152,7 @@ const getPinnedRightOffset = (colKey) => {
       <th
         v-if="expandableRows"
         class="text-center align-middle sticky-col"
-        style="width: 50px; left: 0; z-index: 15px"
+        style="width: 50px; left: 0; z-index: 10px"
       >
         <button
           class="btn btn-sm btn-light p-0 d-flex align-items-center justify-content-center"
