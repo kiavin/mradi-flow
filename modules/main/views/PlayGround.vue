@@ -355,30 +355,6 @@ const getStatusClass = (theme) => {
 
   <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
   <div class="cardq p-1">
-    <!-- <h2 class="h2">Bootstrap Table</h2> -->
-    <!-- <Suspense>
-      <template #default>
-        <DataTable
-          :data="tableData"
-          :columns="tableColumns"
-          :loading="isLoading"
-          @edit="handleEdit"
-          @search="handleSearch"
-          @delete="handleDelete"
-          @view="handleView"
-          @changePage="changePage"
-          @update:perPage="updatePerPage"
-          :columnFormatters="{
-            status: Demo,
-          }"
-          :mergedColumns="[{ keys: ['start_time', 'end_time'], label: 'Time', separator: ' - ' }]"
-          :layouts="{ stickyHeader: true }"
-        />
-      </template>
-      <template #fallback>
-        <TableSkeleton />
-      </template>
-    </Suspense> -->
   </div>
   <div class="card p-3">
     <OmniGridView
