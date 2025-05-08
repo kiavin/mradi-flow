@@ -144,116 +144,123 @@ const exportToExcel = (data) => {
     downloadFile(JSON.stringify(data), 'application/vnd.ms-excel', 'export.xls')
   }
 }
-
+const isExportingPDF = ref(false)
 const exportToPDF = async (data) => {
   if (!data || data.length === 0) {
-    console.error('No data to export')
-    return
+    console.error('No data to export');
+    return;
   }
 
-  try {
-    // Dynamically import required libraries
-    const { jsPDF } = await import('jspdf')
-    const autoTable = (await import('jspdf-autotable')).default
+  isExportingPDF.value = true;
 
-    // Create PDF document with landscape orientation
+  try {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+
+    // Create PDF with better compression settings
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
       format: 'a4',
-      hotfixes: ['px_scaling'], // Fix for pixel scaling issues
-    })
+      compress: true,
+      hotfixes: ['px_scaling'],
+    });
 
-    // Add title
-    doc.setFontSize(16)
-    doc.setTextColor(40)
-    doc.setFont('helvetica', 'bold')
-    doc.text('Exported Data', doc.internal.pageSize.getWidth() / 2, 15, {
+    // Title with smaller font
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40);
+    doc.setFontSize(12);
+    doc.text('Exported Data', doc.internal.pageSize.getWidth() / 2, 10, {
       align: 'center',
-    })
+    });
 
-    // Prepare table data
-    const headers = Object.keys(data[0] || {})
-    const body = data.map((row) =>
-      headers.map((header) => {
-        const value = row[header]
-        if (value === null || value === undefined) return ''
-        if (typeof value === 'object') return JSON.stringify(value)
-        return String(value)
-      }),
-    )
+    const headers = Object.keys(data[0] || {});
+    
+    // Calculate column widths based on content
+    const columnStyles = {};
+    headers.forEach((header, index) => {
+      columnStyles[index] = {
+        cellWidth: 'wrap', // Auto-width based on content
+        minCellWidth: 15, // Minimum width for each column
+        maxCellWidth: 40, // Maximum width before breaking
+      };
+    });
 
-    // Generate the table
+    // Prepare all data at once (jsPDF-autotable handles pagination internally)
+    const body = data.map(row =>
+      headers.map(header => {
+        const value = row[header];
+        if (value == null) return '';
+        if (typeof value === 'object') {
+          return JSON.stringify(value).slice(0, 50); // Truncate long JSON
+        }
+        return String(value).slice(0, 100); // Truncate very long strings
+      })
+    );
+
+    // Generate table with proper multi-page support
     autoTable(doc, {
       head: [headers],
       body: body,
-      startY: 25,
-      margin: {
-        top: 20,
-        left: 10,
-        right: 10,
-        bottom: 20,
-      },
-      tableWidth: 'wrap',
+      startY: 15,
+      margin: { top: 15, left: 5, right: 5, bottom: 10 },
+      tableWidth: 'auto',
       showHead: 'everyPage',
       styles: {
-        fontSize: 9,
-        cellPadding: 4,
-        overflow: 'linebreak',
+        fontSize: 7, // Smaller font size
+        cellPadding: 1.5, // Tighter padding
+        overflow: 'linebreak', // Break content into multiple lines
         halign: 'left',
         valign: 'middle',
-        lineColor: [220, 220, 220],
-        lineWidth: 0.3,
+        lineColor: [200, 200, 200], // Lighter grid lines
+        lineWidth: 0.1, // Thinner lines
         textColor: [20, 20, 20],
       },
       headStyles: {
-        fillColor: [51, 102, 153], // Darker blue header
+        fillColor: [41, 92, 143], // Darker blue header
         textColor: 255,
         fontStyle: 'bold',
+        fontSize: 7,
         halign: 'center',
-        lineWidth: 0.5,
-        lineColor: [255, 255, 255],
+        lineWidth: 0.1,
       },
       bodyStyles: {
-        lineWidth: 0.3,
+        lineWidth: 0.1,
       },
+      columnStyles: columnStyles, // Our dynamic column widths
       alternateRowStyles: {
-        fillColor: [245, 245, 245],
-      },
-      columnStyles: {
-        // Apply to all columns
-        0: { cellWidth: 'auto' },
-        1: { cellWidth: 'auto' },
-      },
-      didParseCell: (data) => {
-        // Right-align numeric columns
-        if (!isNaN(data.cell.raw)) {
-          data.cell.styles.halign = 'right'
-        }
+        fillColor: [245, 245, 245], // Zebra striping
       },
       didDrawPage: (data) => {
         // Footer with page numbers
-        const pageCount = doc.internal.getNumberOfPages()
-        doc.setFontSize(10)
-        doc.setTextColor(100)
+        doc.setFontSize(6);
+        doc.setTextColor(100);
         doc.text(
-          `Page ${data.pageNumber} of ${pageCount}`,
-          doc.internal.pageSize.getWidth() / 2,
-          doc.internal.pageSize.getHeight() - 10,
-          { align: 'center' },
-        )
+          `Page ${data.pageNumber} of ${data.pageCount}`,
+          doc.internal.pageSize.getWidth() - 10,
+          doc.internal.pageSize.getHeight() - 5,
+          { align: 'right' }
+        );
       },
-      // Enable horizontal overflow handling
+      // Horizontal overflow handling
       horizontalPageBreak: true,
-      horizontalPageBreakRepeat: 0, // Repeat header column on horizontal break
-    })
+      horizontalPageBreakRepeat: 0,
+      // Vertical overflow handling
+      pageBreak: 'auto',
+      rowPageBreak: 'avoid',
+    });
 
-    // Save the PDF
-    doc.save('export.pdf')
+    // Save with timestamp
+    doc.save(`data_export_${new Date().getTime()}.pdf`);
+
   } catch (error) {
-    console.error('PDF export failed:', error)
+    console.error('PDF export error:', error);
+    // Fallback to CSV with limited rows
+    exportToCSV(data.slice(0, 500));
+  } finally {
+    isExportingPDF.value = false;
   }
-}
+};
 
 const exportToText = (data) => {
   if (!data || data.length === 0) {
