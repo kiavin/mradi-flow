@@ -12,7 +12,9 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 library.add(fas)
 
 // registering globaly omnigrid view registering globaly
-import OmniGridView from '~/themes/hopeui/components/organisms/OmniGridView.vue'
+// import OmniGridView from '~/themes/hopeui/components/organisms/OmniGridView.vue'
+import OmniGridView from '~/components/OmniGridView.vue'
+
 
 export default function registerPlugins(app) {
     app.use(createPinia())

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, computed, nextTick } from 'vue'
-import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
+import { useOmnigridStore } from '~/omnicore/stores/omnigridStore'
+
 import EditPanel from './EditPanel.vue'
 
 const emit = defineEmits(['toggle-expand', 'update-all-expanded', 'action-triggered'])

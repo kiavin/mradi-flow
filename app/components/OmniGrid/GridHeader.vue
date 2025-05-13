@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import SearchInput from '../../molecules/SearchInput.vue'
-import PageDropDownSelect from '../../molecules/PageDropDownSelect.vue'
-import BaseButton from '../../atoms/button/BaseButton.vue'
+import SearchInput from '~/themes/hopeui/components/molecules/SearchInput.vue'
+import PageDropDownSelect from '~/themes/hopeui/components/molecules/PageDropDownSelect.vue'
+import BaseButton from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { onClickOutside } from '@vueuse/core'
 
 // pdf and excel

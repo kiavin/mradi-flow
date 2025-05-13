@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, inject } from 'vue'
-import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
+import { useOmnigridStore } from '~/omnicore/stores/omnigridStore'
 import Row from './Row.vue'
 import ColumnOptions from './ColumnOptions.vue'
 import FilteringOptions from './FilteringOptions.vue'

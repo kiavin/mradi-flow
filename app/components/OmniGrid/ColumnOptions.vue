@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
+import { useOmnigridStore } from '~/omnicore/stores/omnigridStore'
+
 
 const props = defineProps({
   menuPosition: {

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { useOmnigridStore } from '../../../../../omnicore/stores/omnigridStore'
+import { useOmnigridStore } from '~/omnicore/stores/omnigridStore'
+
 
 const props = defineProps({
   columns: Array,
