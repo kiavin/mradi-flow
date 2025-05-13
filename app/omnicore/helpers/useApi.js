@@ -1,6 +1,7 @@
 import { ref, computed, watch, watchEffect } from 'vue'
 import axios from 'axios'
 import qs from 'qs' // Import for handling query parameters
+import axiosInstance from './axiosInstance'
 
 // Cache storage with expiration
 const cache = new Map()
@@ -28,18 +29,18 @@ const clearCacheForUrl = (baseUrl) => {
     }
 }
 
-export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, enableCache = false) {
+export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, enableCache = false, useAuth = false, manualToken = null) {
     const data = ref(null)
     const error = ref(null)
     const status = ref('idle') // idle | loading | success | error | refreshed
     const lastFetched = ref(null)
-    let controller = null 
+    let controller = null
 
     const request = async (payload = null, queryParams = {}) => {
         if (controller) {
             await new Promise(resolve => setTimeout(resolve, 50))
             controller.abort()
-        } 
+        }
         controller = new AbortController()
 
         status.value = 'loading'
@@ -61,17 +62,31 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
                     return
                 }
             }
+            ////////////////
+            const headers = {
+                ...(options.headers || {})
+            }
+
+            // Add manual Authorization header if token is provided
+            if (manualToken) {
+                headers['Authorization'] = `Bearer ${manualToken}`
+            }
+            ////////////////
 
             const config = {
                 method,
                 url,
                 signal: controller.signal, //signal for cancellation
+                headers,
+                ...(useAuth ? {} : { skipAuth: true }), // custom flag for axiosInterceptor
                 ...options,
             }
 
-            if (payload) config.data = payload 
+            if (payload) config.data = payload
 
-            const response = await axios(config)
+            // const response = await axios(config)
+            const axiosToUse = useAuth ? axiosInstance : axios
+            const response = await axiosToUse(config)
             data.value = response.data
 
             if (enableCache && method.toUpperCase() === 'GET') {
@@ -84,11 +99,11 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             if (axios.isCancel(err)) return
             error.value = err.response?.data?.errorPayload?.errors || err.response?.data || [err.message]
             status.value = 'error'
-            data.value = null 
+            data.value = null
         }
     }
 
-     
+
 
     // Auto-fetch for GET requests when dependencies change
     watch(() => [baseUrl, method, options], () => {
@@ -113,7 +128,7 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
         error,
         status,
         lastFetched,
-        request, 
+        request,
         refresh,
         clear,
         isLoading: computed(() => status.value === 'loading'),
