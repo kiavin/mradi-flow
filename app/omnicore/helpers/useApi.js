@@ -1,7 +1,8 @@
-import { ref, computed, watch, watchEffect } from 'vue'
+import { ref, computed, watch } from 'vue'
 import axios from 'axios'
 import qs from 'qs' // Import for handling query parameters
 import axiosInstance from './axiosInstance'
+import { useErrorRedirect } from '~/omnicore/helpers/useErrorRedirect.js'
 
 // Cache storage with expiration
 const cache = new Map()
@@ -29,7 +30,7 @@ const clearCacheForUrl = (baseUrl) => {
     }
 }
 
-export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, enableCache = false, useAuth = false, manualToken = null) {
+export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, enableCache = false, useAuth = true, manualToken = null) {
     const data = ref(null)
     const error = ref(null)
     const status = ref('idle') // idle | loading | success | error | refreshed
@@ -97,12 +98,36 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             lastFetched.value = new Date().toISOString()
         } catch (err) {
             if (axios.isCancel(err)) return
+
+            //auto  redirect errors
+            const responseData = err.response?.data || {}
+            const statusCode = err.response?.status || 500;
+
+
+
+            const title = responseData?.responseData?.name || '';
+            // const title = responseData?.alertifyPayload?.message || '';
+            const description =
+                statusCode === 500
+                    ? '' // intentionally leave blank since fallback handled in error page
+                    : responseData?.alertifyPayload?.message || ''
+
+            if ([401, 403, 404, 500].includes(statusCode)) {
+                const { redirectOnError } = useErrorRedirect()
+                redirectOnError(statusCode, {
+                    code: statusCode,
+                    title,
+                    description,
+                })
+            }
+
             error.value = err.response?.data?.errorPayload?.errors || err.response?.data || [err.message]
             status.value = 'error'
             data.value = null
+
+
         }
     }
-
 
 
     // Auto-fetch for GET requests when dependencies change

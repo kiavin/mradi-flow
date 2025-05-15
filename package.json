@@ -37,7 +37,6 @@
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.28",
     "lodash": "^4.17.21",
-    "omnigrid": "github:Francis-Yuppie/omnigrid",
     "ora": "^8.2.0",
     "pdfmake": "^0.2.19",
     "pinia": "^3.0.1",

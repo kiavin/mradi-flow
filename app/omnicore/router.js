@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '@/main/views/Index.vue'
-import PlayGroundView from '@/main/views/PlayGround.vue'
 import _404 from '@/main/views/_404.vue'
-import moduleRoutes from './moduleRoutes.js';
+import ErrorPage from '@/main/views/ErrorPage.vue';
+import moduleRoutes from './moduleRoutes.js'
+import authGuard from './middleware/authGuard.js';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,29 +14,29 @@ const router = createRouter({
       component: LandingView,
       meta: { title: 'Omniface - Home', layout: 'main' },
     },
-    {
-      path: '/playground',
-      name: 'playground',
-      component: PlayGroundView,
-      meta: { title: 'Omniface - PlayGround', layout: 'hopeui' },
-    },
 
     // module generated routes
     ...moduleRoutes,
     {
-      path: "/:pathMatch(.*)*",
-      name: "NotFound",
+      path: '/ErrorPage',
+      name: 'error-page',
+      component: ErrorPage,
+      meta: { title: 'Omniface-ErrorPage', layout: 'none' },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
       component: _404,
       meta: {
-        layout: "AppLayoutError",
+        layout: 'AppLayoutError',
       },
     },
   ],
 })
 
-// router.beforeEach((to, from, next) => {
-// document.title = to.meta.title || 'Omniface';
-//   authMiddleware(to, from, next);
-// });
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title || 'Omniface'
+  authGuard(to, from, next)
+})
 
 export default router

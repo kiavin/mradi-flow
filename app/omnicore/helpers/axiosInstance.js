@@ -23,12 +23,23 @@ function decryptToken(encryptedToken) {
 async function broadcastLogout() {
     const { useAuthStore } = await import('../stores/authStore')
     const authStore = useAuthStore()
-    authStore.removeToken()
-    authStore.removeRefreshToken()
+
+    if (authStore.getToken()) {
+        authStore.removeToken()
+        authStore.removeRefreshToken()
+    }
+
     localStorage.setItem('logout-event', Date.now().toString())
+
     const { useRouter } = await import('vue-router')
-    useRouter().push('/login')
+    const router = useRouter()
+
+    // Optional: avoid redundant redirects
+    if (router.currentRoute.value.path !== '/iam/login/index') {
+        router.push('/iam/login/index')
+    }
 }
+
 
 // Cross-tab logout
 window.addEventListener('storage', async (event) => {
@@ -38,12 +49,13 @@ window.addEventListener('storage', async (event) => {
         authStore.removeToken()
         authStore.removeRefreshToken()
         const { useRouter } = await import('vue-router')
-        useRouter().push('/login')
+        useRouter().push('/iam/login/index')
     }
 })
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(async (config) => {
+    // console.log('[AXIOS INTERCEPTOR] Executing...', config)
     if (config.skipAuth) return config
 
     const encryptedToken = localStorage.getItem('user.token')
@@ -95,13 +107,26 @@ async function refreshAccessToken() {
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
+        const status = error.response?.status
+        const data = error.response?.data || {}
+
+        const message = data?.message
+        const type = data?.type
         const originalRequest = error.config
 
         if (!originalRequest || originalRequest._retry) {
             return Promise.reject(error)
         }
 
-        if (error.response?.status === 401 || error.response?.status === 440) {
+       if (status === 401) {
+        if (
+                message === 'Session has expired' ||
+                message === 'Your account has been deactivated.' ||
+                (typeof type === 'object' && type.route?.includes('/auth/login'))
+            ) {
+                await broadcastLogout()
+                return Promise.reject(error)
+            }
             originalRequest._retry = true
 
             if (isRefreshing) {
@@ -116,7 +141,7 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true
 
             try {
-                const newToken = await refreshAccessToken()
+                const newToken = await refreshAccessToken();
 
                 isRefreshing = false
                 processQueue(null, newToken)

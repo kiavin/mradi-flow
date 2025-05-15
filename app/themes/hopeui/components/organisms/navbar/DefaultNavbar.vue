@@ -1,12 +1,14 @@
 <script>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useSetting } from '~/themes/hopeui/store/index.js'
-
+import { useAuthStore } from '~/omnicore/stores/authStore'
+import { useRouter } from 'vue-router'
 export default {
   components: {},
   setup(props, { emit }) {
     const store = useSetting()
-
+    const router = useRouter()
+    const authStore = useAuthStore()
     const headerNavbar = computed(() => store.header_navbar_value)
 
     const fullScreen = ref(false)
@@ -37,6 +39,23 @@ export default {
     const navbarHide = computed(() => [store.navbar_show_value])
 
     const carts = computed(() => store.carts)
+    const logOut = async () => {
+      const apiBaseUrl = `/v1/iam/auth/logout`
+      const { request, error } = useApi(apiBaseUrl, 'DELETE')
+
+      await request()
+
+      console.log('LOGOUT ERROR',error)
+
+      // if (error.value) {
+      //   console.error('Logout error:', error.value)
+      //   return
+      // }
+
+      authStore.removeToken()
+      authStore.removeRefreshToken()
+      router.push({ path: '/iam/login/index' })
+    }
 
     onMounted(() => {
       window.addEventListener('scroll', onscroll())
@@ -48,6 +67,7 @@ export default {
     return {
       headerNavbar,
       openFullScreen,
+      logOut,
       // fontSize,
       fullScreen,
       isHidden,
@@ -167,7 +187,7 @@ export default {
             <li>
               <hr class="dropdown-divider" />
             </li>
-            <b-dropdown-item variant="none" href="#">Logout</b-dropdown-item>
+            <b-dropdown-item variant="none" href="#" @click="logOut">Logout</b-dropdown-item>
           </b-dropdown>
           <li class="nav-item iq-full-screen d-none d-xl-block" id="fullscreen-item">
             <a href="#" class="nav-link" id="btnFullscreen">

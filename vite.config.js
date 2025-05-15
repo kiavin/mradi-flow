@@ -10,6 +10,9 @@ dotenv.config({ path: './omniface.cfg' });
 
 // https://vite.dev/config/
 export default defineConfig({
+   define: {
+    'import.meta.env.VITE_SAFE_ROUTES': JSON.stringify(process.env.VITE_SAFE_ROUTES || '')
+  },
   optimizeDeps: {
     include: [
       "@fortawesome/free-solid-svg-icons",
@@ -30,9 +33,6 @@ export default defineConfig({
           imports: ['useApi'],
         }
       ],
-      // dts: 'app/auto-imports.d.ts', Disabled,, enable if uisng typoescript 
-      //dirs: [], // Clear default directories
-      //vueTemplate: true // Enable for <template> usage
     })
   ],
   resolve: {

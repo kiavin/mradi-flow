@@ -1,10 +1,7 @@
 <script setup>
 import { onMounted, ref, watch, getCurrentInstance } from 'vue'
-import DataTable from '../../../app/themes/hopeui/components/organisms/DataTable.vue'
-import DemoForm from '../../../app/themes/hopeui/components/organisms/DemoForm.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 const { proxy } = getCurrentInstance()
-import Demo from '../components/StatusFormater.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import BaseButton from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 
@@ -322,22 +319,7 @@ const getStatusClass = (theme) => {
     </template>
     centered modal
   </Button>
-  <!-- <div v-if="isLoading">Loading...</div> -->
-  <!-- <div v-if="error">Error: {{ error }}</div> -->
-  <!-- <div class="bg-primary rounded" v-else> -->
-  <!-- <pre>{{ data }}</pre> -->
-  <!-- </div> -->
-  <!-- <button
-      @click="
-        () => {
-          proxy.$showToast()
-        }
-      "
-    >
-      Refresh Data
-    </button>
-    <button @click="handleEdit(23)">Refresh Data</button> -->
-
+  
   <!-- <Label labelFor="email" customClass="form-label">Email</Label>
     <Input class="form-control" placeholder="demo input" />
     <Button customClass="btn btn-primary">Submit</Button> -->
@@ -351,11 +333,8 @@ const getStatusClass = (theme) => {
       <button type="submit" :disabled="isLoading">Login</button>
     </form> -->
 
-  <!-- <div v-if="isLoading">Logging in...</div> -->
 
-  <!-- <pre v-else-if="data">Login successful: {{ data }}</pre> -->
-  <div class="cardq p-1">
-  </div>
+ 
   <div class="card p-3">
     <OmniGridView
       :columns="tableColumns"
