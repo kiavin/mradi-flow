@@ -347,7 +347,16 @@ const editableColumns = [
   },
 ]
 
-
+const customActions = [
+  {
+    key: 'manage-role',
+    label: 'Manage Role',
+    icon: ['fas', 'shield-halved'],
+    callback: (row) => handleEdit(row),
+    show: true,
+    colorClass: 'text-secondary ',
+  },
+]
 </script>
 <template>
   <div class="card p-3">
@@ -367,6 +376,7 @@ const editableColumns = [
         :data="tableData"
         :loading="isLoading"
         :dropDownPerPageOptions="[10, 25, 50]"
+        :actions="customActions"
         action-layout="inline"
         :pagination-config="{
           variant: 'circle',

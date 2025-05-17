@@ -35,22 +35,7 @@ const tableColumns = [
 watch(data, () => {
   updateResponseData()
 })
-// const updateResponseData = () => {
-//   if (data.value?.dataPayload) {
-//     tableData.value.data = Array.isArray(data.value.dataPayload.data)
-//       ? data.value.dataPayload.data
-//       : []
-//     tableData.value.paginationData = {
-//       countOnPage: data.value.dataPayload.countOnPage,
-//       currentPage: data.value.dataPayload.currentPage,
-//       perPage: data.value.dataPayload.perPage,
-//       totalCount: data.value.dataPayload.totalCount,
-//       totalPages: data.value.dataPayload.totalPages,
-//       paginationLinks: data.value.dataPayload.paginationLinks,
-//     }
-//     // console.log('Updated tableData:', tableData.value)
-//   }
-// }
+ 
 const updateResponseData = () => {
   // console.log("NEW DATA ON PAGINATION", data.value)
   if (data.value?.dataPayload) {

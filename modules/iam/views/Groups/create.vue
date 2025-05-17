@@ -1,33 +1,33 @@
 <script setup>
-import { ref, getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import Form from './form.vue';
+import Form from './form.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 
-const apiBaseUrl = `/v1/iam/groups`;
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
+const apiBaseUrl = `/v1/iam/rbac/group`
+const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST')
 
-const formData = ref({});
+const formData = ref({})
 
-const handleSubmit = async (data) => {
-  await request(data)
+const handleSubmit = async (payloadData) => {
+  await request(payloadData)
 
   if (error.value) {
-    return 
+    return
   }
 
-  proxy.$showAlert({ 
+  proxy.$showAlert({
     title: 'Success',
-    icon: 'success', 
-    text: 'Groups created successfully',
+    icon: 'success',
+    text: 'Group created successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,
-    timer: 2000, 
+    timer: 2000,
     timerProgressBar: true,
-})
+  })
   setTimeout(() => {
     router.push({ name: 'iam/groups' })
   }, 2000)
@@ -36,15 +36,9 @@ const handleSubmit = async (data) => {
 
 <template>
   <div class="card p-3">
-
-    <h1 class="h4 mt-2">Create Groups</h1>
-    <Form 
-    :formData="formData" 
-    :error="error" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
-    />
-    </div>
+    <h1 class="h4 mt-2">Create Group</h1>
+    <Form :formData="formData" :error="error" :isLoading="isLoading" @submit="handleSubmit" />
+  </div>
 </template>
 
 <style scoped></style>
