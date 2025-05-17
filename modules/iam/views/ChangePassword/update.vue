@@ -8,13 +8,13 @@ const router = useRouter()
 
 const route = useRoute();
 const id = route.params.id;
-const apiBaseUrl = `/v1/iam/change-password/${id}`;
+const apiBaseUrl = `/v1/iam/auth/change-password`;
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
 const formData = ref({});
 const errors = ref({});
 
-
+// http://localhost:3000/iam/changepassword/create
 watch(data, () => {
   if (data.value) {
     formData.value = data.value.dataPayload.data || {}

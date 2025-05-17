@@ -35,20 +35,49 @@ const tableColumns = [
 watch(data, () => {
   updateResponseData()
 })
+// const updateResponseData = () => {
+//   console.log("NEW DATA ON PAGINATION", data.value.dataPayload.data)
+//   if (data.value?.dataPayload) {
+//     tableData.value.data = Array.isArray(data.value.dataPayload.data)
+//       ? data.value.dataPayload.data
+//       : []
+//     tableData.value.paginationData = {
+//       countOnPage: data.value.dataPayload.countOnPage,
+//       currentPage: data.value.dataPayload.currentPage,
+//       perPage: data.value.dataPayload.perPage,
+//       totalCount: data.value.dataPayload.totalCount,
+//       totalPages: data.value.dataPayload.totalPages,
+//       paginationLinks: data.value.dataPayload.paginationLinks,
+//     }
+//     console.log('Updated tableData:', tableData.value)
+//   }
+// }
 const updateResponseData = () => {
+  console.log("NEW DATA ON PAGINATION", data.value)
   if (data.value?.dataPayload) {
-    tableData.value.data = Array.isArray(data.value.dataPayload.data)
-      ? data.value.dataPayload.data
-      : []
-    tableData.value.paginationData = {
-      countOnPage: data.value.dataPayload.countOnPage,
-      currentPage: data.value.dataPayload.currentPage,
-      perPage: data.value.dataPayload.perPage,
-      totalCount: data.value.dataPayload.totalCount,
-      totalPages: data.value.dataPayload.totalPages,
-      paginationLinks: data.value.dataPayload.paginationLinks,
+    // Transform the object data into an array if needed
+    const responseData = data.value.dataPayload.data
+    let formattedData = []
+    
+    if (typeof responseData === 'object' && !Array.isArray(responseData)) {
+      // Convert object to array if API returns object
+      formattedData = Object.values(responseData)
+    } else if (Array.isArray(responseData)) {
+      formattedData = responseData
     }
-    // console.log('Updated tableData:', tableData.value)
+    
+    tableData.value = {
+      data: formattedData,
+      paginationData: {
+        countOnPage: data.value.dataPayload.countOnPage || 0,
+        currentPage: data.value.dataPayload.currentPage || 1,
+        perPage: data.value.dataPayload.perPage || tableData.value.paginationData.perPage,
+        totalCount: data.value.dataPayload.totalCount || 0,
+        totalPages: data.value.dataPayload.totalPages || 0,
+        paginationLinks: data.value.dataPayload.paginationLinks || {},
+      }
+    }
+    console.log('Updated tableData:', JSON.parse(JSON.stringify(tableData.value)))
   }
 }
 
@@ -295,6 +324,30 @@ onMounted(() => {
     updateResponseData()
   })
 })
+
+const editableColumns = [
+  {
+    key: 'description',
+    onSave: async (value, row) => {
+      const updatedData = {
+        ...row,
+        description: value, // flat structure
+      }
+
+      const { request: updateRequest, error } = useApi(`/v1/iam/rbac/role/${row.name}`, 'PUT')
+      await updateRequest(updatedData)
+
+      if (error.value) {
+        proxy.$showAlert({ title: 'Error', text: error.value.message, icon: 'error' })
+      } else {
+        proxy.$showAlert({ title: 'Saved', text: 'Description updated.', icon: 'success' })
+        refresh()
+      }
+    },
+  },
+]
+
+
 </script>
 <template>
   <div class="card p-3">
@@ -310,8 +363,10 @@ onMounted(() => {
 
       <OmniGridView
         :columns="tableColumns"
+        :editable-columns="editableColumns"
         :data="tableData"
         :loading="isLoading"
+        :dropDownPerPageOptions="[10, 25, 50]"
         action-layout="inline"
         :pagination-config="{
           variant: 'circle',
@@ -333,7 +388,7 @@ onMounted(() => {
         :filtering="true"
         :multi-select="false"
         :radio-select="false"
-        :break-extra-columns="false"
+        :break-extra-columns="true"
         :search-in-backend="true"
         @view="handleView"
         @edit="handleEdit"

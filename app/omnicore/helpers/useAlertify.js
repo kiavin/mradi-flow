@@ -26,6 +26,7 @@ export function useAlertify() {
                     title: 'Notification',
                     text: message,
                     icon: theme,
+                    showCancelButton: false,
                     ...rest,
                 })
             }

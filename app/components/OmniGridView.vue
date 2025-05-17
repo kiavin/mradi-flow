@@ -41,6 +41,9 @@ const props = defineProps({
       return value.every(col => typeof col === 'string' || (col && typeof col.key === 'string'))
     }
   },
+  dropDownPerPageOptions: {
+    type: Array,
+  },
   searchInBackend: { type: Boolean, default: true },
   options: {
     type: Object,
@@ -264,6 +267,7 @@ const createButton = () => emit('handleCreate')
           :show-refresh-button="true"
           :show-show-all-toggle="true"
           :show-export-button="true"
+          :dropDownPerPageOptions="dropDownPerPageOptions"
           @search="onSearch"
           @update:perPage="onPerPageChange"
           @changePage="onChangePage"

@@ -368,7 +368,7 @@ const getPinnedRightOffset = (colKey) => {
       >
         <font-awesome-icon
           :icon="['fas', showExtra ? 'chevron-down' : 'fa-chevron-right']"
-          v-if="breakExtraColumns && isFirstVisibleColumn(index)"
+          v-if="breakExtraColumns && isFirstVisibleColumn(index) && extraDynamicColumns?.length > 0"
           class="me-2"
           title="View Extra Columns"
           style="cursor: pointer"

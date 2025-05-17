@@ -3,6 +3,7 @@ import axios from 'axios'
 import qs from 'qs' // Import for handling query parameters
 import axiosInstance from './axiosInstance'
 import { useErrorRedirect } from '~/omnicore/helpers/useErrorRedirect.js'
+import app from '../config/app'
 
 // Cache storage with expiration
 const cache = new Map()
@@ -36,6 +37,8 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
     const status = ref('idle') // idle | loading | success | error | refreshed
     const lastFetched = ref(null)
     let controller = null
+
+    const redirectEnabled = options?.redirectOnError ?? app.api?.redirectErrorPages
 
     const request = async (payload = null, queryParams = {}) => {
         if (controller) {
@@ -98,28 +101,28 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             lastFetched.value = new Date().toISOString()
         } catch (err) {
             if (axios.isCancel(err)) return
-
-            //auto  redirect errors
             const responseData = err.response?.data || {}
             const statusCode = err.response?.status || 500;
+            //auto  redirect errors
+            if (redirectEnabled) {
 
+                const title = responseData?.responseData?.name || '';
+                // const title = responseData?.alertifyPayload?.message || '';
+                const description =
+                    statusCode === 500
+                        ? '' // intentionally leave blank since fallback handled in error page
+                        : responseData?.alertifyPayload?.message || ''
 
-
-            const title = responseData?.responseData?.name || '';
-            // const title = responseData?.alertifyPayload?.message || '';
-            const description =
-                statusCode === 500
-                    ? '' // intentionally leave blank since fallback handled in error page
-                    : responseData?.alertifyPayload?.message || ''
-
-            if ([401, 403, 404, 500].includes(statusCode)) {
-                const { redirectOnError } = useErrorRedirect()
-                redirectOnError(statusCode, {
-                    code: statusCode,
-                    title,
-                    description,
-                })
+                if ([401, 403, 404, 500].includes(statusCode)) {
+                    const { redirectOnError } = useErrorRedirect()
+                    redirectOnError(statusCode, {
+                        code: statusCode,
+                        title,
+                        description,
+                    })
+                }
             }
+
 
             error.value = err.response?.data?.errorPayload?.errors || err.response?.data || [err.message]
             status.value = 'error'

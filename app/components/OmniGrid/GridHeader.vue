@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import SearchInput from '~/themes/hopeui/components/molecules/SearchInput.vue'
-import PageDropDownSelect from '~/themes/hopeui/components/molecules/PageDropDownSelect.vue'
-import BaseButton from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+import PageDropDownSelect from './PageDropDownSelect.vue'
+import BaseButton from './BaseButton.vue'
 import { onClickOutside } from '@vueuse/core'
 
 // pdf and excel
@@ -31,6 +31,9 @@ const props = defineProps({
       showCreateButton: false,
       showExportButton: false,
     }),
+  },
+  dropDownPerPageOptions: {
+    type: Array,
   },
   showCreateButton: { type: Boolean, default: false },
   showRefreshButton: { type: Boolean, default: true },
@@ -120,9 +123,9 @@ const exportToCSV = (data) => {
     ...data.map((row) =>
       headers
         .map((header) =>
-          typeof row[header] === 'string' ? `"${row[header].replace(/"/g, '""')}"` : row[header],
+          typeof row[header] === 'string' ? `"${row[header].replace(/"/g, '""')}"` : row[header]
         )
-        .join(','),
+        .join(',')
     ),
   ].join('\n')
 
@@ -147,15 +150,15 @@ const exportToExcel = (data) => {
 const isExportingPDF = ref(false)
 const exportToPDF = async (data) => {
   if (!data || data.length === 0) {
-    console.error('No data to export');
-    return;
+    console.error('No data to export')
+    return
   }
 
-  isExportingPDF.value = true;
+  isExportingPDF.value = true
 
   try {
-    const { jsPDF } = await import('jspdf');
-    const autoTable = (await import('jspdf-autotable')).default;
+    const { jsPDF } = await import('jspdf')
+    const autoTable = (await import('jspdf-autotable')).default
 
     // Create PDF with better compression settings
     const doc = new jsPDF({
@@ -164,39 +167,39 @@ const exportToPDF = async (data) => {
       format: 'a4',
       compress: true,
       hotfixes: ['px_scaling'],
-    });
+    })
 
     // Title with smaller font
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(40);
-    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(40)
+    doc.setFontSize(12)
     doc.text('Exported Data', doc.internal.pageSize.getWidth() / 2, 10, {
       align: 'center',
-    });
+    })
 
-    const headers = Object.keys(data[0] || {});
-    
+    const headers = Object.keys(data[0] || {})
+
     // Calculate column widths based on content
-    const columnStyles = {};
+    const columnStyles = {}
     headers.forEach((header, index) => {
       columnStyles[index] = {
         cellWidth: 'wrap', // Auto-width based on content
         minCellWidth: 15, // Minimum width for each column
         maxCellWidth: 40, // Maximum width before breaking
-      };
-    });
+      }
+    })
 
     // Prepare all data at once (jsPDF-autotable handles pagination internally)
-    const body = data.map(row =>
-      headers.map(header => {
-        const value = row[header];
-        if (value == null) return '';
+    const body = data.map((row) =>
+      headers.map((header) => {
+        const value = row[header]
+        if (value == null) return ''
         if (typeof value === 'object') {
-          return JSON.stringify(value).slice(0, 50); // Truncate long JSON
+          return JSON.stringify(value).slice(0, 50) // Truncate long JSON
         }
-        return String(value).slice(0, 100); // Truncate very long strings
+        return String(value).slice(0, 100) // Truncate very long strings
       })
-    );
+    )
 
     // Generate table with proper multi-page support
     autoTable(doc, {
@@ -233,14 +236,14 @@ const exportToPDF = async (data) => {
       },
       didDrawPage: (data) => {
         // Footer with page numbers
-        doc.setFontSize(6);
-        doc.setTextColor(100);
+        doc.setFontSize(6)
+        doc.setTextColor(100)
         doc.text(
           `Page ${data.pageNumber} of ${data.pageCount}`,
           doc.internal.pageSize.getWidth() - 10,
           doc.internal.pageSize.getHeight() - 5,
           { align: 'right' }
-        );
+        )
       },
       // Horizontal overflow handling
       horizontalPageBreak: true,
@@ -248,19 +251,18 @@ const exportToPDF = async (data) => {
       // Vertical overflow handling
       pageBreak: 'auto',
       rowPageBreak: 'avoid',
-    });
+    })
 
     // Save with timestamp
-    doc.save(`data_export_${new Date().getTime()}.pdf`);
-
+    doc.save(`data_export_${new Date().getTime()}.pdf`)
   } catch (error) {
-    console.error('PDF export error:', error);
+    console.error('PDF export error:', error)
     // Fallback to CSV with limited rows
-    exportToCSV(data.slice(0, 500));
+    exportToCSV(data.slice(0, 500))
   } finally {
-    isExportingPDF.value = false;
+    isExportingPDF.value = false
   }
-};
+}
 
 const exportToText = (data) => {
   if (!data || data.length === 0) {
@@ -271,7 +273,7 @@ const exportToText = (data) => {
     .map((row) =>
       Object.entries(row)
         .map(([key, value]) => `${key}: ${value}`)
-        .join('\t'),
+        .join('\t')
     )
     .join('\n')
   downloadFile(textContent, 'text/plain', 'export.txt')
@@ -369,7 +371,7 @@ const downloadFile = (content, mimeType, fileName) => {
 
         <!-- Show All Toggle -->
         <BaseButton
-          v-if="showShowAllToggle"
+          v-if="1==0"
           @click="onToggleShowAll"
           class="btn btn-light btn-sm me-2"
           :title="showAll ? 'Show Paginated' : 'Show All'"
@@ -438,6 +440,7 @@ const downloadFile = (content, mimeType, fileName) => {
     <!-- Search and Page Dropdown -->
     <div class="d-flex align-items-center justify-content-between">
       <PageDropDownSelect
+        :options="dropDownPerPageOptions"
         :modelValue="props.data?.paginationData?.perPage"
         @update:modelValue="handlePerPageChange"
       />

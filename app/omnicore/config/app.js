@@ -6,4 +6,7 @@ export default {
         'NotFound',
         'error-page',
     ],
+    api: {
+        redirectErrorPages: false, 
+    }
 }

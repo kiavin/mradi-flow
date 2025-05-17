@@ -219,20 +219,48 @@ const tableColumns = ${JSON.stringify(tableColumns)}
 watch(data, () => {
   updateResponseData()
 })
+// const updateResponseData = () => {
+//   if (data.value?.dataPayload) {
+//     tableData.value.data = Array.isArray(data.value.dataPayload.data)
+//       ? data.value.dataPayload.data
+//       : []
+//     tableData.value.paginationData = {
+//       countOnPage: data.value.dataPayload.countOnPage,
+//       currentPage: data.value.dataPayload.currentPage,
+//       perPage: data.value.dataPayload.perPage,
+//       totalCount: data.value.dataPayload.totalCount,
+//       totalPages: data.value.dataPayload.totalPages,
+//       paginationLinks: data.value.dataPayload.paginationLinks,
+//     }
+//     // console.log('Updated tableData:', tableData.value)
+//   }
+// }
 const updateResponseData = () => {
+  // console.log("NEW DATA ON PAGINATION", data.value)
   if (data.value?.dataPayload) {
-    tableData.value.data = Array.isArray(data.value.dataPayload.data)
-      ? data.value.dataPayload.data
-      : []
-    tableData.value.paginationData = {
-      countOnPage: data.value.dataPayload.countOnPage,
-      currentPage: data.value.dataPayload.currentPage,
-      perPage: data.value.dataPayload.perPage,
-      totalCount: data.value.dataPayload.totalCount,
-      totalPages: data.value.dataPayload.totalPages,
-      paginationLinks: data.value.dataPayload.paginationLinks,
+    // Transform the object data into an array if needed
+    const responseData = data.value.dataPayload.data
+    let formattedData = []
+    
+    if (typeof responseData === 'object' && !Array.isArray(responseData)) {
+      // Convert object to array if API returns object
+      formattedData = Object.values(responseData)
+    } else if (Array.isArray(responseData)) {
+      formattedData = responseData
     }
-    // console.log('Updated tableData:', tableData.value)
+    
+    tableData.value = {
+      data: formattedData,
+      paginationData: {
+        countOnPage: data.value.dataPayload.countOnPage || 0,
+        currentPage: data.value.dataPayload.currentPage || 1,
+        perPage: data.value.dataPayload.perPage || tableData.value.paginationData.perPage,
+        totalCount: data.value.dataPayload.totalCount || 0,
+        totalPages: data.value.dataPayload.totalPages || 0,
+        paginationLinks: data.value.dataPayload.paginationLinks || {},
+      }
+    }
+    // console.log('Updated tableData:', JSON.parse(JSON.stringify(tableData.value)))
   }
 }
 

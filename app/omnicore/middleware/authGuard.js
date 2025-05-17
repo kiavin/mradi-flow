@@ -8,15 +8,15 @@ export default function authGuard(to, from, next) {
     const currentRouteName = to.name?.toString() || '';
     const isSafe = safeRoutes.includes(currentRouteName);
 
-    if (auth.isAuthenticated && currentRouteName === 'iam/login/index') {
+    if (auth.isAuthenticated && currentRouteName === 'iam/auth/login') {
         return next(from.fullPath || { name: 'dashboard' })
     }
 
     if (!auth.isAuthenticated && !isSafe) {
-        if (currentRouteName === 'iam/login/index') {
+        if (currentRouteName === 'iam/auth/login') {
             return next()
         }
-        return next({ name: 'iam/login/index' })
+        return next({ name: 'iam/auth/login' })
     }
 
     return next()

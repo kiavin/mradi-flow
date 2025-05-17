@@ -1,17 +1,16 @@
 <script setup>
-import { ref, getCurrentInstance } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Form from './form.vue'
 import { useAlertStore } from '~/omnicore/stores/alert.js'
 import { useAuthStore } from '~/omnicore/stores/authStore'
 
-const { proxy } = getCurrentInstance()
 const router = useRouter()
 const alertStore = useAlertStore()
 const authStore = useAuthStore()
 
 const apiBaseUrl = `/v1/iam/auth/login`
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST')
 
 const formData = ref({
   username: '',
