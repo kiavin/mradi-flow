@@ -31,7 +31,7 @@ const handleSubmit = async (data) => {
     timerProgressBar: true,
   })
   setTimeout(() => {
-    router.push({ name: 'iam/login/index' })
+    router.push({ name: 'iam/auth/login' })
   }, 2000)
 }
 </script>

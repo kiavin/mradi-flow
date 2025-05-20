@@ -45,7 +45,7 @@ const onSubmit = () => {
               <div class="me-auto">
                 <!-- "me-auto" pushes everything else to the right -->
                 <router-link
-                  :to="{ name: 'iam/login/index' }"
+                  :to="{ name: 'iam/auth/login' }"
                   class="navbar-brand d-flex align-items-center mb-3"
                 >
                   <font-awesome-icon

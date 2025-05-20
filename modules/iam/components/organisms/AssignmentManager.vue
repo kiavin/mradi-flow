@@ -142,7 +142,10 @@ const toggleSelection = (item, type, event = null) => {
   }
 }
 
+const isProcessing = ref(false)
+
 const updateBackend = async (url, payload) => {
+  isProcessing.value = true
   try {
     const { data, request } = useApi(url, 'POST')
     await request(payload)
@@ -150,6 +153,8 @@ const updateBackend = async (url, payload) => {
     emit('refresh')
   } catch (error) {
     console.error('Error updating assignments:', error)
+  } finally {
+    isProcessing.value = false
   }
 }
 
@@ -465,6 +470,16 @@ const closeModal = () => {
       </div> -->
     </div>
   </div>
+
+  <!-- Loading Overlay -->
+<div 
+  v-if="isProcessing"
+  class="loading-overlay d-flex align-items-center justify-content-center"
+>
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
 </template>
 
 <style scoped>
@@ -560,5 +575,21 @@ const closeModal = () => {
   background-color: #adb5bd;
   border-radius: 10px;
   border: 2px solid #f8f9fa;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1050;
+  backdrop-filter: blur(1px);
+}
+
+.loading-overlay .spinner-border {
+  width: 3rem;
+  height: 3rem;
 }
 </style>

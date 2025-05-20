@@ -1,6 +1,5 @@
 
 <script setup>
-import { ref } from 'vue'
 import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
@@ -33,7 +32,7 @@ const onSubmit = () => {
         <b-card class="shadow-sm p-4 text-center mt-3" body-class="p-0">
           <!-- Brand logo -->
           <router-link
-            :to="{ name: 'playground' }"
+            :to="{ name: 'iam/auth/login' }"
             class="navbar-brand d-flex align-items-center justify-content-center mb-3"
           >
             <!-- app-logo -->
