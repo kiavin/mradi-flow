@@ -92,7 +92,7 @@ watch(
     if (typeof newVal === 'boolean') {
       store.setRowExpanded(rowKey.value, newVal)
     }
-  },
+  }
 )
 
 const isMergedColumnHidden = (key) => {
@@ -197,7 +197,7 @@ const currentEditValue = ref('')
 
 const isEditable = (columnKey) => {
   return props.editableColumns.some((col) =>
-    typeof col === 'string' ? col === columnKey : col.key === columnKey,
+    typeof col === 'string' ? col === columnKey : col.key === columnKey
   )
 }
 
@@ -226,24 +226,27 @@ const startEditing = async (column, event) => {
   }
 }
 
-const saveEdit = async (value) => {
+const saveEdit = async ({ value }) => {
   try {
-    // Find the editable column config
-    const colConfig = props.editableColumns.find(
-      (col) =>
-        (typeof col === 'string' && col === currentEditColumn.value.key) ||
-        col.key === currentEditColumn.value.key,
+    const colConfig = props.editableColumns.find((col) =>
+      typeof col === 'string'
+        ? col === currentEditColumn.value.key
+        : col.key === currentEditColumn.value.key
     )
 
     if (typeof colConfig === 'object' && colConfig.onSave) {
-      const result = await colConfig.onSave({
-        row: props.row,
-        column: currentEditColumn.value,
-        value,
-      })
+      const result = await colConfig.onSave(value, props.row)
 
       if (result?.error) {
-        return { error: result.error }
+        return {
+          error: result.error,
+          isLoading: result.isLoading,
+        }
+      }
+
+      // Refresh if needed
+      if (result?.shouldRefresh) {
+        emit('refresh') // Emit refresh event
       }
     }
 
@@ -322,7 +325,7 @@ const getPinnedRightOffset = (colKey) => {
     <td
       v-if="expandableRows"
       class="text-center align-middle"
-      style="width: 50px; left: 0; position: sticky !important; z-index: 10; "
+      style="width: 50px; left: 0; position: sticky !important; z-index: 10"
     >
       <button
         class="btn btn-sm btn-light p-0 d-flex align-items-center justify-content-center"

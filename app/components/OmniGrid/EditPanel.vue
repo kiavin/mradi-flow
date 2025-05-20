@@ -27,25 +27,25 @@ const save = async () => {
   isLoading.value = true
 
   try {
-    if (props.column.onSave) {
-      const result = await props.column.onSave({
-        row: props.row,
-        value: editedValue.value,
-      })
+    const result = await props.column?.editableConfig?.onSave(editedValue.value, props.row)
 
-      if (result?.error) {
-        error.value = result.error
-        return
-      }
+    if (result?.error) {
+      error.value = result.error
+      // Update loading state from the result
+      isLoading.value = result.isLoading ?? false
+      return
     }
 
-    // Emit to parent in case they want to handle the save
+    // Emit success to parent
     emit('save', {
       value: editedValue.value,
       row: props.row,
+      column: props.column,
+      isLoading: result?.isLoading ?? false,
+      shouldRefresh: result?.shouldRefresh ?? true,
     })
   } catch (e) {
-    error.value = e.message || 'Failed to save'
+    error.value = e.message || 'Failed to save changes'
   } finally {
     isLoading.value = false
   }

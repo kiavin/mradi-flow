@@ -1,29 +1,9 @@
-export default function pageTemplate(resource, type) {
-  switch (type) {
-    case 'create':
-      return createPageTemplate(resource);
-    case 'update':
-      return updatePageTemplate(resource);
-    case 'view':
-      return viewPageTemplate(resource);
-    case 'index':
-      return indexPageTemplate(resource);
-    default:
-      throw new Error(`Unknown page type: ${type}`);
-  }
-}
-
-
-
-export function indexPageTemplate(resource, tableColumns, moduleName, endPoints) {
-  return `<script setup>
+<script setup>
 import { onMounted, ref, watch, getCurrentInstance, nextTick } from 'vue'
 import { useRouter } from 'vue-router';
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
-
-import DataTable from '~/themes/hopeui/components/organisms/DataTable.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter();
@@ -31,7 +11,7 @@ const router = useRouter();
 const modalStore = useModalStore()
 
 
-const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
+const apiBaseUrl = `/v1/admin/profile`;
   
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false);
 
@@ -48,31 +28,59 @@ const tableData = ref({
   },
 })
 
-const tableColumns = ${JSON.stringify(tableColumns)}
+const tableColumns = [{"key":"first_name","label":"First Name"},{"key":"middle_name","label":"Middle Name"},{"key":"last_name","label":"Last Name"},{"key":"email_address","label":"Email Address"},{"key":"phone_number","label":"Phone Number"},{"key":"profile_picture","label":"Profile Picture"}]
 
 watch(data, () => {
   updateResponseData()
 })
+// const updateResponseData = () => {
+//   if (data.value?.dataPayload) {
+//     tableData.value.data = Array.isArray(data.value.dataPayload.data)
+//       ? data.value.dataPayload.data
+//       : []
+//     tableData.value.paginationData = {
+//       countOnPage: data.value.dataPayload.countOnPage,
+//       currentPage: data.value.dataPayload.currentPage,
+//       perPage: data.value.dataPayload.perPage,
+//       totalCount: data.value.dataPayload.totalCount,
+//       totalPages: data.value.dataPayload.totalPages,
+//       paginationLinks: data.value.dataPayload.paginationLinks,
+//     }
+//     // console.log('Updated tableData:', tableData.value)
+//   }
+// }
 const updateResponseData = () => {
+  // console.log("NEW DATA ON PAGINATION", data.value)
   if (data.value?.dataPayload) {
-    tableData.value.data = Array.isArray(data.value.dataPayload.data)
-      ? data.value.dataPayload.data
-      : []
-    tableData.value.paginationData = {
-      countOnPage: data.value.dataPayload.countOnPage,
-      currentPage: data.value.dataPayload.currentPage,
-      perPage: data.value.dataPayload.perPage,
-      totalCount: data.value.dataPayload.totalCount,
-      totalPages: data.value.dataPayload.totalPages,
-      paginationLinks: data.value.dataPayload.paginationLinks,
+    // Transform the object data into an array if needed
+    const responseData = data.value.dataPayload.data
+    let formattedData = []
+    
+    if (typeof responseData === 'object' && !Array.isArray(responseData)) {
+      // Convert object to array if API returns object
+      formattedData = Object.values(responseData)
+    } else if (Array.isArray(responseData)) {
+      formattedData = responseData
     }
-    // console.log('Updated tableData:', tableData.value)
+    
+    tableData.value = {
+      data: formattedData,
+      paginationData: {
+        countOnPage: data.value.dataPayload.countOnPage || 0,
+        currentPage: data.value.dataPayload.currentPage || 1,
+        perPage: data.value.dataPayload.perPage || tableData.value.paginationData.perPage,
+        totalCount: data.value.dataPayload.totalCount || 0,
+        totalPages: data.value.dataPayload.totalPages || 0,
+        paginationLinks: data.value.dataPayload.paginationLinks || {},
+      }
+    }
+    // console.log('Updated tableData:', JSON.parse(JSON.stringify(tableData.value)))
   }
 }
 
 
-//const handleView = (id) => {
-// router.push({ name: '${moduleName}/${resource.toLowerCase()}/view', params: { id } });
+//const handleView = (id = row.id) => {
+// router.push({ name: 'admin/profile/view', params: { id } });
 //};
 
 const handleView = async (id) => {
@@ -81,11 +89,11 @@ const handleView = async (id) => {
   await nextTick(); // ensure store state is updated
 
   if (!modalStore.useModal) {
-    router.push({ name: '${moduleName}/${resource.toLowerCase()}/view', params: { id } });
+    router.push({ name: 'admin/profile/view', params: { id } });
     return
   }
 
-  const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
+  const apiBaseUrl = `/v1/admin/profile/${id}`;
 
   const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
 
@@ -100,18 +108,18 @@ const handleView = async (id) => {
       readonly: true,
       hideSubmit: true,
     },
-    'View ${resource}',
+    'View Profile',
   )
 }
 
 //const handleEdit = (id) => {
-//   router.push({ name: '${moduleName}/${resource.toLowerCase()}/update', params: { id } });
+//   router.push({ name: 'admin/profile/update', params: { id } });
 //}
 
 
 const errors = ref({})
 
-const handleEdit = async (id) => {
+const handleEdit = async (id = row.id) => {
   errors.value = {}
   
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
@@ -120,12 +128,12 @@ const handleEdit = async (id) => {
 
   if (!modalStore.useModal) {
     // Navigate to the update page
-    router.push({ name: '${moduleName}/${resource.toLowerCase()}/update', params: { id } });
+    router.push({ name: 'admin/profile/update', params: { id } });
     return
   }
 
   // Fetch appointment data before opening the modal
-  const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
+  const apiBaseUrl = `/v1/admin/profile/${id}`;
   const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
 
   await request() // Fetch data before opening modal
@@ -147,7 +155,7 @@ const handleEdit = async (id) => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: '${resource} Updated successfully',
+      text: 'Profile Updated successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -167,7 +175,7 @@ const handleEdit = async (id) => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
     },
-    'Edit ${resource}',
+    'Edit Profile',
   )
 }
 
@@ -179,13 +187,13 @@ const handleCreate = async() => {
   await nextTick(); // ensure store state is updated
 
   if (!modalStore.useModal) {
-    router.push({ name: '${moduleName}/${resource.toLowerCase()}/create' })
+    router.push({ name: 'admin/profile/create' })
     return
   }
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
-    const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
+    const apiBaseUrl = `/v1/admin/profile`;
 
     const { request: createData, error } = useApi(apiBaseUrl, 'POST')
 
@@ -203,7 +211,7 @@ const handleCreate = async() => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: '${resource} Created successfully',
+      text: 'Profile Created successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -223,12 +231,12 @@ const handleCreate = async() => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    'Create ${resource}',
+    'Create Profile',
   )
 }
 
 
-const handleDelete = async (id, is_deleted) => {
+const handleDelete = async (id = row.id, is_deleted = row. is_deleted) => {
    const action = is_deleted ? 'Restore' : 'Delete'
 
   const confirmationText = is_deleted
@@ -240,7 +248,7 @@ const handleDelete = async (id, is_deleted) => {
     text: confirmationText,
     icon: 'warning',
     showConfirmButton: true,
-    confirmButtonText: \`Yes, \${action} it!\`,
+    confirmButtonText: `Yes, ${action} it!`,
     cancelButtonText: 'No, cancel!',
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
@@ -253,7 +261,7 @@ const handleDelete = async (id, is_deleted) => {
      
       // autoFetch.value = false
       const { data, request, isLoading } = useApi(
-        \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`,
+        `/v1/admin/profile/${id}`,
         'DELETE',
       )
 
@@ -261,7 +269,7 @@ const handleDelete = async (id, is_deleted) => {
 
      if (data.value) {
         await proxy.$showAlert({
-          title: \`\${action}d!\`,
+          title: `${action}d!`,
           text: data.value?.toastPayload?.toastMessage || 'Record deleted successfully',
           icon: 'success',
           showCancelButton: false,
@@ -273,7 +281,7 @@ const handleDelete = async (id, is_deleted) => {
       console.error('Error deleting record:', error)
       await proxy.$showAlert({
         title: 'Error!',
-        text: \`Error deleting record: \${error.value}\`,
+        text: `Error deleting record: ${error.value}`,
         icon: 'error',
         showCancelButton: false,
       })
@@ -323,27 +331,60 @@ onMounted(() => {
   <div class="card p-3">
    <div class="row d-flex justify-content-between align-items-center mb-3">
       <div class="col-auto">
-        <h1 class="h4 mt-2">List of ${resource}</h1>
+        <h1 class="h4 mt-2">List of Profile</h1>
       </div>
       <div class="col-auto mb-4">
-        <Button type="submit" customClass="btn btn-primary" @click="handleCreate"> New ${resource} </Button>
+        <Button type="submit" customClass="btn btn-primary" @click="handleCreate"> New Profile </Button>
       </div>
-  <DataTable
-        :data="tableData"
-        :columns="tableColumns"
-        :loading="isLoading"
-        @edit="handleEdit"
-        @search="handleSearch"
-        @delete="handleDelete"
-        @view="handleView"
-        @changePage="changePage"
-        @update:perPage="updatePerPage"
-      />
+
+      <OmniGridView
+      :columns="tableColumns"
+      :data="tableData"
+      :loading="isLoading"
+      action-layout="inline"
+      :pagination-config="{
+        variant: 'circle',
+        position: 'right',
+        bgColor: '#4f46e5',
+        hoverBgColor: '#6366f1',
+        textColor: '#374151',
+        activeTextColor: '#ffffff',
+        showFirstLast: true,
+        showNumbers: true,
+        showTotal: true,
+        showRange: true,
+      }"
+      :toolbar="{
+        show: true,
+        showCreateButton: true,
+      }"
+      :expandable-rows="true"
+      :filtering="true"
+      :multi-select="false"
+      :radio-select="false"
+      :break-extra-columns="true"
+      :search-in-backend="true"
+      @view="handleView"
+      @edit="handleEdit"
+      @delete="handleDelete"
+      @search="handleSearch"
+      @changePage="changePage"
+      @update:perPage="updatePerPage"
+      @refresh="request"
+    >
+      <template #left-buttons>
+        <Button class="btn btn-success btn-sm" @click="handleCreate" style="font-size: 1.2rem">
+          <template #icon>
+            <font-awesome-icon :icon="['fas', 'plus']" />
+          </template>
+         New Profile
+        </Button>
+      </template>
+    </OmniGridView>
   </div>
 </div>
 
 
 </template>
   
-<style scoped></style>`;
-}
+<style scoped></style>

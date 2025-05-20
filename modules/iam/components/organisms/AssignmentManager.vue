@@ -1,6 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome' // Make sure this is correctly set up
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { useAlertStore } from '~/omnicore/stores/alert'
+import { useModalStore } from '~/omnicore/stores/modalStore'
+
+const alertStore = useAlertStore()
+const modalStore = useModalStore()
 
 const props = defineProps({
   entity: {
@@ -12,13 +17,15 @@ const props = defineProps({
     required: true,
     validator: (config) => {
       return [
+        'title',
         'availableTitle',
         'assignedTitle',
         'keyField',
         'displayField',
         'getAllEndpoint',
         'getAssignedEndpoint',
-        'updateEndpoint',
+        'assignEndpoint',
+        'removeEndpoint',
       ].every((key) => key in config)
     },
   },
@@ -110,34 +117,80 @@ const fetchData = async () => {
 }
 
 const isSelected = (item, type) => {
-  const selectedArray = type === 'available' ? selectedAvailableItems : selectedAssignedItems
-  return selectedArray.value.some((i) => i[props.config.keyField] === item[props.config.keyField])
+  const selectedArray =
+    type === 'available' ? selectedAvailableItems.value : selectedAssignedItems.value
+  return selectedArray.some((i) => i[props.config.keyField] === item[props.config.keyField])
 }
 
-const toggleSelection = (item, type) => {
+const toggleSelection = (item, type, event = null) => {
+  event?.stopPropagation()
+  event?.preventDefault()
+
   const selectedArray = type === 'available' ? selectedAvailableItems : selectedAssignedItems
-  const index = selectedArray.value.findIndex(
-    (i) => i[props.config.keyField] === item[props.config.keyField]
-  )
+  const keyField = props.config.keyField
+  console.log('KEYS', props.config.keyField)
+
+  const index = selectedArray.value.findIndex((i) => i[keyField] === item[keyField])
 
   if (index === -1) {
-    selectedArray.value.push(item)
+    selectedArray.value.push({
+      ...item,
+      [keyField]: item[keyField],
+    })
   } else {
     selectedArray.value.splice(index, 1)
   }
 }
 
-const assignSelected = () => {
-  assignedItems.value = [...assignedItems.value, ...selectedAvailableItems.value]
+const updateBackend = async (url, payload) => {
+  try {
+    const { data, request } = useApi(url, 'POST')
+    await request(payload)
+    alertStore.show(data?.value)
+    emit('refresh')
+  } catch (error) {
+    console.error('Error updating assignments:', error)
+  }
+}
+
+const dataPayload = props.config.title
+
+const assignSelected = async () => {
+  if (selectedAvailableItems.value.length === 0) return
+
+  // Validate items have the key field
+  const validItems = selectedAvailableItems.value.filter((item) => props.config.keyField in item)
+
+  if (validItems.length !== selectedAvailableItems.value.length) {
+    console.error(
+      'Some items are missing the key field:',
+      selectedAvailableItems.value.filter((item) => !(props.config.keyField in item))
+    )
+  }
+
+  const payload = {
+    [dataPayload]: validItems.map((item) => item[props.config.keyField]),
+  }
+
+  assignedItems.value = [...assignedItems.value, ...validItems]
   selectedAvailableItems.value = []
+  await updateBackend(props.config.assignEndpoint, payload)
 }
 
-const assignAll = () => {
+const assignAll = async () => {
+  const payload = {
+    [dataPayload]: availableItems.value.map((item) => item[props.config.keyField]),
+  }
   assignedItems.value = [...assignedItems.value, ...availableItems.value]
-  availableItems.value = []
+  await updateBackend(props.config.assignEndpoint, payload)
 }
 
-const removeSelected = () => {
+const removeSelected = async () => {
+  if (selectedAssignedItems.value.length === 0) return
+
+  const payload = {
+    [dataPayload]: selectedAssignedItems.value.map((item) => item[props.config.keyField]),
+  }
   assignedItems.value = assignedItems.value.filter(
     (item) =>
       !selectedAssignedItems.value.some(
@@ -145,35 +198,27 @@ const removeSelected = () => {
       )
   )
   selectedAssignedItems.value = []
+  await updateBackend(props.config.removeEndpoint, payload)
 }
 
-const removeAll = () => {
-  assignedItems.value = []
-}
-
-const saveAssignments = async () => {
-  try {
-    const { request } = useApi(props.config.updateEndpoint, 'POST')
-    const payload = {
-      [props.config.keyField + 's']: assignedItems.value.map((item) => item[props.config.keyField]),
-    }
-    await request(payload)
-
-    emit('refresh')
-    closeModal()
-  } catch (error) {
-    console.error('Error saving assignments:', error)
+const removeAll = async () => {
+  const payload = {
+    dataPayload: assignedItems.value.map((item) => item[props.config.keyField]),
   }
+  assignedItems.value = []
+  await updateBackend(props.config.removeEndpoint, payload)
 }
 
 const closeModal = () => {
-  emit('close')
+  modalStore.closeModal
 }
 </script>
 
 <template>
   <div class="container-fluid p-3">
+    <!-- Mobile View -->
     <div v-if="isMobile" class="d-flex flex-column gap-3">
+      <!-- Available Items Card -->
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <h5 class="mb-0">Available {{ config.availableTitle }}</h5>
@@ -199,7 +244,7 @@ const closeModal = () => {
               :key="item[config.keyField]"
               class="list-group-item list-group-item-action d-flex justify-content-between align-items-start"
               :class="{ active: isSelected(item, 'available') }"
-              @click="toggleSelection(item, 'available')"
+              @click="(event) => toggleSelection(item, 'available', event)"
             >
               <div>
                 <div class="fw-bold">{{ item[config.displayField] }}</div>
@@ -213,10 +258,11 @@ const closeModal = () => {
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="d-grid gap-2 d-md-flex justify-content-center">
         <button @click="assignSelected" class="btn btn-primary" :disabled="!hasAvailableSelection">
           <font-awesome-icon :icon="['fas', 'arrow-down']" class="me-1" />
-          Assign
+          Assign Selected
         </button>
         <button @click="assignAll" class="btn btn-outline-primary" :disabled="!hasAvailableItems">
           <font-awesome-icon :icon="['fas', 'angles-down']" class="me-1" />
@@ -224,6 +270,7 @@ const closeModal = () => {
         </button>
       </div>
 
+      <!-- Assigned Items Card -->
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <h5 class="mb-0">Assigned {{ config.assignedTitle }}</h5>
@@ -249,7 +296,7 @@ const closeModal = () => {
               :key="item[config.keyField]"
               class="list-group-item list-group-item-action d-flex justify-content-between align-items-start"
               :class="{ active: isSelected(item, 'assigned') }"
-              @click="toggleSelection(item, 'assigned')"
+              @click="(event) => toggleSelection(item, 'assigned', event)"
             >
               <div>
                 <div class="fw-bold">{{ item[config.displayField] }}</div>
@@ -263,10 +310,11 @@ const closeModal = () => {
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="d-grid gap-2 d-md-flex justify-content-center">
         <button @click="removeSelected" class="btn btn-danger" :disabled="!hasAssignedSelection">
           <font-awesome-icon :icon="['fas', 'arrow-up']" class="me-1" />
-          Remove
+          Remove Selected
         </button>
         <button @click="removeAll" class="btn btn-outline-danger" :disabled="!hasAssignedItems">
           <font-awesome-icon :icon="['fas', 'angles-up']" class="me-1" />
@@ -274,22 +322,24 @@ const closeModal = () => {
         </button>
       </div>
 
+      <!-- Footer -->
       <div class="d-grid gap-2 d-md-flex justify-content-end mt-2">
         <button @click="closeModal" class="btn btn-outline-secondary">Cancel</button>
-        <button @click="saveAssignments" class="btn btn-success">Save Changes</button>
       </div>
     </div>
 
+    <!-- Desktop View -->
     <div v-else class="row">
-      <div class="ol-lg-5 col-xl-5">
-        <div class="card shadow-sm h-100" style="height: 100%">
+      <!-- Available Items -->
+      <div class="col-lg-5 col-xl-5">
+        <div class="card shadow-sm h-100">
           <div
             class="card-header bg-light d-flex align-items-center justify-content-center py-3 border-top rounded-top"
           >
             <h5 class="mb-0">Available {{ config.availableTitle }}</h5>
           </div>
-          <div class="card-body d-flex flex-column" style="height: calc(100% - 2.5rem)">
-            <div class="input-group mb-3">
+          <div class="card-body d-flex flex-column p-0">
+            <div class="input-group mb-3 px-3 pt-3">
               <span class="input-group-text">
                 <font-awesome-icon :icon="['fas', 'search']" />
               </span>
@@ -300,7 +350,7 @@ const closeModal = () => {
                 :placeholder="`Search ${config.availableTitle.toLowerCase()}...`"
               />
             </div>
-            <div class="list-group overflow-auto flex-grow-1">
+            <div class="list-group overflow-auto" style="max-height: 60vh; min-height: 200px">
               <div v-if="!hasAvailableItems" class="list-group-item list-group-item-action">
                 No {{ config.availableTitle }} available.
               </div>
@@ -309,10 +359,10 @@ const closeModal = () => {
                 :key="item[config.keyField]"
                 class="list-group-item list-group-item-action d-flex justify-content-between align-items-start"
                 :class="{ active: isSelected(item, 'available') }"
-                @click="toggleSelection(item, 'available')"
+                @click="toggleSelection(item, 'available', $event)"
               >
                 <div>
-                  <div class="fw-bold">{{ item[config.displayField] }}</div>
+                  <!-- <div class="fw-bold">{{ item[config.displayField] }}</div> -->
                   <small v-if="item.description" class="text-muted">{{ item.description }}</small>
                 </div>
                 <span v-if="isSelected(item, 'available')" class="badge bg-primary rounded-pill">
@@ -324,7 +374,8 @@ const closeModal = () => {
         </div>
       </div>
 
-      <div class="ol-lg-2 col-xl-2 d-flex flex-column justify-content-center px-0">
+      <!-- Action Buttons -->
+      <div class="col-lg-2 col-xl-2 d-flex flex-column justify-content-center px-0">
         <div class="d-grid gap-2 mx-auto" style="width: fit-content">
           <button
             @click="assignSelected"
@@ -332,7 +383,7 @@ const closeModal = () => {
             :disabled="!hasAvailableSelection"
             title="Assign Selected"
           >
-            <font-awesome-icon :icon="['fas', 'arrow-right']" class="" size="lg" />
+            <font-awesome-icon :icon="['fas', 'arrow-right']" size="lg" />
           </button>
           <button
             @click="assignAll"
@@ -340,7 +391,7 @@ const closeModal = () => {
             title="Assign All"
             :disabled="!hasAvailableItems"
           >
-            <font-awesome-icon :icon="['fas', 'angles-right']" class="" size="lg" />
+            <font-awesome-icon :icon="['fas', 'angles-right']" size="lg" />
           </button>
           <div class="my-2 border-bottom"></div>
           <button
@@ -349,7 +400,7 @@ const closeModal = () => {
             :disabled="!hasAssignedSelection"
             title="Remove Selected"
           >
-            <font-awesome-icon :icon="['fas', 'arrow-left']" class="" size="lg" />
+            <font-awesome-icon :icon="['fas', 'arrow-left']" size="lg" />
           </button>
           <button
             @click="removeAll"
@@ -357,20 +408,21 @@ const closeModal = () => {
             title="Remove All"
             :disabled="!hasAssignedItems"
           >
-            <font-awesome-icon :icon="['fas', 'angles-left']" class="" size="lg" />
+            <font-awesome-icon :icon="['fas', 'angles-left']" size="lg" />
           </button>
         </div>
       </div>
 
+      <!-- Assigned Items -->
       <div class="col-lg-5 col-xl-5">
-        <div class="card shadow-sm h-100" style="height: 100%">
+        <div class="card shadow-sm h-100">
           <div
             class="card-header bg-light d-flex align-items-center justify-content-center py-3 border-top rounded-top"
           >
             <h5 class="mb-0">Assigned {{ config.assignedTitle }}</h5>
           </div>
-          <div class="card-body d-flex flex-column" style="height: calc(100% - 2.5rem)">
-            <div class="input-group mb-3">
+          <div class="card-body d-flex flex-column p-0">
+            <div class="input-group mb-3 px-3 pt-3">
               <span class="input-group-text">
                 <font-awesome-icon :icon="['fas', 'search']" />
               </span>
@@ -381,7 +433,7 @@ const closeModal = () => {
                 :placeholder="`Search assigned ${config.assignedTitle.toLowerCase()}...`"
               />
             </div>
-            <div class="list-group overflow-auto flex-grow-1">
+            <div class="list-group overflow-auto" style="max-height: 60vh; min-height: 200px">
               <div v-if="!hasAssignedItems" class="list-group-item list-group-item-action">
                 No {{ config.assignedTitle }} assigned.
               </div>
@@ -390,10 +442,10 @@ const closeModal = () => {
                 :key="item[config.keyField]"
                 class="list-group-item list-group-item-action d-flex justify-content-between align-items-start"
                 :class="{ active: isSelected(item, 'assigned') }"
-                @click="toggleSelection(item, 'assigned')"
+                @click="(event) => toggleSelection(item, 'assigned', event)"
               >
                 <div>
-                  <div class="fw-bold">{{ item[config.displayField] }}</div>
+                  <!-- <div class="fw-bold">{{ item[config.displayField] }}</div> -->
                   <small v-if="item.description" class="text-muted">{{ item.description }}</small>
                 </div>
                 <span v-if="isSelected(item, 'assigned')" class="badge bg-primary rounded-pill">
@@ -405,12 +457,12 @@ const closeModal = () => {
         </div>
       </div>
 
-      <div class="col-12">
+      <!-- Footer - Full width and right-aligned -->
+      <!-- <div class="col-12">
         <div class="d-flex justify-content-end gap-2 mt-4">
-          <button @click="closeModal" class="btn btn-outline-secondary">Cancel</button>
-          <button @click="saveAssignments" class="btn btn-success">Save Changes</button>
+          <button @click="modalStore.closeModal" class="btn btn-outline-secondary">Cancel</button>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -485,5 +537,28 @@ const closeModal = () => {
   .d-flex > .btn {
     width: 100%;
   }
+}
+.list-group-item > * {
+  pointer-events: none;
+}
+
+/* Custom scrollbar styling */
+.list-group {
+  scrollbar-width: thin;
+  scrollbar-color: #adb5bd #f8f9fa;
+}
+
+.list-group::-webkit-scrollbar {
+  width: 8px;
+}
+
+.list-group::-webkit-scrollbar-track {
+  background: #f8f9fa;
+}
+
+.list-group::-webkit-scrollbar-thumb {
+  background-color: #adb5bd;
+  border-radius: 10px;
+  border: 2px solid #f8f9fa;
 }
 </style>

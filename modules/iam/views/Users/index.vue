@@ -306,39 +306,24 @@ onMounted(() => {
   })
 })
 
-const inLineEditing = async (url, data) => {
-  const { request, error, isLoading } = useApi(url, 'PUT')
-  await request(data)
-
-  if (error.value) {
-    return {
-      error: error.value.message,
-      isLoading: isLoading.value,
-    }
-  }
-
-  return {
-    success: true,
-    isLoading: isLoading.value,
-    shouldRefresh: true,
-  }
-}
-
 const editableColumns = [
   {
     key: 'description',
     onSave: async (value, row) => {
       const updatedData = {
-        name: row.name,
-        description: value,
-        ...(row.ruleName && { ruleName: row.ruleName }),
+        ...row,
+        description: value, // flat structure
       }
 
-      const url = `/v1/iam/rbac/role/${row.name}`
-      const res =  await inLineEditing(url, updatedData)
+      const { request: updateRequest, error } = useApi(`/v1/iam/rbac/role/${row.name}`, 'PUT')
+      await updateRequest(updatedData)
 
-      refresh();
-      return res;
+      if (error.value) {
+        proxy.$showAlert({ title: 'Error', text: error.value.message, icon: 'error' })
+      } else {
+        proxy.$showAlert({ title: 'Saved', text: 'Description updated.', icon: 'success' })
+        refresh()
+      }
     },
   },
 ]
@@ -414,7 +399,7 @@ const customActions = [
           showRange: true,
         }"
         :toolbar="{
-          show: false,
+          show: true,
           showCreateButton: true,
         }"
         :expandable-rows="false"

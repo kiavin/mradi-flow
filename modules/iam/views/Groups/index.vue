@@ -305,19 +305,22 @@ onMounted(() => {
   })
 })
 
-const manageRolePermissions = (group) => {
+const manageGroupRoles = (group) => {
   modalStore.openModal(
     AssignmentManager,
     {
       entity: group,
       config: {
+        title: 'roles',
         availableTitle: 'Roles',
         assignedTitle: 'Roles',
         keyField: 'name',
         displayField: 'name',
         getAllEndpoint: '/v1/iam/rbac/roles',
         getAssignedEndpoint: `/v1/iam/rbac/group/assign/${group.name}`,
-        updateEndpoint: `/v1/iam/rbac/group/assign/${group.name}`,
+        assignEndpoint: `/v1/iam/rbac/group/assign/${group.name}`,
+        removeEndpoint: `/v1/iam/rbac/group/remove/${group.name}`,
+
       },
     },
     `Manage Roles for ${group.name}`,
@@ -335,13 +338,12 @@ const customActions = [
     key: 'manage-group',
     label: 'Manage Group',
     icon: ['fas', 'user-group'],
-    callback: (row) => manageRolePermissions(row),
+    callback: (row) => manageGroupRoles(row),
     show: true,
     colorClass: 'text-secondary ',
   },
 ]
 
-// Assignment Manager
 </script>
 <template>
   <div class="card p-3">

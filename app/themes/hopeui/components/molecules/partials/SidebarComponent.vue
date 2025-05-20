@@ -4,9 +4,7 @@ import SideMenu from '~/themes/hopeui/components/organisms/menu/SideMenu.vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import menuData from "~/omnicore/helpers/menu.json";
-
-console.log(JSON.stringify(menuData))
+import menuData from '~/omnicore/config/menu.json'
 
 const currentRoute = ref('')
 const route = useRoute()
@@ -47,41 +45,27 @@ toggle(route.name)
 <template>
   <default-sidebar>
     <ul class="navbar-nav iq-main-menu" id="sidebar-menu">
-      <template v-for="(sections, category) in menuItems" :key="category">
-        <li class="nav-item">
-          <span class="menu-title">{{ category }}</span>
-          <ul class="sub-menu">
-            <template v-for="(items, section) in sections" :key="section">
-              <!-- Treat each section as a parent menu item -->
-               <b-collapse></b-collapse>
-              <side-menu
-                :title="section"
-                :caret-icon="true"
-                :route="{ popup: 'false', to: section }"
-                @onClick="toggle"
-                :active="currentRoute.includes(section)"
-              >
-                <b-collapse
-                  tag="ul"
-                  class="sub-nav"
-                  :id="`collapse-${section}`"
-                  accordion="sidebar-menu"
-                  :visible="currentRoute.includes(section)"
-                >
-                  <!-- Render child items -->
-                  <side-menu
-                    v-for="(item, index) in items"
-                    :key="index"
-                    isTag="router-link"
-                    :title="item.title"
-                    :route="{ to: item.name }"
-                  />
-                </b-collapse>
-              </side-menu>
-            </template>
-          </ul>
-        </li>
-      </template>
+      <side-menu title="Home" :static-item="true"></side-menu>
+      <side-menu
+        isTag="router-link"
+        title="Dashboard"
+        icon="view-grid"
+        :route="{ to: 'dashboard' }"
+      ></side-menu>
+      <side-menu
+        isTag="router-link"
+        title="Alternate Dashboard"
+        icon="dashboard"
+        :route="{ to: 'playground' }"
+      ></side-menu>
+      <side-menu title="IAM" icon="shield" toggle-id="menu-style" :caret-icon="true" :route="{ popup: 'false', to: 'menu-style' }" @onClick="toggle" :active="currentRoute.includes('menu-style')">
+        <b-collapse tag="ul" class="sub-nav" id="menu-style" accordion="sidebar-menu" :visible="currentRoute.includes('menu-style')">
+          <side-menu title="Users" icon="circle" :icon-size="10" icon-type="solid" miniTitle="H" :route="{ to: 'iam/roles' }"></side-menu>
+          <side-menu title="Roles" icon="circle" :icon-size="10" icon-type="solid" miniTitle="D" :route="{ to: 'iam/roles' }"></side-menu>
+          <side-menu title="Groups" icon="circle" :icon-size="10" icon-type="solid" miniTitle="D" :route="{ to: 'iam/groups' }"></side-menu>
+          <side-menu title="Permissions" icon="circle" :icon-size="10" icon-type="solid" miniTitle="B" :route="{ to: 'iam/permissions' }"></side-menu>
+        </b-collapse>
+      </side-menu>
     </ul>
   </default-sidebar>
 </template>

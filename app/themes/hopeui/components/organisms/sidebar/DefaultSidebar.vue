@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import Scrollbar from 'smooth-scrollbar'
+import Logo from '../../../../../components/molecules/Logo.vue'
 import { useSetting } from '~/themes/hopeui/store/index.js'
-
 
 const store = useSetting()
 const sidebarType = computed(() => store.sidebar_type_value)
@@ -22,15 +22,28 @@ onMounted(() => {
 </script>
 <template>
   <aside
-    :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(' ')} ${sidebarShow}`"
+    :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(
+      ' '
+    )} ${sidebarShow}`"
     data-toggle="main-sidebar"
     data-sidebar="responsive"
   >
     <div class="sidebar-header d-flex align-items-center justify-content-start">
       <router-link :to="{ name: 'playground' }" class="navbar-brand">
-        <brand-logo></brand-logo>
-        <h4 class="logo-title" data-setting="app_name">
-          <brand-name></brand-name>
+        <Logo
+          class="bg-white"
+          :options="{
+            containerWidth: 60,
+            containerHeight: 60,
+            borderRadius: '50%',
+            border: '1px solid cyan',
+            objectFit: 'contain',
+            imgWidth: 40,
+            imgHeight: 40,
+          }"
+        />
+        <h4 class="logo-title" style="" data-setting="app_name">
+           Mradi360
         </h4>
       </router-link>
       <div class="sidebar-toggle" @click="toggleSidebar">

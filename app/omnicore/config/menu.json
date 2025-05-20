@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Home",
+    "icon": "home",
+    "route": {
+      "to": "dashboard"
+    }
+  },
+  {
+    "title": "IAM",
+    "icon": "shield-check",
+    "route": {
+      "to": "iam"
+    },
+    "toggleId": "iam-menu",
+    "children": [
+      {
+        "title": "Users",
+        "icon": "user",
+        "route": {
+          "to": "iam.users"
+        }
+      },
+      {
+        "title": "Roles",
+        "icon": "badge-check",
+        "route": {
+          "to": "iam.roles"
+        }
+      },
+      {
+        "title": "Groups",
+        "icon": "users",
+        "route": {
+          "to": "iam.groups"
+        }
+      },
+      {
+        "title": "Permissions",
+        "icon": "key",
+        "route": {
+          "to": "iam.permissions"
+        }
+      }
+    ]
+  }
+]
