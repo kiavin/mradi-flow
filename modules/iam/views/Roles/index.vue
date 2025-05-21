@@ -96,9 +96,6 @@ const handleView = async (row) => {
   )
 }
 
-//const handleEdit = (id) => {
-//   router.push({ name: 'iam/roles/update', params: { id } });
-//}
 
 const errors = ref({})
 

@@ -269,7 +269,8 @@ const updateResponseData = () => {
 // router.push({ name: '${moduleName}/${resource.toLowerCase()}/view', params: { id } });
 //};
 
-const handleView = async (id) => {
+const handleView = async (row) => {
+  const id = row.id;
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
 
   await nextTick(); // ensure store state is updated
@@ -305,7 +306,8 @@ const handleView = async (id) => {
 
 const errors = ref({})
 
-const handleEdit = async (id = row.id) => {
+const handleEdit = async (row) => {
+  const id = row.id
   errors.value = {}
   
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
@@ -422,7 +424,9 @@ const handleCreate = async() => {
 }
 
 
-const handleDelete = async (id = row.id, is_deleted = row. is_deleted) => {
+const handleDelete = async (row) => {
+  const id = row.id;
+  const is_deleted = row.is_deleted
    const action = is_deleted ? 'Restore' : 'Delete'
 
   const confirmationText = is_deleted
