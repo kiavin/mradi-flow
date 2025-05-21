@@ -430,11 +430,10 @@ const getPinnedRightOffset = (colKey) => {
               v-if="shouldShow(action, row)"
               :icon="getActionIcon(action, row)"
               @click="() => handleClick(action, row)"
-              class="icon me-1"
+              class="icon me-1 cursor-pointer"
               style="font-size: 1.2rem"
               :class="getColorClass(action, row)"
-              data-bs-toggle="tooltip"
-              :title="getActionLabel(action, row)"
+              v-tooltip:bottom="getActionLabel(action, row)"
             />
           </slot>
         </template>

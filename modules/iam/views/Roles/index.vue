@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, watch, getCurrentInstance, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
+import Button from '~/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
 import AssignmentManager from '@/iam/components/organisms/AssignmentManager.vue'

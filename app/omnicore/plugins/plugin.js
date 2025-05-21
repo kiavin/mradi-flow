@@ -1,6 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
+// import tooltip from '~/omnicore/helpers/tooltip.js'
+import BootstrapTooltips from '~/omnicore/plugins/bootstrap-tooltip.js'
+
+ 
 
 import sweetAlertPlugin from '~/omnicore/plugins/sweetAlertPlugin'
 import { showAlert, showToast } from '~/omnicore/utils'
@@ -18,6 +22,9 @@ import Logo from '~/components/molecules/Logo.vue'
 export default function registerPlugins(app) {
     app.use(sweetAlertPlugin)
     app.use(BootstrapVueNext)
+
+    // app.directive('tooltip', tooltip)
+    app.use(BootstrapTooltips)
 
     // Provide global methods
     app.provide('showAlert', showAlert)
