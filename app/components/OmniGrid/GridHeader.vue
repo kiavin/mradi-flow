@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import SearchInput from '~/themes/hopeui/components/molecules/SearchInput.vue'
+import SearchInput from './SearchInput.vue'
 import PageDropDownSelect from './PageDropDownSelect.vue'
 import BaseButton from './BaseButton.vue'
 import { onClickOutside } from '@vueuse/core'
