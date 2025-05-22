@@ -4,7 +4,7 @@ import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 // import tooltip from '~/omnicore/helpers/tooltip.js'
 import BootstrapTooltips from '~/omnicore/plugins/bootstrap-tooltip.js'
 
- 
+
 
 import sweetAlertPlugin from '~/omnicore/plugins/sweetAlertPlugin'
 import { showAlert, showToast } from '~/omnicore/utils'

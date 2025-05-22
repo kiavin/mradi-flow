@@ -368,7 +368,7 @@ const closeModal = () => {
               >
                 <div>
                   <!-- <div class="fw-bold">{{ item[config.displayField] }}</div> -->
-                  <small v-if="item.description" class="text-muted">{{ item.description }}</small>
+                  <small v-if="item.description" class="fw-bold">{{ item.description }}</small>
                 </div>
                 <span v-if="isSelected(item, 'available')" class="badge bg-primary rounded-pill">
                   <font-awesome-icon :icon="['fas', 'check']" />
@@ -451,7 +451,7 @@ const closeModal = () => {
               >
                 <div>
                   <!-- <div class="fw-bold">{{ item[config.displayField] }}</div> -->
-                  <small v-if="item.description" class="text-muted">{{ item.description }}</small>
+                  <small v-if="item.description" class="fw-bold">{{ item.description }}</small>
                 </div>
                 <span v-if="isSelected(item, 'assigned')" class="badge bg-primary rounded-pill">
                   <font-awesome-icon :icon="['fas', 'check']" />
@@ -472,14 +472,11 @@ const closeModal = () => {
   </div>
 
   <!-- Loading Overlay -->
-<div 
-  v-if="isProcessing"
-  class="loading-overlay d-flex align-items-center justify-content-center"
->
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
+  <div v-if="isProcessing" class="loading-overlay d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-</div>
 </template>
 
 <style scoped>

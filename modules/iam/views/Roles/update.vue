@@ -8,7 +8,7 @@ const router = useRouter()
 
 const route = useRoute();
 const id = route.params.id;
-const apiBaseUrl = `/v1/iam/roles/${id}`;
+const apiBaseUrl = `/v1/iam/rbac/role/${id}`;
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
 const formData = ref({});
@@ -41,7 +41,7 @@ const handleSubmit = async (updatedData) => {
   proxy.$showAlert({
     title: 'Success',
     icon: 'success',
-    text: 'Roles Updated successfully',
+    text: 'Role Updated successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,

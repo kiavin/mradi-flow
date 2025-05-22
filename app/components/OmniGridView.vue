@@ -297,6 +297,7 @@ const onChangePage = (page) => emit('changePage', page)
 
 const onRefresh = () => emit('refresh')
 const createButton = () => emit('handleCreate')
+ 
 
 </script>
 <template>
@@ -363,9 +364,11 @@ const createButton = () => emit('handleCreate')
     <!-- end-body -->
 
     <!-- Expanded Row -->
+     <transition name="slide-fade">
     <div v-if="expandableRows && currentExpandedRow">
-      <slot name="expanded-row" :row="currentExpandedRow"> </slot>
+      <slot name="expanded" :row="currentExpandedRow"> </slot>
     </div>
+    </transition>
 
     <!-- footer -->
     <div class="mt-2">

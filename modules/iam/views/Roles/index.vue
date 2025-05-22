@@ -96,7 +96,6 @@ const handleView = async (row) => {
   )
 }
 
-
 const errors = ref({})
 
 const handleEdit = async (row) => {
@@ -136,8 +135,10 @@ const handleEdit = async (row) => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Roles Updated successfully',
+      text: 'Role Updated successfully',
       showConfirmButton: false,
+      showCancelButton: false,
+      draggable: true,
       timer: 2000,
       timerProgressBar: true,
     })
@@ -332,10 +333,10 @@ const editableColumns = [
       }
 
       const url = `/v1/iam/rbac/role/${row.name}`
-      const res =  await inLineEditing(url, updatedData)
+      const res = await inLineEditing(url, updatedData)
 
-      refresh();
-      return res;
+      refresh()
+      return res
     },
   },
 ]
@@ -399,8 +400,8 @@ const customActions = [
         :actions="customActions"
         action-layout="inline"
         :pagination-config="{
-          variant: 'circle',
-          position: 'right',
+          variant: 'circle', // 'default', 'compact', 'rounded', 'circle'
+          position: 'right', // 'left', 'center', 'right'
           bgColor: '#4f46e5',
           hoverBgColor: '#6366f1',
           textColor: '#374151',
@@ -411,11 +412,11 @@ const customActions = [
           showRange: true,
         }"
         :toolbar="{
-          show: false,
+          show: true,
           showCreateButton: true,
         }"
         :expandable-rows="false"
-        :filtering="true"
+        :filtering="false"
         :multi-select="false"
         :radio-select="false"
         :break-extra-columns="true"
@@ -435,6 +436,15 @@ const customActions = [
             </template>
             New Role
           </Button>
+        </template>
+
+        <template #expanded="{ row }">
+          <div class="p-3 bg-light">
+            <pre>
+              {{ row }}
+             </pre
+            >
+          </div>
         </template>
       </OmniGridView>
     </div>
