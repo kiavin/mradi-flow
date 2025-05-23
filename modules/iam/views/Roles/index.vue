@@ -386,7 +386,7 @@ const customActions = [
         <h1 class="h4 mt-2">List of Roles</h1>
       </div>
       <div class="col-auto mb-4">
-        <Button type="submit" customClass="btn btn-primary" @click="handleCreate">
+        <Button type="submit" customClass="btn btn-primary" @click="handleCreate" v-tooltip:left="'Add New Role'">
           New Role
         </Button>
       </div>

@@ -386,14 +386,15 @@ const closeModal = () => {
             @click="assignSelected"
             class="btn btn-success p-2"
             :disabled="!hasAvailableSelection"
-            title="Assign Selected"
+            v-tooltip:top="'Assign Selected'"
           >
             <font-awesome-icon :icon="['fas', 'arrow-right']" size="lg" />
           </button>
           <button
             @click="assignAll"
             class="btn btn-outline-success p-2"
-            title="Assign All"
+            title=""
+            v-tooltip:bottom="'Assign All'"
             :disabled="!hasAvailableItems"
           >
             <font-awesome-icon :icon="['fas', 'angles-right']" size="lg" />
@@ -403,14 +404,14 @@ const closeModal = () => {
             @click="removeSelected"
             class="btn btn-danger p-2"
             :disabled="!hasAssignedSelection"
-            title="Remove Selected"
+            v-tooltip:top="'Remove Selected'"
           >
             <font-awesome-icon :icon="['fas', 'arrow-left']" size="lg" />
           </button>
           <button
             @click="removeAll"
             class="btn btn-outline-danger p-2"
-            title="Remove All"
+            v-tooltip:bottom="'Remove All'"
             :disabled="!hasAssignedItems"
           >
             <font-awesome-icon :icon="['fas', 'angles-left']" size="lg" />

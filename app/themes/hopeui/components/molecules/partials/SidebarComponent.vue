@@ -45,20 +45,14 @@ toggle(route.name)
 <template>
   <default-sidebar>
     <ul class="navbar-nav iq-main-menu" id="sidebar-menu">
-      <side-menu title="Home" :static-item="true"></side-menu>
+      <!-- <side-menu title="Home" :static-item="true"></side-menu> -->
       <side-menu
         isTag="router-link"
         title="Dashboard"
-        icon="view-grid"
+        icon="dashboard"
         :route="{ to: 'dashboard' }"
       ></side-menu>
-      <side-menu
-        isTag="router-link"
-        title="Alternate Dashboard"
-        icon="dashboard"
-        :route="{ to: 'playground' }"
-      ></side-menu>
-      <side-menu title="IAM" icon="shield" toggle-id="menu-style" :caret-icon="true" :route="{ popup: 'false', to: 'menu-style' }" @onClick="toggle" :active="currentRoute.includes('menu-style')">
+      <side-menu title="ADMIN & IAM" icon="shield"  toggle-id="menu-style" :caret-icon="true" :route="{ popup: 'false', to: 'menu-style' }" @onClick="toggle" :active="currentRoute.includes('menu-style')">
         <b-collapse tag="ul" class="sub-nav" id="menu-style" accordion="sidebar-menu" :visible="currentRoute.includes('menu-style')">
           <side-menu title="Users" icon="circle" :icon-size="10" icon-type="solid" miniTitle="H" :route="{ to: 'iam/roles' }"></side-menu>
           <side-menu title="Roles" icon="circle" :icon-size="10" icon-type="solid" miniTitle="D" :route="{ to: 'iam/roles' }"></side-menu>

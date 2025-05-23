@@ -156,7 +156,8 @@ export default {
       :aria-expanded="collapseActive"
     >
       <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
-        <icon-component :type="iconType" :icon-name="icon" :size="iconSize"></icon-component>
+        <!-- <icon-component :type="iconType" :icon-name="icon" :size="iconSize"></icon-component> -->
+          <font-awesome-icon :icon="['fas', icon]" />
       </i>
       <i
         class="sidenav-mini-icon"
