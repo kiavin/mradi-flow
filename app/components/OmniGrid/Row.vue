@@ -576,7 +576,7 @@ const getPinnedRightOffset = (colKey) => {
 .selected-row,
 .selected-row td,
 .selected-row .sticky-col {
-  background-color: #e5c7ca !important;
+  /* background-color: #e5c7ca !important; */
   z-index: 10;
 }
 
@@ -584,8 +584,8 @@ const getPinnedRightOffset = (colKey) => {
 .sticky-col {
   position: sticky !important;
   right: 0;
-  background-color: white;
-  z-index: 10;
+  /* background-color: white; */
+  /* z-index: 10; */
 }
 
 .sticky-col:nth-child(1) {
@@ -633,7 +633,7 @@ const getPinnedRightOffset = (colKey) => {
 
 .sticky-pinned {
   position: sticky !important;
-  background-color: lightgrey;
+  background-color: grey;
 
   top: 0;
   backface-visibility: hidden;

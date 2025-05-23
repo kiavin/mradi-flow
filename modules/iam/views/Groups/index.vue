@@ -377,11 +377,13 @@ const customActions = [
           showRange: true,
         }"
         :toolbar="{
-          show: true,
+          show: false,
           showCreateButton: true,
         }"
         :expandable-rows="false"
-        :filtering="true"
+        :filtering="false"
+        rowSize="sm"
+        :striped="false"
         :multi-select="false"
         :radio-select="false"
         :break-extra-columns="true"

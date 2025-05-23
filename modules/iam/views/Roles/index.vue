@@ -398,7 +398,7 @@ const customActions = [
         :loading="isLoading"
         :dropDownPerPageOptions="[10, 25, 50]"
         :actions="customActions"
-        action-layout="inline"
+        action-layout="inline" 
         :pagination-config="{
           variant: 'circle', // 'default', 'compact', 'rounded', 'circle'
           position: 'right', // 'left', 'center', 'right'

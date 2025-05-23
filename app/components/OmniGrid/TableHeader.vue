@@ -132,7 +132,7 @@ const getPinnedRightOffset = (colKey) => {
 </script>
 
 <template>
-  <thead class="table-secondary" :class="{ 'sticky-header': layouts.stickyHeader }">
+  <thead  class="table-secondary" :class="{ 'sticky-header4': layouts.stickyHeader }">
     <!-- Header Row -->
     <tr>
       <!-- Radio Select Header -->
@@ -177,10 +177,6 @@ const getPinnedRightOffset = (colKey) => {
             right: store.getColumnPinPosition(col.key) === 'right' ? getPinnedRightOffset(col.key) : 'auto',
             position: store.getColumnPinPosition(col.key) ? 'sticky' : 'relative',
             zIndex: store.getColumnPinPosition(col.key) ? 10 + store.getPinnedColumnIndex(col.key) : 'auto',
-            // width: columnWidths[col.key] || '250px', 
-            // minWidth: columnWidths[col.key] || '250px', 
-            // maxWidth: columnWidths[col.key] || '250px', 
-            // willChange: 'transform',
           }"
           :class="[
             'text-nowrap align-middle',
@@ -195,7 +191,7 @@ const getPinnedRightOffset = (colKey) => {
           <div class="d-flex justify-content-between align-items-center w-100">
             <!-- Column Label with Click to Toggle Sort -->
             <span
-              class="flex-grow-1"
+              class="flex-grow-1 fw-bold"
               :style="col.key !== 'actions' && col.key !== 'id' ? 'cursor: pointer' : ''"
               @click="col.key !== 'actions' && col.key !== 'id' && toggleSort(col.key)"
             >
@@ -235,7 +231,7 @@ const getPinnedRightOffset = (colKey) => {
 
       <th
         v-if="showActions"
-        class="sticky-col text-center align-middle"
+        class="sticky-col text-center align-middle fw-bold"
         :style="{
           width: '100px',
           right: multiSelect ? '50px' : '0',
@@ -375,7 +371,7 @@ const getPinnedRightOffset = (colKey) => {
 .sticky-col {
   position: sticky;
   right: 0;
-  background-color: inherit;
+  /* background-color: inherit; */
   z-index: 10;
 }
 
@@ -405,20 +401,20 @@ const getPinnedRightOffset = (colKey) => {
 .sticky-col-left {
   position: sticky !important;
   left: 0;
-  background-color: #d3d3d3;
+  /* background-color: #d3d3d3; */
   z-index: 10;
 }
 
 .sticky-col-right {
   position: sticky !important;
   right: 0;
-  background-color: #d3d3d3;
+  /* background-color: #d3d3d3; */
   z-index: 10;
 }
 
 .sticky-pinned {
   position: sticky !important;
-  background-color: lightgrey;
+  background-color: grey;
 
   top: 0;
   backface-visibility: hidden;
@@ -429,14 +425,7 @@ const getPinnedRightOffset = (colKey) => {
   z-index: 20;
   transform: translateZ(0);
 }
-
-/* .sticky-pinned[style*="left"]:not(:last-of-type) {
-  box-shadow: 4px 0 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.sticky-pinned[style*="right"]:not(:last-of-type) {
-  box-shadow: -4px 0 4px -2px rgba(0, 0, 0, 0.1);
-} */
+ 
 
 /* Special styling for the first pinned columns */
 .sticky-pinned[style*='left']:first-of-type {

@@ -43,6 +43,13 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  rowSize: {
+    type: String,
+    default: 'sm',
+  },
+  striped: Boolean,
+  bordered: Boolean,
+  hover: Boolean,
   searchQuery: {
     type: String,
     default: '',
@@ -118,7 +125,7 @@ watch(
   () => props.toggleAllSignal,
   (newVal) => {
     emit('toggle-expand', { row: props.row, expanded: newVal })
-  },
+  }
 )
 
 // emiting events
@@ -135,7 +142,7 @@ watch(
     // console.log('DataTable received new data:', newData)
     return
   },
-  { deep: true },
+  { deep: true }
 )
 
 const filteredData = computed(() => {
@@ -146,8 +153,8 @@ const filteredData = computed(() => {
 
     return props.data.filter((row) =>
       Object.values(row).some((value) =>
-        String(value).toLowerCase().includes(props.searchQuery.toLowerCase()),
-      ),
+        String(value).toLowerCase().includes(props.searchQuery.toLowerCase())
+      )
     )
   }
 })
@@ -161,7 +168,7 @@ const sortedData = computed(() => {
 
   // Apply column filters if any are active
   const hasActiveFilters = Object.values(selectedFilterValues.value).some(
-    (vals) => vals && vals.length > 0,
+    (vals) => vals && vals.length > 0
   )
 
   if (hasActiveFilters) {
@@ -442,41 +449,40 @@ const dynamicColumns = computed(() => {
   return props.columns.filter((col) => !staticKeys.has(col.key))
 })
 
-
 const visibleColumns = computed(() => {
   const staticCols = props.columns.filter((col) =>
     ['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
-  );
+  )
 
   const dynamicCols = props.columns.filter(
     (col) => !['actions', 'multiSelect', 'radioSelect', 'expandableRows'].includes(col.key)
-  );
+  )
 
   // Get pinned columns in their stored order
   const pinnedLeft = pinnedLeftColumns.value
-    .map(key => dynamicCols.find(col => col.key === key))
-    .filter(Boolean);
-    
+    .map((key) => dynamicCols.find((col) => col.key === key))
+    .filter(Boolean)
+
   const pinnedRight = pinnedRightColumns.value
-    .map(key => dynamicCols.find(col => col.key === key))
-    .filter(Boolean);
+    .map((key) => dynamicCols.find((col) => col.key === key))
+    .filter(Boolean)
 
   if (!props.breakExtraColumns) {
-    const pinnedKeys = new Set([...pinnedLeftColumns.value, ...pinnedRightColumns.value]);
-    const unpinned = dynamicCols.filter(col => !pinnedKeys.has(col.key));
-    return [...pinnedLeft, ...unpinned, ...pinnedRight, ...staticCols];
+    const pinnedKeys = new Set([...pinnedLeftColumns.value, ...pinnedRightColumns.value])
+    const unpinned = dynamicCols.filter((col) => !pinnedKeys.has(col.key))
+    return [...pinnedLeft, ...unpinned, ...pinnedRight, ...staticCols]
   }
 
-  const pinnedKeys = new Set([...pinnedLeftColumns.value, ...pinnedRightColumns.value]);
-  const unpinned = dynamicCols.filter(col => !pinnedKeys.has(col.key));
-  const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length;
-  const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots));
+  const pinnedKeys = new Set([...pinnedLeftColumns.value, ...pinnedRightColumns.value])
+  const unpinned = dynamicCols.filter((col) => !pinnedKeys.has(col.key))
+  const remainingSlots = maxVisibleColumns.value - pinnedLeft.length - pinnedRight.length
+  const visibleUnpinned = unpinned.slice(0, Math.max(0, remainingSlots))
 
-  return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols];
-});
+  return [...pinnedLeft, ...visibleUnpinned, ...pinnedRight, ...staticCols]
+})
 
 const extraDynamicColumns = computed(() =>
-  props.breakExtraColumns ? dynamicColumns.value.slice(maxVisibleColumns.value) : [],
+  props.breakExtraColumns ? dynamicColumns.value.slice(maxVisibleColumns.value) : []
 )
 
 onMounted(() => {
@@ -640,7 +646,7 @@ watch(
     clearAllFilters()
     updateUniqueValues()
   },
-  { deep: true },
+  { deep: true }
 )
 
 const handleColumnFilter = ({ columnKey, values }) => {
@@ -649,7 +655,7 @@ const handleColumnFilter = ({ columnKey, values }) => {
 
   // If no filters are active (all values selected or no filters at all), reset to original data
   const hasActiveFilters = Object.values(selectedFilterValues.value).some(
-    (vals) => vals && vals.length > 0,
+    (vals) => vals && vals.length > 0
   )
 
   if (!hasActiveFilters) {
@@ -695,9 +701,14 @@ const clearAllFilters = () => {
 const paginationConfig = inject('paginationConfig', {})
 </script>
 <template>
-  <!-- <div :class="{ 'table-responsive table-wrapper': !breakExtraColumns }" style="position: relative"> -->
-    <div :class="{ 'table-responsive': !breakExtraColumns, 'table-wrapper': true }" style="position: relative">
-    <table class="table table-sm table-hover w-100">
+  <div
+    :class="{ 'table-responsive': !breakExtraColumns, 'table-wrapper': true }"
+    style="position: relative"
+  >
+    <table
+      class="table table-hover w-100"
+      :class="[`table-${rowSize}`, { 'table-borderless': false, 'table-striped': striped }]"
+    >
       <TableHeader
         :columns="columns"
         :visible-columns="visibleColumns"
@@ -844,6 +855,9 @@ const paginationConfig = inject('paginationConfig', {})
   />
 </template>
 <style scoped>
+.table-sm-size {
+  height: 2px !important;
+}
 .resize-handle {
   position: absolute;
   top: 0;

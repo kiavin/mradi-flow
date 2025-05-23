@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed,  useSlots, provide } from 'vue'
+import { ref, computed, useSlots, provide } from 'vue'
 import GridHeader from './OmniGrid/GridHeader.vue'
 import TableBody from './OmniGrid/TableBody.vue'
 
@@ -13,7 +13,6 @@ const emit = defineEmits([
   'search',
   'update:perPage',
   'refresh',
-  
 ])
 
 const props = defineProps({
@@ -38,8 +37,8 @@ const props = defineProps({
     type: Array,
     default: () => [],
     validator: (value) => {
-      return value.every(col => typeof col === 'string' || (col && typeof col.key === 'string'))
-    }
+      return value.every((col) => typeof col === 'string' || (col && typeof col.key === 'string'))
+    },
   },
   dropDownPerPageOptions: {
     type: Array,
@@ -118,11 +117,16 @@ const props = defineProps({
   tableClass: { type: String, default: '' },
   headerClass: { type: String, default: '' },
   rowClass: { type: [String, Function], default: '' },
-  striped: { type: Boolean, default: true },
-  bordered: { type: Boolean, default: false },
+  striped: { type: Boolean, default: false },
+  bordered: { type: Boolean, default: true },
   hover: { type: Boolean, default: true },
   responsive: { type: Boolean, default: true },
-  stickyHeader: { type: Boolean, default: false },
+  stickyHeader: { type: Boolean, default: true },
+  rowSize: {
+    type: String,
+    default: 'sm', // 'sm' | 'md' | 'lg'
+    validator: (value) => ['xs', 'sm', 'md', 'lg'].includes(value),
+  },
 
   // row selection options
   multiSelect: { type: Boolean, default: true },
@@ -258,10 +262,10 @@ const columnSlots = computed(() => {
 })
 
 /* emiting events */
- 
+
 // const onActionTriggered = (payload) => {
 //   const { actionKey, row, originalCallback } = payload
-   
+
 //   emit('action', actionKey, row)
 
 //   if (['view', 'edit', 'delete', 'restore'].includes(actionKey)) {
@@ -274,13 +278,13 @@ const columnSlots = computed(() => {
 // }
 const onActionTriggered = (payload) => {
   const { actionKey, row } = payload
-  
+
   // Emit the general action event
   emit('action', actionKey, row)
-  
+
   // Emit the specific event based on actionKey
   if (['view', 'edit', 'delete', 'restore'].includes(actionKey)) {
-    emit(actionKey, row) 
+    emit(actionKey, row)
   }
 }
 
@@ -297,8 +301,6 @@ const onChangePage = (page) => emit('changePage', page)
 
 const onRefresh = () => emit('refresh')
 const createButton = () => emit('handleCreate')
- 
-
 </script>
 <template>
   <!-- <div class="card p-3"> -->
@@ -353,6 +355,10 @@ const createButton = () => emit('handleCreate')
           :radio-select="radioSelect"
           :break-extra-columns="breakExtraColumns"
           @action-triggered="onActionTriggered"
+          :row-size="rowSize"
+          :striped="striped"
+          :bordered="bordered"
+          :hover="hover"
         >
           <!-- Dynamic column slots -->
           <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
@@ -364,10 +370,10 @@ const createButton = () => emit('handleCreate')
     <!-- end-body -->
 
     <!-- Expanded Row -->
-     <transition name="slide-fade">
-    <div v-if="expandableRows && currentExpandedRow">
-      <slot name="expanded" :row="currentExpandedRow"> </slot>
-    </div>
+    <transition name="slide-fade">
+      <div v-if="expandableRows && currentExpandedRow">
+        <slot name="expanded" :row="currentExpandedRow"> </slot>
+      </div>
     </transition>
 
     <!-- footer -->

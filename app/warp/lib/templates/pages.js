@@ -549,7 +549,9 @@ onMounted(() => {
         showCreateButton: true,
       }"
       :expandable-rows="true"
-      :filtering="true"
+      :filtering="false"
+      rowSize="sm"
+      :striped="false"
       :multi-select="false"
       :radio-select="false"
       :break-extra-columns="true"
