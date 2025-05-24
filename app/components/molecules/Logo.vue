@@ -31,7 +31,7 @@ const props = defineProps({
     }"
   >
     <img
-      src="/storage/logos/removebg.png"
+      src="/logos/removebg.png"
       :alt="props.options.alt"
       loading="lazy"
       :style="{
