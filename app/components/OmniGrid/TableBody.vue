@@ -86,6 +86,7 @@ const props = defineProps({
   filtering: {
     type: Boolean,
   },
+  title: {type: String},
   animations: {
     type: Object,
     default: () => ({
@@ -792,6 +793,7 @@ const paginationConfig = inject('paginationConfig', {})
             :action-layout="actionLayout"
             :multi-select="multiSelect"
             :radio-select="radioSelect"
+            :title="title"
             :open-row="openRow"
             :is-selected="isSelected"
             :toggle-actions-panel="toggleActionsPanel"

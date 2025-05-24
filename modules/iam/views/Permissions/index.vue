@@ -327,6 +327,7 @@ onMounted(() => {
         :loading="isLoading"
         :dropDownPerPageOptions="[10, 25, 50]"
         action-layout="inline"
+        title="Permission"
         :pagination-config="{
           variant: 'circle',
           position: 'right',

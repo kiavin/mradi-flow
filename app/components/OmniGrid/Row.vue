@@ -24,6 +24,7 @@ const props = defineProps({
   radioSelect: {
     type: Boolean,
   },
+  title:{type: String},
   showActions: Boolean,
   index: Number,
   mergedColumns: {
@@ -433,7 +434,7 @@ const getPinnedRightOffset = (colKey) => {
               class="icon me-1 cursor-pointer"
               style="font-size: 1.2rem"
               :class="getColorClass(action, row)"
-              v-tooltip:bottom="getActionLabel(action, row)"
+              v-tooltip:bottom="getActionLabel(action, row) + ' ' + title"
             />
           </slot>
         </template>

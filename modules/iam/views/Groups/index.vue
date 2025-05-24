@@ -364,6 +364,7 @@ const customActions = [
         :dropDownPerPageOptions="[10, 25, 50]"
         :actions="customActions"
         action-layout="inline"
+        title="Group"
         :pagination-config="{
           variant: 'circle',
           position: 'right',

@@ -127,6 +127,7 @@ const props = defineProps({
     default: 'sm', // 'sm' | 'md' | 'lg'
     validator: (value) => ['xs', 'sm', 'md', 'lg'].includes(value),
   },
+  title: {type: String, default: ''},
 
   // row selection options
   multiSelect: { type: Boolean, default: true },
@@ -359,6 +360,7 @@ const createButton = () => emit('handleCreate')
           :striped="striped"
           :bordered="bordered"
           :hover="hover"
+          :title="title"
         >
           <!-- Dynamic column slots -->
           <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">

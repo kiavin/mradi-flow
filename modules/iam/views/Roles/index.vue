@@ -399,6 +399,7 @@ const customActions = [
         :dropDownPerPageOptions="[10, 25, 50]"
         :actions="customActions"
         action-layout="inline" 
+        title="Role"
         :pagination-config="{
           variant: 'circle', // 'default', 'compact', 'rounded', 'circle'
           position: 'right', // 'left', 'center', 'right'
@@ -412,7 +413,7 @@ const customActions = [
           showRange: true,
         }"
         :toolbar="{
-          show: true,
+          show: false ,
           showCreateButton: true,
         }"
         :expandable-rows="false"
