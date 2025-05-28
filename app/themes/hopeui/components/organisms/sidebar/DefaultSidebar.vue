@@ -13,11 +13,37 @@ const sidebarColor = computed(() => [store.sidebar_color_value])
 
 const sidebarMenuStyle = computed(() => [store.sidebar_menu_style_value])
 
+// const toggleSidebar = () => {
+//   document.getElementsByTagName('ASIDE')[0].classList.toggle('sidebar-mini')
+// }
+
+const SIDEBAR_STORAGE_KEY = 'sidebar-mini-enabled'
+
 const toggleSidebar = () => {
-  document.getElementsByTagName('ASIDE')[0].classList.toggle('sidebar-mini')
+  const aside = document.getElementsByTagName('ASIDE')[0]
+  // aside.classList.toggle('sidebar-mini')
+  const isMini = aside.classList.toggle('sidebar-mini')
+  localStorage.setItem(SIDEBAR_STORAGE_KEY, isMini ? '1' : '0')
+  
+  // Toggle logo visibility based on sidebar state
+  const logo = document.querySelector('.navbar-brand')
+  if (aside.classList.contains('sidebar-mini')) {
+    logo.style.transform = 'scale(0.8)'
+  } else {
+    logo.style.transform = 'scale(1)'
+  }
 }
 onMounted(() => {
   Scrollbar.init(document.querySelector('.data-scrollbar'), { continuousScrolling: false })
+
+   // Restore sidebar state from localStorage
+  const aside = document.getElementsByTagName('ASIDE')[0]
+  const isMini = localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1'
+  if (isMini) {
+    aside.classList.add('sidebar-mini')
+  } else {
+    aside.classList.remove('sidebar-mini')
+  }
 })
 </script>
 <template>
@@ -29,7 +55,7 @@ onMounted(() => {
     data-sidebar="responsive"
   >
     <div class="sidebar-header d-flex align-items-center justify-content-start">
-      <router-link :to="{ name: 'playground' }" class="navbar-brand">
+      <router-link :to="{ name: 'dashboard' }" class="navbar-brand">
         <Logo
           class="bg-white"
           :options="{
@@ -82,3 +108,61 @@ onMounted(() => {
     <div class="sidebar-footer"></div>
   </aside>
 </template>
+<style scoped>
+
+/* Minimized state */
+.sidebar-base.sidebar-mini {
+  width: 80px; /* Increased from typical 60px to prevent overlap */
+}
+
+/* Logo adjustments */
+.navbar-brand {
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  gap: 10px;
+  padding: 0 15px;
+}
+
+.sidebar-header {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* This will help center the navbar-brand */
+}
+
+.sidebar-mini .logo-title {
+  display: none;
+}
+
+/* Toggle button positioning */
+.sidebar-toggle {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.sidebar-mini .sidebar-toggle {
+  right: -15px; /* Adjust position when minimized */
+}
+
+/* Ensure scrollbar works properly */
+.data-scrollbar {
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
+</style>
