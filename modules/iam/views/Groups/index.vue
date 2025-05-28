@@ -336,7 +336,7 @@ const manageGroupRoles = (group) => {
 const customActions = [
   {
     key: 'manage-group',
-    label: 'Manage Group',
+    label: 'Manage',
     icon: ['fas', 'user-group'],
     callback: (row) => manageGroupRoles(row),
     show: true,

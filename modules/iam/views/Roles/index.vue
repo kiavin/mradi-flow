@@ -371,7 +371,7 @@ const manageGroupRoles = (role) => {
 const customActions = [
   {
     key: 'manage-role',
-    label: 'Manage Role',
+    label: 'Manage',
     icon: ['fas', 'shield-halved'],
     callback: (row) => manageGroupRoles(row),
     show: true,
@@ -401,6 +401,7 @@ const customActions = [
         action-layout="inline" 
         title="Role"
         :pagination-config="{
+          show: true,
           variant: 'circle', // 'default', 'compact', 'rounded', 'circle'
           position: 'right', // 'left', 'center', 'right'
           bgColor: '#4f46e5',

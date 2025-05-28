@@ -25,7 +25,7 @@ const props = defineProps({
     type: Boolean,
   },
   title:{type: String},
-  showActions: Boolean,
+  showActionColumn: Boolean,
   index: Number,
   mergedColumns: {
     type: Array,
@@ -412,7 +412,7 @@ const getPinnedRightOffset = (colKey) => {
 
     <!-- Actions -->
     <td
-      v-if="showActions"
+      v-if="showActionColumn"
       class="actions text-body text-center sticky-col"
       :class="{ 'selected-row': isSelected?.(row, index) }"
       :style="{

@@ -29,7 +29,7 @@ const tableData = ref({
 const tableColumns = [
   { key: 'name', label: 'Name' },
   { key: 'description', label: 'Description' },
-  { key: 'ruleName', label: 'RuleName' },
+  // { key: 'ruleName', label: 'RuleName' },
 ]
 
 watch(data, () => {
@@ -303,6 +303,43 @@ const updatePerPage = async (perPage) => {
   updateResponseData()
 }
 
+const inLineEditing = async (url, data) => {
+  const { request, error, isLoading } = useApi(url, 'PUT')
+  await request(data)
+
+  if (error.value) {
+    return {
+      error: error.value.message,
+      isLoading: isLoading.value,
+    }
+  }
+
+  return {
+    success: true,
+    isLoading: isLoading.value,
+    shouldRefresh: true,
+  }
+}
+
+const editableColumns = [
+  {
+    key: 'description',
+    onSave: async (value, row) => {
+      const updatedData = {
+        name: row.name,
+        description: value,
+        ...(row.ruleName && { ruleName: row.ruleName }),
+      }
+
+      const url = `/v1/iam/rbac/role/${row.name}`
+      const res = await inLineEditing(url, updatedData)
+
+      refresh()
+      return res
+    },
+  },
+]
+
 onMounted(() => {
   request().then(() => {
     updateResponseData()
@@ -324,6 +361,8 @@ onMounted(() => {
       <OmniGridView
         :columns="tableColumns"
         :data="tableData"
+        :editable-columns="editableColumns"
+        :showActionColumn="false"
         :loading="isLoading"
         :dropDownPerPageOptions="[10, 25, 50]"
         action-layout="inline"

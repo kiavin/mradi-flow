@@ -19,24 +19,21 @@ function decryptToken(encryptedToken) {
     return decrypt(encryptedToken)
 }
 
-// Broadcast Logout
+
 async function broadcastLogout() {
     const { useAuthStore } = await import('../stores/authStore')
     const authStore = useAuthStore()
 
-    if (authStore.getToken()) {
-        authStore.removeToken()
-        authStore.removeRefreshToken()
-    }
+    // This will handle all cleanup internally
+    authStore.logOutRequest()
 
     localStorage.setItem('logout-event', Date.now().toString())
 
     const { useRouter } = await import('vue-router')
     const router = useRouter()
 
-    // Optional: avoid redundant redirects
-    if (router.currentRoute.value.path !== '/iam/login/index') {
-        router.push('/iam/login/index')
+    if (router.currentRoute.value.path !== '/iam/auth/login') {
+        router.push('/iam/auth/login')
     }
 }
 
@@ -118,8 +115,8 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(error)
         }
 
-       if (status === 401) {
-        if (
+        if (status === 401) {
+            if (
                 message === 'Session has expired' ||
                 message === 'Your account has been deactivated.' ||
                 (typeof type === 'object' && type.route?.includes('/auth/login'))

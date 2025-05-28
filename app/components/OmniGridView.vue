@@ -24,6 +24,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showActionColumn: {
+    type: Boolean,
+    default: true,
+  },
   columns: {
     type: Array,
     default: () => [],
@@ -185,43 +189,7 @@ const props = defineProps({
 provide('paginationConfig', props.paginationConfig)
 
 // actions
-// const actions = computed(() => {
-//   const defaultActions = [
-//     {
-//       label: 'View',
-//       key: 'view',
-//       icon: ['fas', 'eye'],
-//       callback: (row) => emit('view', row.id),
-//       show: (row) => props.showView && row.is_deleted !== 1,
-//       colorClass: 'text-primary',
-//     },
-//     {
-//       label: 'Edit',
-//       key: 'edit',
-//       icon: ['fas', 'pen-to-square'],
-//       callback: (row) => emit('edit', row.id),
-//       show: (row) => props.showEdit && row.is_deleted !== 1,
-//       colorClass: 'text-primary',
-//     },
-//     {
-//       label: (row) => (row?.is_deleted === 1 ? 'Restore' : 'Delete'),
-//       key: (row) => (row?.is_deleted === 1 ? 'restore' : 'delete'),
-//       icon: (row) => (row?.is_deleted === 1 ? ['fas', 'rotate-left'] : ['fas', 'trash-can']),
-//       callback: (row) => emit('delete', row.id, row?.is_deleted),
-//       show: props.showDelete,
-//       colorClass: (row) => (row?.is_deleted === 1 ? 'text-primary' : 'text-danger'),
-//     },
-//   ]
-
-//   // Add `show` property to custom actions (if not provided, default to true)
-//   const customActions = props.actions.map((action) => ({
-//     ...action,
-//     show: action.show !== undefined ? action.show : true, // Default to visible
-//   }))
-
-//   return [...defaultActions, ...customActions].filter((action) => action.show)
-// })
-
+ 
 const actions = computed(() => {
   const defaultActions = [
     {
@@ -263,20 +231,7 @@ const columnSlots = computed(() => {
 })
 
 /* emiting events */
-
-// const onActionTriggered = (payload) => {
-//   const { actionKey, row, originalCallback } = payload
-
-//   emit('action', actionKey, row)
-
-//   if (['view', 'edit', 'delete', 'restore'].includes(actionKey)) {
-//     emit(actionKey, row)
-//   }
-
-//   if (typeof originalCallback === 'function') {
-//     originalCallback(row)
-//   }
-// }
+ 
 const onActionTriggered = (payload) => {
   const { actionKey, row } = payload
 
@@ -347,6 +302,7 @@ const createButton = () => emit('handleCreate')
           @changePage="onChangePage"
           :actions="actions"
           :action-layout="actionLayout"
+          :showActionColumn="showActionColumn"
           v-bind="$attrs"
           :filtering="filtering"
           :column-slots="columnSlots"

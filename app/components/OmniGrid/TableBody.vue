@@ -21,6 +21,7 @@ const props = defineProps({
     required: true,
   },
   editableColumns: Array,
+  showActionColumn: Boolean,
   columnSlots: Array,
   mergedColumns: {
     type: Array,
@@ -718,7 +719,7 @@ const paginationConfig = inject('paginationConfig', {})
         :is-merged-column-hidden="isMergedColumnHidden"
         :radio-select="radioSelect"
         :expandable-rows="expandableRows"
-        :show-actions="showActions"
+        :showActionColumn="showActionColumn"
         :multi-select="multiSelect"
         :filtering="filtering"
         :sort-column="sortColumn"
@@ -780,6 +781,7 @@ const paginationConfig = inject('paginationConfig', {})
             :row="row"
             :index="index"
             :columns="visibleColumns"
+            :showActionColumn="showActionColumn"
             :column-widths="columnWidths"
             :editable-columns="editableColumns"
             :all-columns="columns"

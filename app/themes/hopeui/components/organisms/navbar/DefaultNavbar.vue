@@ -41,20 +41,18 @@ export default {
     const carts = computed(() => store.carts)
     const logOut = async () => {
       const apiBaseUrl = `/v1/iam/auth/logout`
-      const { request, error } = useApi(apiBaseUrl, 'DELETE')
+      const { data, request, error } = useApi(apiBaseUrl, 'DELETE')
 
       await request()
 
-      console.log('LOGOUT ERROR',error)
+      const redirectUrl = data.value?.alertifyPayload?.type?.route
+      console.log(`LOGOUT DATA ${redirectUrl}`)
 
-      // if (error.value) {
-      //   console.error('Logout error:', error.value)
-      //   return
-      // }
+      console.log('LOGOUT ERROR', error.value)
 
       authStore.removeToken()
       authStore.removeRefreshToken()
-      router.push({ path: '/iam/login/index' })
+      router.push({ path: redirectUrl ?? '/iam/auth/login' })
     }
 
     onMounted(() => {

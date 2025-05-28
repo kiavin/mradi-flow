@@ -121,8 +121,11 @@ export const useAuthStore = defineStore('userAuth', {
       localStorage.removeItem('user.refreshToken')
     },
 
-    logOutRequest(){
-
+    logOutRequest() {
+      this.removeToken()
+      this.removeRefreshToken()
+      localStorage.removeItem('user.menus')
+      localStorage.removeItem('user.permissions')
     }
   },
 

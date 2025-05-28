@@ -11,7 +11,7 @@ const props = defineProps({
   isMergedColumnHidden: Function,
   radioSelect: Boolean,
   expandableRows: Boolean,
-  showActions: Boolean,
+  showActionColumn: Boolean,
   multiSelect: Boolean,
   filtering: Boolean,
   sortColumn: String,
@@ -230,7 +230,7 @@ const getPinnedRightOffset = (colKey) => {
       </template>
 
       <th
-        v-if="showActions"
+        v-if="showActionColumn"
         class="sticky-col text-center align-middle fw-bold"
         :style="{
           width: '100px',
