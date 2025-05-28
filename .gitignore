@@ -16,6 +16,7 @@ coverage
 
 /cypress/videos/
 /cypress/screenshots/
+grep -rnw . -e 'glass-card.png'
 
 # Editor directories and files
 .vscode/*
@@ -35,3 +36,4 @@ ddd.rty
 
 /dist/sw.js
 /dist/workbox-*.js
+vite##.conf.js

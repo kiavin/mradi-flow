@@ -12,26 +12,32 @@ dotenv.config({ path: './omniface.cfg' });
 
 // https://vite.dev/config/
 export default defineConfig({
-  /** setting build config options **/
+  base: './',
 
   // Set custom project root (where index.html is located)
   root: fileURLToPath(new URL('./', import.meta.url)),
   // Define entry points
   publicDir: fileURLToPath(new URL('./storage', import.meta.url)), // Replaces 'public'
 
+  preview: {
+    host: true,
+    port: 4173,
+    strictPort: true,
+    headers: {
+      'Cache-Control': 'no-store'  // Disable caching for preview
+    }
+  },
+
   build: {
+    outDir: fileURLToPath(new URL('./dist', import.meta.url)),
+    emptyOutDir: true,
     rollupOptions: {
-      // Exclude the 'warp' folder from production build
-      external: [
-        /\/app\/warp\/.*/ // Regex to match any file in /app/warp
-      ],
-      // Explicit entry points (if auto-discovery fails)
-      input: {
-        main: fileURLToPath(new URL('./app/main.js', import.meta.url))
+      output: {
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       }
-    },
-    // Output directory (default: 'dist')
-    outDir: fileURLToPath(new URL('./dist', import.meta.url))
+    }
   },
   define: {
     'import.meta.env.VITE_SAFE_ROUTES': JSON.stringify(process.env.VITE_SAFE_ROUTES || '')
