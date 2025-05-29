@@ -44,7 +44,43 @@ onMounted(() => {
   } else {
     aside.classList.remove('sidebar-mini')
   }
+
+  // Expand sidebar on hover when minimized
+  // sidebarList.addEventListener('mouseenter', () => {
+  //   if (aside.classList.contains('sidebar-mini')) {
+  //     aside.classList.add('sidebar-hover-expanded')
+  //   }
+  // })
+  // sidebarList.addEventListener('mouseleave', () => {
+  //   aside.classList.remove('sidebar-hover-expanded')
+  // })
 })
+
+// onMounted(() => {
+//   Scrollbar.init(document.querySelector('.data-scrollbar'), { continuousScrolling: false })
+
+//   // Restore sidebar state from localStorage
+//   const aside = document.getElementsByTagName('ASIDE')[0]
+//   const sidebarList = document.querySelector('.sidebar-list') // ✅ define it here
+//   const isMini = localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1'
+//   if (isMini) {
+//     aside.classList.add('sidebar-mini')
+//   } else {
+//     aside.classList.remove('sidebar-mini')
+//   }
+
+//   // Expand sidebar on hover when minimized
+//   sidebarList.addEventListener('mouseenter', () => {
+//     if (aside.classList.contains('sidebar-mini')) {
+//       aside.classList.add('sidebar-hover-expanded')
+//     }
+//   })
+
+//   sidebarList.addEventListener('mouseleave', () => {
+//     aside.classList.remove('sidebar-hover-expanded')
+//   })
+// })
+
 </script>
 <template>
   <aside
@@ -165,4 +201,9 @@ onMounted(() => {
   height: calc(100vh - 120px);
   overflow: hidden;
 }
+
+.sidebar-mini.sidebar-hover-expanded {
+  width: 240px !important; /* or whatever your full width is */
+}
+
 </style>

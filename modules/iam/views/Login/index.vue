@@ -24,17 +24,17 @@ const handleSubmit = async (dataPayload) => {
     return
   }
 
-  const { access_token, data_token } = data.value.dataPayload.data
+  const { access_token, userData } = data.value.dataPayload.data
 
   if (access_token) {
     authStore.setToken(access_token, dataPayload?.username)
   }
 
-  if (data_token) {
-    authStore.setUserDataFromToken(data_token)
+  if (userData) {
+    authStore.setUserData(userData)
   }
 
-  console.log('DATA', data.value?.dataPayload)
+  // console.log('DATA', data.value?.dataPayload)
 
   alertStore.show(data.value)
 

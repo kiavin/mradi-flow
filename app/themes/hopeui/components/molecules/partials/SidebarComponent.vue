@@ -10,36 +10,39 @@ const currentRoute = ref('')
 const route = useRoute()
 const menuItems = ref(menuData) || {}
 
-// const toggle = (route) => {
-//   if (route === currentRoute.value && route.includes('.')) {
-//     const menu = currentRoute.value.split('.')
-//     return (currentRoute.value = menu[menu.length - 2])
-//   }
-//   if (route !== currentRoute.value && currentRoute.value.includes(route)) {
-//     return (currentRoute.value = '')
-//   }
-//   if (route !== currentRoute.value) {
-//     return (currentRoute.value = route)
-//   }
-//   if (route === currentRoute.value) {
-//     return (currentRoute.value = '')
-//   }
-//   return (currentRoute.value = '')
-// }
-// toggle(route.name)
-
 const toggle = (routeName) => {
   if (!routeName) return
-  if (routeName === currentRoute.value && routeName.includes('.')) {
-    const menu = currentRoute.value.split('.')
-    currentRoute.value = menu[menu.length - 2]
-  } else if (routeName !== currentRoute.value && currentRoute.value.includes(routeName)) {
-    currentRoute.value = ''
-  } else {
-    currentRoute.value = routeName
-  }
+  currentRoute.value = currentRoute.value === routeName ? '' : routeName
 }
-toggle(route.name)
+
+watch(
+  () => route.name,
+  (newVal) => {
+    if (newVal) {
+      // If the route matches a parent menu, open it
+      const parentRoute = menuItems.value.find((item) =>
+        item.children?.some((child) => child.to === newVal)
+      )
+      if (parentRoute) {
+        currentRoute.value = parentRoute.to
+      }
+    }
+  },
+  { immediate: true }
+)
+
+// const toggle = (routeName) => {
+//   if (!routeName) return
+//   if (routeName === currentRoute.value && routeName.includes('.')) {
+//     const menu = currentRoute.value.split('.')
+//     currentRoute.value = menu[menu.length - 2]
+//   } else if (routeName !== currentRoute.value && currentRoute.value.includes(routeName)) {
+//     currentRoute.value = ''
+//   } else {
+//     currentRoute.value = routeName
+//   }
+// }
+// toggle(route.name)
 </script>
 
 <template>
@@ -49,17 +52,41 @@ toggle(route.name)
       <side-menu
         isTag="router-link"
         title="Dashboard"
-        icon="dashboard"
+        icon="house"
         :route="{ to: 'dashboard' }"
       ></side-menu>
-      <side-menu title="ADMIN & IAM" icon="shield"  toggle-id="menu-style" :caret-icon="true" :route="{ popup: 'false', to: 'menu-style' }" @onClick="toggle" :active="currentRoute.includes('menu-style')">
-        <b-collapse tag="ul" class="sub-nav" id="menu-style" accordion="sidebar-menu" :visible="currentRoute.includes('menu-style')">
-          <side-menu title="Users" icon="circle" :icon-size="10" icon-type="solid" miniTitle="H" :route="{ to: 'iam/roles' }"></side-menu>
-          <side-menu title="Roles" icon="circle" :icon-size="10" icon-type="solid" miniTitle="D" :route="{ to: 'iam/roles' }"></side-menu>
-          <side-menu title="Groups" icon="circle" :icon-size="10" icon-type="solid" miniTitle="D" :route="{ to: 'iam/groups' }"></side-menu>
-          <side-menu title="Permissions" icon="circle" :icon-size="10" icon-type="solid" miniTitle="B" :route="{ to: 'iam/permissions' }"></side-menu>
+      <side-menu
+        title="ADMIN & IAM"
+        icon="shield"
+        toggle-id="menu-style"
+        :caret-icon="true"
+        :route="{ popup: 'false', to: 'menu-style' }"
+        @onClick="toggle"
+        :active="currentRoute.includes('menu-style')"
+      >
+        <b-collapse
+          tag="ul"
+          class="sub-nav"
+          id="menu-style"
+          accordion="sidebar-menu"
+          :visible="currentRoute.includes('menu-style')"
+        >
+          <!-- <side-menu title="Users" icon="circle" :icon-size="10" icon-type="solid" miniTitle="H" :route="{ to: 'iam/roles' }"></side-menu> -->
+          <side-menu title="Users" :route="{ to: 'iam/roles' }"></side-menu>
+          <side-menu title="Roles" :route="{ to: 'iam/roles' }"></side-menu>
+          <side-menu title="Groups" :route="{ to: 'iam/groups' }"></side-menu>
+          <side-menu title="Permissions" :route="{ to: 'iam/permissions' }"></side-menu>
         </b-collapse>
       </side-menu>
+      <side-menu
+        isTag="router-link"
+        title="Settings"
+        icon="gear"
+        animation="'spin'"
+        :route="{ to: 'iam/roles' }"
+      ></side-menu>
+
+      
     </ul>
   </default-sidebar>
 </template>

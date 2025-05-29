@@ -23,6 +23,10 @@ export default {
       type: String,
       default: '',
     },
+    animation: {
+      type: String,
+      default: '',
+    },
     caretIcon: {
       type: Boolean,
       default: false,
@@ -128,7 +132,7 @@ export default {
           collapseActive.value = false
         }
       },
-      { deep: true },
+      { deep: true }
     )
     return {
       onClickNav,
@@ -157,7 +161,7 @@ export default {
     >
       <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
         <!-- <icon-component :type="iconType" :icon-name="icon" :size="iconSize"></icon-component> -->
-          <font-awesome-icon :icon="['fas', icon]" />
+        <font-awesome-icon :icon="['fas', icon]" animation class="icon-size" />
       </i>
       <i
         class="sidenav-mini-icon"
@@ -202,7 +206,7 @@ export default {
         @click="navigate"
       >
         <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
-          <font-awesome-icon :icon="['fas', icon]" />
+          <font-awesome-icon :icon="['fas', icon]" animation class="icon-size" />
         </i>
         <i
           class="sidenav-mini-icon"
@@ -241,4 +245,102 @@ export default {
   </router-link>
 </template>
 
-<style lang="scss" scoped></style>
+ 
+<style scoped>
+.icon-size {
+  font-size: 1.5rem !important;
+}
+.nav-item {
+  /* position: relative; */
+  margin: 4px 0;
+  list-style: none;
+  margin-top: 10px !important;
+  /* z-index: 1 !important;  */
+}
+
+.nav-item .nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  overflow: visible;
+  z-index: 1;
+  margin-left: 10px;
+  background-color: #3a57e8;
+  transition: background-color 0.3s ease, border-radius 0.3s ease, color 0.3s ease;
+}
+
+.nav-item .nav-link.active {
+  transition: all 0.3s ease;
+  border-top-left-radius: 50px !important;
+  border-bottom-left-radius: 50px !important;
+  /* height: 50px !important; */
+}
+
+/* .nav-item .nav-link.active::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  border-bottom-right-radius: 20px;
+  background: #3a57e8;
+  
+  z-index: 999 !important;
+} */
+/* .nav-item .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  z-index: 2;
+  border-top-right-radius: 20px;
+  background: #3a57e8;
+}  */
+/* .nav-item .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  right: -7px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+  border-top-right-radius: 20px;
+  background: #3a57e8;
+} */
+
+.nav-item .nav-link:hover {
+  background-color: #f2f2f2;
+}
+
+.sub-nav-item {
+  list-style: none;
+  padding-left: 1.5rem;
+}
+
+.sub-nav-item .nav-link {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.sub-nav-item .nav-link.active {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.sub-nav-item .nav-link:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+ul {
+  padding-left: 0;
+  margin: 0;
+}
+
+ul li {
+  list-style: none;
+}
+</style>

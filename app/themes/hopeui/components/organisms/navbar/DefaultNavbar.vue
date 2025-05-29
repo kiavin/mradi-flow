@@ -39,21 +39,50 @@ export default {
     const navbarHide = computed(() => [store.navbar_show_value])
 
     const carts = computed(() => store.carts)
+
     const logOut = async () => {
       const apiBaseUrl = `/v1/iam/auth/logout`
-      const { data, request, error } = useApi(apiBaseUrl, 'DELETE')
+      const { data, request, error } = useApi(apiBaseUrl, 'POST')
 
       await request()
 
-      const redirectUrl = data.value?.alertifyPayload?.type?.route
-      console.log(`LOGOUT DATA ${redirectUrl}`)
+      let redirectUrl = data.value?.alertifyPayload?.type?.route
 
-      console.log('LOGOUT ERROR', error.value)
+      if (redirectUrl && !redirectUrl.startsWith('/')) {
+        redirectUrl = `/${redirectUrl}`
+      }
+
+      console.log('LOGOUT URL', redirectUrl)
 
       authStore.removeToken()
       authStore.removeRefreshToken()
-      router.push({ path: redirectUrl ?? '/iam/auth/login' })
+      router.push(redirectUrl) // Just pass the string directly
     }
+    // const logOut3 = async () => {
+    //   try {
+    //     const apiBaseUrl = `/v1/iam/auth/logout`
+    //     const { data, request, error } = useApi(apiBaseUrl, 'POST')
+
+    //     await request()
+
+    //     let redirectUrl = data.value?.alertifyPayload?.type?.route
+
+    //     // Normalize the redirect URL
+    //     redirectUrl = redirectUrl?.startsWith('/')
+    //       ? redirectUrl
+    //       : `/${redirectUrl || 'iam/auth/login'}`
+
+    //     authStore.removeToken()
+    //     authStore.removeRefreshToken()
+
+    //     // Use replace instead of push to prevent back navigation to logged out state
+    //     router.replace(redirectUrl).then(() => window.location.reload())
+    //   } catch (error) {
+    //     console.error('Logout failed:', error)
+    //     // Fallback redirect if something goes wrong
+    //     router.replace('/iam/auth/login')
+    //   }
+    // }
 
     onMounted(() => {
       window.addEventListener('scroll', onscroll())

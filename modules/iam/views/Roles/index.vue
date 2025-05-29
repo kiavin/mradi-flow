@@ -30,7 +30,7 @@ const tableData = ref({
 const tableColumns = [
   { key: 'name', label: 'Name' },
   { key: 'description', label: 'Description' },
-  { key: 'ruleName', label: 'RuleName' },
+  // { key: 'ruleName', label: 'RuleName' },
 ]
 
 watch(data, () => {
