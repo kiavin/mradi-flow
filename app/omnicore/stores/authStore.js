@@ -64,26 +64,60 @@ export const useAuthStore = defineStore('userAuth', {
     },
 
 
-    setUserDataFromToken(dataToken) {
-      const decoded = decodeJwt(dataToken)
+    // setUserData(userData) {
+    //   if (userData) {
+    //     const { menus, permissions } = userData
 
-      if (decoded?.data) {
-        const { username, menus, permissions } = decoded.data
+    //     this.user.menus = menus || {}
+    //     this.user.permissions = permissions || []
 
-        if (username) {
-          this.user.username = username
-          localStorage.setItem('user.username', username)
-        }
+    //     localStorage.setItem('user.menus', JSON.stringify(this.user.menus))
+    //     localStorage.setItem('user.permissions', JSON.stringify(this.user.permissions))
+    //   } else {
+    //     console.warn('User data is missing or invalid.')
+    //   }
+    // },
+    setUserData(userData) {
+      if (userData) {
+        const { menus, permissions } = userData
 
         this.user.menus = menus || {}
         this.user.permissions = permissions || []
 
-        localStorage.setItem('user.menus', JSON.stringify(this.user.menus))
-        localStorage.setItem('user.permissions', JSON.stringify(this.user.permissions))
+        const encryptedMenus = encrypt(JSON.stringify(this.user.menus))
+        const encryptedPermissions = encrypt(JSON.stringify(this.user.permissions))
+
+        localStorage.setItem('user.menus', encryptedMenus)
+        localStorage.setItem('user.permissions', encryptedPermissions)
       } else {
-        console.warn('Could not decode data token or missing data.')
+        console.warn('User data is missing or invalid.')
       }
     },
+
+    getMenus() {
+      const encryptedMenus = localStorage.getItem('user.menus')
+      if (!encryptedMenus) return {}
+
+      try {
+        return JSON.parse(decrypt(encryptedMenus))
+      } catch (error) {
+        console.error('Failed to decrypt menus:', error)
+        return {}
+      }
+    },
+
+    getPermissions() {
+      const encryptedPermissions = localStorage.getItem('user.permissions')
+      if (!encryptedPermissions) return []
+
+      try {
+        return JSON.parse(decrypt(encryptedPermissions))
+      } catch (error) {
+        console.error('Failed to decrypt permissions:', error)
+        return []
+      }
+    },
+
 
     removeToken() {
       this.user.token = null
