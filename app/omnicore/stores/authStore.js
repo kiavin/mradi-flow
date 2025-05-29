@@ -10,24 +10,6 @@ export const useAuthStore = defineStore('userAuth', {
       username: null,
       token: null,
       ipAddr: null,
-      // menus: (() => {
-      //   try {
-      //     const value = localStorage.getItem('user.menus')
-      //     return value ? JSON.parse(value) : {}
-      //   } catch (e) {
-      //     console.warn('Failed to parse user.menus:', e)
-      //     return {}
-      //   }
-      // })(),
-      // permissions: (() => {
-      //   try {
-      //     const value = localStorage.getItem('user.permissions')
-      //     return value ? JSON.parse(value) : []
-      //   } catch (e) {
-      //     console.warn('Failed to parse user.permissions:', e)
-      //     return []
-      //   }
-      // })()
     }
   }),
 
@@ -63,20 +45,7 @@ export const useAuthStore = defineStore('userAuth', {
       localStorage.setItem('loggedIn', true)
     },
 
-
-    // setUserData(userData) {
-    //   if (userData) {
-    //     const { menus, permissions } = userData
-
-    //     this.user.menus = menus || {}
-    //     this.user.permissions = permissions || []
-
-    //     localStorage.setItem('user.menus', JSON.stringify(this.user.menus))
-    //     localStorage.setItem('user.permissions', JSON.stringify(this.user.permissions))
-    //   } else {
-    //     console.warn('User data is missing or invalid.')
-    //   }
-    // },
+     
     setUserData(userData) {
       if (userData) {
         const { menus, permissions } = userData
