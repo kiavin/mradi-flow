@@ -10,24 +10,24 @@ export const useAuthStore = defineStore('userAuth', {
       username: null,
       token: null,
       ipAddr: null,
-      menus: (() => {
-        try {
-          const value = localStorage.getItem('user.menus')
-          return value ? JSON.parse(value) : {}
-        } catch (e) {
-          console.warn('Failed to parse user.menus:', e)
-          return {}
-        }
-      })(),
-      permissions: (() => {
-        try {
-          const value = localStorage.getItem('user.permissions')
-          return value ? JSON.parse(value) : []
-        } catch (e) {
-          console.warn('Failed to parse user.permissions:', e)
-          return []
-        }
-      })()
+      // menus: (() => {
+      //   try {
+      //     const value = localStorage.getItem('user.menus')
+      //     return value ? JSON.parse(value) : {}
+      //   } catch (e) {
+      //     console.warn('Failed to parse user.menus:', e)
+      //     return {}
+      //   }
+      // })(),
+      // permissions: (() => {
+      //   try {
+      //     const value = localStorage.getItem('user.permissions')
+      //     return value ? JSON.parse(value) : []
+      //   } catch (e) {
+      //     console.warn('Failed to parse user.permissions:', e)
+      //     return []
+      //   }
+      // })()
     }
   }),
 
