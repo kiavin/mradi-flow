@@ -72,21 +72,34 @@ watch(
           :visible="currentRoute.includes('menu-style')"
         >
           <!-- <side-menu title="Users" icon="circle" :icon-size="10" icon-type="solid" miniTitle="H" :route="{ to: 'iam/roles' }"></side-menu> -->
-          <side-menu title="Users" :route="{ to: 'iam/roles' }"></side-menu>
+          <side-menu title="Users" :route="{ to: 'iam/users' }"></side-menu>
           <side-menu title="Roles" :route="{ to: 'iam/roles' }"></side-menu>
           <side-menu title="Groups" :route="{ to: 'iam/groups' }"></side-menu>
           <side-menu title="Permissions" :route="{ to: 'iam/permissions' }"></side-menu>
         </b-collapse>
       </side-menu>
+
       <side-menu
-        isTag="router-link"
         title="Settings"
         icon="gear"
         animation="'spin'"
-        :route="{ to: 'iam/roles' }"
-      ></side-menu>
-
-      
+        toggle-id="menu-style1"
+        :caret-icon="true"
+        :route="{ popup: 'false', to: 'menu-setting' }"
+        @onClick="toggle"
+        :active="currentRoute.includes('menu-setting')"
+      >
+        <b-collapse
+          tag="ul"
+          class="sub-nav"
+          id="menu-style"
+          accordion="sidebar-menu"
+          :visible="currentRoute.includes('menu-setting')"
+        >
+          <side-menu title="General" :route="{ to: 'iam/users' }"></side-menu>
+          <side-menu title="Email" :route="{ to: 'iam/roles' }"></side-menu>
+        </b-collapse>
+      </side-menu>
     </ul>
   </default-sidebar>
 </template>

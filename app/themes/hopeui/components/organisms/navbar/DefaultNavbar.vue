@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useSetting } from '~/themes/hopeui/store/index.js'
 import { useAuthStore } from '~/omnicore/stores/authStore'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 export default {
   components: {},
   setup(props, { emit }) {
@@ -209,7 +209,10 @@ export default {
                 </span>
               </b-button>
             </template>
-            <b-dropdown-item variant="none" href="#">Profile</b-dropdown-item>
+            <RouterLink to="/main/dashboard">
+              <b-dropdown-item variant="none" href="#">Profile</b-dropdown-item>
+            </RouterLink>
+
             <b-dropdown-item variant="none" href="#">Privacy Setting</b-dropdown-item>
             <li>
               <hr class="dropdown-divider" />

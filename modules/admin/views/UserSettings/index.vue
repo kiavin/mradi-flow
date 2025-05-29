@@ -1,20 +1,18 @@
 <script setup>
 import { onMounted, ref, watch, getCurrentInstance, nextTick } from 'vue'
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
 
 const { proxy } = getCurrentInstance()
-const router = useRouter();
+const router = useRouter()
 
 const modalStore = useModalStore()
 
+const apiBaseUrl = `/v1/admin/user-settings`
 
-const apiBaseUrl = `/v1/admin/user-settings`;
-  
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false);
-
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false)
 
 const tableData = ref({
   data: [],
@@ -28,41 +26,34 @@ const tableData = ref({
   },
 })
 
-const tableColumns = [{"key":"id","label":"Id"},{"key":"user_id","label":"User Id"},{"key":"data","label":"Data"},{"key":"is_deleted","label":"Is Deleted"},{"key":"status","label":"Status"},{"key":"created_at","label":"Created At"},{"key":"updated_at","label":"Updated At"}]
+const tableColumns = [
+  // { key: 'id', label: 'Id' },
+  { key: 'user_id', label: 'User Id' },
+  { key: 'data', label: 'Data' },
+  // { key: 'is_deleted', label: 'Is Deleted' },
+  { key: 'status', label: 'Status' },
+  { key: 'created_at', label: 'Created At' },
+  { key: 'updated_at', label: 'Updated At' },
+]
 
 watch(data, () => {
   updateResponseData()
 })
-// const updateResponseData = () => {
-//   if (data.value?.dataPayload) {
-//     tableData.value.data = Array.isArray(data.value.dataPayload.data)
-//       ? data.value.dataPayload.data
-//       : []
-//     tableData.value.paginationData = {
-//       countOnPage: data.value.dataPayload.countOnPage,
-//       currentPage: data.value.dataPayload.currentPage,
-//       perPage: data.value.dataPayload.perPage,
-//       totalCount: data.value.dataPayload.totalCount,
-//       totalPages: data.value.dataPayload.totalPages,
-//       paginationLinks: data.value.dataPayload.paginationLinks,
-//     }
-//     // console.log('Updated tableData:', tableData.value)
-//   }
-// }
+
 const updateResponseData = () => {
   // console.log("NEW DATA ON PAGINATION", data.value)
   if (data.value?.dataPayload) {
     // Transform the object data into an array if needed
     const responseData = data.value.dataPayload.data
     let formattedData = []
-    
+
     if (typeof responseData === 'object' && !Array.isArray(responseData)) {
       // Convert object to array if API returns object
       formattedData = Object.values(responseData)
     } else if (Array.isArray(responseData)) {
       formattedData = responseData
     }
-    
+
     tableData.value = {
       data: formattedData,
       paginationData: {
@@ -72,12 +63,11 @@ const updateResponseData = () => {
         totalCount: data.value.dataPayload.totalCount || 0,
         totalPages: data.value.dataPayload.totalPages || 0,
         paginationLinks: data.value.dataPayload.paginationLinks || {},
-      }
+      },
     }
     // console.log('Updated tableData:', JSON.parse(JSON.stringify(tableData.value)))
   }
 }
-
 
 //const handleView = (id = row.id) => {
 // router.push({ name: 'admin/usersettings/view', params: { id } });
@@ -86,14 +76,14 @@ const updateResponseData = () => {
 const handleView = async (id) => {
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
 
-  await nextTick(); // ensure store state is updated
+  await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
-    router.push({ name: 'admin/usersettings/view', params: { id } });
+    router.push({ name: 'admin/usersettings/view', params: { id } })
     return
   }
 
-  const apiBaseUrl = `/v1/admin/user-settings/${id}`;
+  const apiBaseUrl = `/v1/admin/user-settings/${id}`
 
   const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
 
@@ -108,7 +98,7 @@ const handleView = async (id) => {
       readonly: true,
       hideSubmit: true,
     },
-    'View UserSettings',
+    'View UserSettings'
   )
 }
 
@@ -116,24 +106,23 @@ const handleView = async (id) => {
 //   router.push({ name: 'admin/usersettings/update', params: { id } });
 //}
 
-
 const errors = ref({})
 
 const handleEdit = async (id = row.id) => {
   errors.value = {}
-  
+
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
 
-  await nextTick(); // ensure store state is updated
+  await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
     // Navigate to the update page
-    router.push({ name: 'admin/usersettings/update', params: { id } });
+    router.push({ name: 'admin/usersettings/update', params: { id } })
     return
   }
 
   // Fetch appointment data before opening the modal
-  const apiBaseUrl = `/v1/admin/user-settings/${id}`;
+  const apiBaseUrl = `/v1/admin/user-settings/${id}`
   const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
 
   await request() // Fetch data before opening modal
@@ -175,16 +164,15 @@ const handleEdit = async (id = row.id) => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
     },
-    'Edit UserSettings',
+    'Edit UserSettings'
   )
 }
 
-
-const handleCreate = async() => {
+const handleCreate = async () => {
   errors.value = {}
   modalStore.toggleModalUsage(true)
 
-  await nextTick(); // ensure store state is updated
+  await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
     router.push({ name: 'admin/usersettings/create' })
@@ -193,7 +181,7 @@ const handleCreate = async() => {
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
-    const apiBaseUrl = `/v1/admin/user-settings`;
+    const apiBaseUrl = `/v1/admin/user-settings`
 
     const { request: createData, error } = useApi(apiBaseUrl, 'POST')
 
@@ -231,13 +219,12 @@ const handleCreate = async() => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    'Create UserSettings',
+    'Create UserSettings'
   )
 }
 
-
-const handleDelete = async (id = row.id, is_deleted = row. is_deleted) => {
-   const action = is_deleted ? 'Restore' : 'Delete'
+const handleDelete = async (id = row.id, is_deleted = row.is_deleted) => {
+  const action = is_deleted ? 'Restore' : 'Delete'
 
   const confirmationText = is_deleted
     ? 'You are about to restore this record. Do you want to proceed?'
@@ -254,20 +241,17 @@ const handleDelete = async (id = row.id, is_deleted = row. is_deleted) => {
     cancelButtonColor: '#d33',
     reverseButtons: true,
   })
- 
+
   if (result.isConfirmed) {
     try {
       // console.log('Deleting record with ID:', id)
-     
+
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(
-        `/v1/admin/user-settings/${id}`,
-        'DELETE',
-      )
+      const { data, request, isLoading } = useApi(`/v1/admin/user-settings/${id}`, 'DELETE')
 
       await request()
 
-     if (data.value) {
+      if (data.value) {
         await proxy.$showAlert({
           title: `${action}d!`,
           text: data.value?.toastPayload?.toastMessage || 'Record deleted successfully',
@@ -292,7 +276,6 @@ const handleDelete = async (id = row.id, is_deleted = row. is_deleted) => {
     console.log('Deletion cancelled')
   }
   // await refresh()
-
 }
 
 const handleSearch = (query) => {
@@ -305,7 +288,7 @@ const handleSearch = (query) => {
 
 const changePage = async (page) => {
   await request(null, { page, 'per-page': tableData.value.paginationData.perPage })
-     
+
   updateResponseData()
 
   console.log('Page changed to: ', data.value)
@@ -318,7 +301,6 @@ const updatePerPage = async (perPage) => {
     'per-page': perPage,
   })
   updateResponseData()
-
 }
 
 onMounted(() => {
@@ -329,62 +311,62 @@ onMounted(() => {
 </script>
 <template>
   <div class="card p-3">
-   <div class="row d-flex justify-content-between align-items-center mb-3">
+    <div class="row d-flex justify-content-between align-items-center mb-3">
       <div class="col-auto">
         <h1 class="h4 mt-2">List of UserSettings</h1>
       </div>
       <div class="col-auto mb-4">
-        <Button type="submit" customClass="btn btn-primary" @click="handleCreate"> New UserSettings </Button>
+        <Button type="submit" customClass="btn btn-primary" @click="handleCreate">
+          New UserSettings
+        </Button>
       </div>
 
       <OmniGridView
-      :columns="tableColumns"
-      :data="tableData"
-      :loading="isLoading"
-      action-layout="inline"
-      :pagination-config="{
-        variant: 'circle',
-        position: 'right',
-        bgColor: '#4f46e5',
-        hoverBgColor: '#6366f1',
-        textColor: '#374151',
-        activeTextColor: '#ffffff',
-        showFirstLast: true,
-        showNumbers: true,
-        showTotal: true,
-        showRange: true,
-      }"
-      :toolbar="{
-        show: true,
-        showCreateButton: true,
-      }"
-      :expandable-rows="true"
-      :filtering="true"
-      :multi-select="false"
-      :radio-select="false"
-      :break-extra-columns="true"
-      :search-in-backend="true"
-      @view="handleView"
-      @edit="handleEdit"
-      @delete="handleDelete"
-      @search="handleSearch"
-      @changePage="changePage"
-      @update:perPage="updatePerPage"
-      @refresh="request"
-    >
-      <template #left-buttons>
-        <Button class="btn btn-success btn-sm" @click="handleCreate" style="font-size: 1.2rem">
-          <template #icon>
-            <font-awesome-icon :icon="['fas', 'plus']" />
-          </template>
-         New UserSettings
-        </Button>
-      </template>
-    </OmniGridView>
+        :columns="tableColumns"
+        :data="tableData"
+        :loading="isLoading"
+        action-layout="inline"
+        :pagination-config="{
+          variant: 'circle',
+          position: 'right',
+          bgColor: '#4f46e5',
+          hoverBgColor: '#6366f1',
+          textColor: '#374151',
+          activeTextColor: '#ffffff',
+          showFirstLast: true,
+          showNumbers: true,
+          showTotal: true,
+          showRange: true,
+        }"
+        :toolbar="{
+          show: true,
+          showCreateButton: true,
+        }"
+        :expandable-rows="false"
+        :filtering="false"
+        :multi-select="false"
+        :radio-select="false"
+        :break-extra-columns="true"
+        :search-in-backend="true"
+        @view="handleView"
+        @edit="handleEdit"
+        @delete="handleDelete"
+        @search="handleSearch"
+        @changePage="changePage"
+        @update:perPage="updatePerPage"
+        @refresh="request"
+      >
+        <template #left-buttons>
+          <Button class="btn btn-success btn-sm" @click="handleCreate" style="font-size: 1.2rem">
+            <template #icon>
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </template>
+            New UserSettings
+          </Button>
+        </template>
+      </OmniGridView>
+    </div>
   </div>
-</div>
-
-
 </template>
   
 <style scoped></style>
