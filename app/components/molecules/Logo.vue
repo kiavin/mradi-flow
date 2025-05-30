@@ -6,7 +6,7 @@ const props = defineProps({
       containerWidth: 100,
       containerHeight: 100,
       borderRadius: '50%',
-      border: '1px solid cyan',
+      border: '1px solid #0D47A1',
       imgWidth: 90,
       imgHeight: 90,
       objectFit: 'contain',

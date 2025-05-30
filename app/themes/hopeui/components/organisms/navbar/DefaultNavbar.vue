@@ -139,7 +139,7 @@ export default {
       >
         <ul class="mb-2 navbar-nav ms-auto align-items-center navbar-list mb-xl-0">
           <slot name="navbar-buttons-start"></slot>
-          <li class="nav-item dropdown border-end pe-3 d-none d-xl-block">
+          <!-- <li class="nav-item dropdown border-end pe-3 d-none d-xl-block">
             <div class="form-group input-group mb-0 search-input">
               <input type="text" class="form-control" placeholder="Search..." />
               <span class="input-group-text">
@@ -169,7 +169,7 @@ export default {
                 </svg>
               </span>
             </div>
-          </li>
+          </li> -->
           <li class="nav-item dropdown iq-responsive-menu border-end d-block d-xl-none">
             <div
               class="btn btn-sm bg-body"

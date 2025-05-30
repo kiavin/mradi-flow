@@ -40,7 +40,7 @@ const onSubmit = () => {
       <div class="col-md-6 p-0">
         <div class="card card-transparent auth-card shadow-none d-flex justify-content-center mb-0">
           <div class="card-body">
-            <div class="d-flex flex-row align-items-center mb-4">
+            <div class="d-flex flex-row align-items-center mb-4 py-3">
               <!-- Arrow on far left -->
               <div class="me-auto">
                 <!-- "me-auto" pushes everything else to the right -->
@@ -50,8 +50,8 @@ const onSubmit = () => {
                 >
                   <font-awesome-icon
                     :icon="['fas', 'arrow-left']"
-                    style="color: #1a1a34; font-weight: bold; font-size: 1.5rem"
-                    title="Go back to login"
+                    class="text-dark fw-bold fs-4"
+                    v-tooltip:bottom="'Go back to login'"
                   />
                 </router-link>
               </div>
@@ -72,13 +72,14 @@ const onSubmit = () => {
                 <font-awesome-icon :icon="['fas', 'arrow-left']" />
               </div>
             </div>
-            <h2 class="mb-2 mt-2">Reset Password</h2>
-            <p>
+
+            <h2 class="mb-3">Reset Password</h2>
+            <p class="mb-4">
               Enter your email address and we'll send you an email with instructions to reset your
               password.
             </p>
             <form @submit.prevent="onSubmit" class="row g-3">
-              <div class="mb-2 form-group">
+              <div class="mb-4 form-group">
                 <Label :labelFor="'username'"> Username or Email Address </Label>
                 <Input
                   :id="'username'"
@@ -95,7 +96,14 @@ const onSubmit = () => {
                   customClass="btn btn-primary d-inline-block"
                   :disabled="isLoading"
                 >
-                  {{ isLoading ? 'Submitting...' : 'Send password reset link' }}
+                  <template v-if="isLoading">
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                  </template>
+                  <template v-else>Send password reset link </template>
                 </Button>
               </div>
             </form>

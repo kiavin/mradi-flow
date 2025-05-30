@@ -5,6 +5,7 @@ import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
 import Particles from '@/iam/components/molecules/Particles.vue'
+// import Spiner from '~/components/atoms/Spiner.vue'
 
 const props = defineProps({
   formData: Object,
@@ -28,10 +29,10 @@ const onSubmit = () => {
 }
 </script>
 <template>
-  <Particles />
+  <Particles v-once />
   <section class="login-content">
     <b-row class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100">
-      <b-col cols="12" md="6" lg="4" style="width: 25vw">
+      <b-col cols="12" md="8" lg="6" xl="4" class="px-3" style="width: 450px">
         <b-card class="shadow-sm p-4 text-center mt-3" body-class="p-0">
           <!-- Brand logo -->
           <router-link
@@ -83,7 +84,10 @@ const onSubmit = () => {
 
             <div class="text-center mb-3">
               <Button type="submit" customClass="btn btn-primary w-100" :disabled="isLoading">
-                {{ isLoading ? 'Submitting...' : 'LOGIN' }}
+                <template v-if="isLoading">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </template>
+                <template v-else> LOGIN </template>
               </Button>
             </div>
 
