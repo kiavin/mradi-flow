@@ -1,5 +1,4 @@
-version: '3.8'
-
+# version: '3.8'
 services:
   mradi360_frontend:
     container_name: mradi360_frontend
@@ -8,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8008:80"
+      - "8888:80"
     volumes:
       - ./mradi360-vue/dist:/usr/share/nginx/html:rw
     networks:
