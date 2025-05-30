@@ -27,55 +27,138 @@ const onSubmit = () => {
 </script>
 <template>
   <section class="login-content">
-    <b-row class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100">
-      <b-col cols="12" md="6" lg="4" style="width: 25vw">
-        <b-card class="shadow-sm p-4 text-center mt-3" body-class="p-0">
-          <!-- Brand logo -->
-          <router-link
-            :to="{ name: 'iam/auth/login' }"
-            class="navbar-brand d-flex align-items-center justify-content-center mb-3"
+    <div class="row m-0 align-items-center bg-white vh-100">
+      <div class="col-md-6 d-md-block d-none bg-primary p-0 vh-100 overflow-hidden">
+        <img
+          src="../../../../app/themes/hopeui/assets/images/auth/02.png"
+          class="img-fluid gradient-main animated-scaleX"
+          alt="images"
+          loading="lazy"
+        />
+      </div>
+      <div class="col-md-6 p-0">
+        <div class="card card-transparent auth-card shadow-none d-flex justify-content-center mb-0">
+          <div class="card-body">
+            <div class="d-flex flex-row align-items-center mb-4">
+              <!-- Arrow on far left -->
+              <div class="me-auto">
+                <!-- "me-auto" pushes everything else to the right -->
+                <router-link
+                  :to="{ name: 'iam/auth/login' }"
+                  class="navbar-brand d-flex align-items-center mb-3"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'arrow-left']"
+                    style="color: #1a1a34; font-weight: bold; font-size: 1.5rem"
+                    title="Go back to login"
+                  />
+                </router-link>
+              </div>
+
+              <!-- Centered Logo -->
+              <div class="position-absolute start-50 translate-middle-x">
+                <!-- Center horizontally -->
+                <router-link
+                  :to="{ name: 'iam/auth/login' }"
+                  class="navbar-brand d-flex align-items-center mb-3"
+                >
+                  <Logo />
+                </router-link>
+              </div>
+
+              <!-- Empty div to balance the flex layout -->
+              <div class="ms-auto" style="visibility: hidden">
+                <font-awesome-icon :icon="['fas', 'arrow-left']" />
+              </div>
+            </div>
+            <h2 class="mb-2 mt-2">New Password</h2>
+            <p>
+             Please enter your new password below. Make sure it’s strong and something you can remember.
+            </p>
+
+            <!--  form -->
+            <form @submit.prevent="onSubmit" class="text-start">
+              <div class="mb-3">
+                <Label class="form-label" :labelFor="'password'">Password</Label>
+                <Input
+                  :id="'password'"
+                  :type="'password'"
+                  v-model="formData.password"
+                  :disabled="readonly"
+                  class="form-control"
+                />
+                <p v-if="error?.username" class="text-danger mt-1">{{ error.passowrd }}</p>
+              </div>
+
+              <div class="mb-3">
+                <Label class="form-label" :labelFor="'confirmPassword'">Confirm Password</Label>
+                <Input
+                  :id="'confirmPassword'"
+                  :type="'password'"
+                  v-model="formData.confirmPassword"
+                  :disabled="readonly"
+                  class="form-control"
+                />
+                <p v-if="error?.password" class="text-danger mt-1">{{ error.confirmPassword }}</p>
+              </div>
+              <div class="text-center mb-3">
+                <Button type="submit" customClass="btn btn-primary w-100" :disabled="isLoading">
+                  {{ isLoading ? 'Submitting...' : 'Reset Password' }}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="sign-bg sign-bg-right">
+          <svg
+            width="280"
+            height="230"
+            viewBox="0 0 431 398"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <!-- app-logo -->
-            <Logo />
-          </router-link>
-
-          <!-- Title & subtitle -->
-          <p class="mb-4">Passord Reset</p>
-
-          <!-- Login form -->
-          <form @submit.prevent="onSubmit" class="text-start">
-            <div class="mb-3">
-              <Label class="form-label" :labelFor="'password'">Password</Label>
-              <Input
-                :id="'password'"
-                :type="'password'"
-                v-model="formData.password"
-                :disabled="readonly"
-                class="form-control"
+            <g opacity="0.05">
+              <rect
+                x="-157.085"
+                y="193.773"
+                width="543"
+                height="77.5714"
+                rx="38.7857"
+                transform="rotate(-45 -157.085 193.773)"
+                fill="#3B8AFF"
               />
-              <p v-if="error?.username" class="text-danger mt-1">{{ error.passowrd }}</p>
-            </div>
-
-            <div class="mb-3">
-              <Label class="form-label" :labelFor="'confirmPassword'">Confirm Password</Label>
-              <Input
-                :id="'confirmPassword'"
-                :type="'password'"
-                v-model="formData.confirmPassword"
-                :disabled="readonly"
-                class="form-control"
+              <rect
+                x="7.46875"
+                y="358.327"
+                width="543"
+                height="77.5714"
+                rx="38.7857"
+                transform="rotate(-45 7.46875 358.327)"
+                fill="#3B8AFF"
               />
-              <p v-if="error?.password" class="text-danger mt-1">{{ error.confirmPassword }}</p>
-            </div>
-            <div class="text-center mb-3">
-              <Button type="submit" customClass="btn btn-success w-100" :disabled="isLoading">
-                {{ isLoading ? 'Submitting...' : 'Reset Password' }}
-              </Button>
-            </div>
-          </form>
-        </b-card>
-      </b-col>
-    </b-row>
+              <rect
+                x="61.9355"
+                y="138.545"
+                width="310.286"
+                height="77.5714"
+                rx="38.7857"
+                transform="rotate(45 61.9355 138.545)"
+                fill="#3B8AFF"
+              />
+              <rect
+                x="62.3154"
+                y="-190.173"
+                width="543"
+                height="77.5714"
+                rx="38.7857"
+                transform="rotate(45 62.3154 -190.173)"
+                fill="#3B8AFF"
+              />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
     
