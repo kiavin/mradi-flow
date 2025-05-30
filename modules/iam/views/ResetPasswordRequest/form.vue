@@ -60,7 +60,7 @@ const onSubmit = () => {
               <div class="position-absolute start-50 translate-middle-x">
                 <!-- Center horizontally -->
                 <router-link
-                  :to="{ name: 'playground' }"
+                  :to="{ name: 'iam/auth/login' }"
                   class="navbar-brand d-flex align-items-center mb-3"
                 >
                   <Logo />
@@ -92,7 +92,7 @@ const onSubmit = () => {
               <div v-if="!hideSubmit" class="text-center mt-3">
                 <Button
                   type="submit"
-                  customClass="btn btn-success d-inline-block"
+                  customClass="btn btn-primary d-inline-block"
                   :disabled="isLoading"
                 >
                   {{ isLoading ? 'Submitting...' : 'Send password reset link' }}

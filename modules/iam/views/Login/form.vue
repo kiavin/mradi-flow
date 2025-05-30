@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
+import Particles from '@/iam/components/molecules/Particles.vue'
 
 const props = defineProps({
   formData: Object,
@@ -27,6 +28,7 @@ const onSubmit = () => {
 }
 </script>
 <template>
+  <Particles />
   <section class="login-content">
     <b-row class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100">
       <b-col cols="12" md="6" lg="4" style="width: 25vw">
@@ -36,7 +38,7 @@ const onSubmit = () => {
             :to="{ name: 'iam/auth/login' }"
             class="navbar-brand d-flex align-items-center justify-content-center mb-3"
           >
-          <!-- app-logo -->
+            <!-- app-logo -->
             <Logo v-once />
           </router-link>
 
@@ -74,11 +76,13 @@ const onSubmit = () => {
                 <input type="checkbox" class="form-check-input" id="customCheck1" />
                 <label class="form-check-label" for="customCheck1">Remember Me</label>
               </div>
-              <router-link :to="{ name: 'iam/resetpasswordrequest/index' }">Forgot Password?</router-link>
+              <router-link :to="{ name: 'iam/resetpasswordrequest/index' }"
+                >Forgot Password?</router-link
+              >
             </div>
 
             <div class="text-center mb-3">
-              <Button type="submit" customClass="btn btn-success w-100" :disabled="isLoading">
+              <Button type="submit" customClass="btn btn-primary w-100" :disabled="isLoading">
                 {{ isLoading ? 'Submitting...' : 'LOGIN' }}
               </Button>
             </div>

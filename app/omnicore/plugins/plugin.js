@@ -19,9 +19,22 @@ import OmniGridView from '~/components/OmniGridView.vue'
 import Logo from '~/components/molecules/Logo.vue'
 
 
+// ts perticles config
+import Particles from "@tsparticles/vue3";
+//import { loadFull } from "tsparticles"; // if you are going to use `loadFull`, install the "tsparticles" package too.
+import { loadSlim } from "@tsparticles/slim";
+
 export default function registerPlugins(app) {
     app.use(sweetAlertPlugin)
     app.use(BootstrapVueNext)
+
+    // ts particles
+    app.use(Particles, {
+        init: async engine => {
+            // await loadFull(engine); // you can load the full tsParticles library from "tsparticles" if you need it
+            await loadSlim(engine); // or you can load the slim version from "@tsparticles/slim" if don't need Shapes or Animations
+        },
+    })
 
     // app.directive('tooltip', tooltip)
     app.use(BootstrapTooltips)
