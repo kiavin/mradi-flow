@@ -3,11 +3,11 @@ services:
   mradi360_frontend:
     container_name: mradi360_frontend
     build:
-      context: ./mradi360
+      context: ./
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8888:80"
+      - "8008:80"
     volumes:
       - ./mradi360-vue/dist:/usr/share/nginx/html:rw
     networks:
