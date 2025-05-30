@@ -12,32 +12,13 @@ dotenv.config({ path: './omniface.cfg' });
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/',
 
-  // Set custom project root (where index.html is located)
-  root: fileURLToPath(new URL('./', import.meta.url)),
   // Define entry points
   publicDir: fileURLToPath(new URL('./storage', import.meta.url)), // Replaces 'public'
 
-  preview: {
-    host: true,
-    port: 4173,
-    strictPort: true,
-    headers: {
-      'Cache-Control': 'no-store'  // Disable caching for preview
-    }
-  },
-
   build: {
-    outDir: fileURLToPath(new URL('./dist', import.meta.url)),
-    emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
-      }
-    }
+    outDir: 'dist',
   },
   define: {
     'import.meta.env.VITE_SAFE_ROUTES': JSON.stringify(process.env.VITE_SAFE_ROUTES || '')

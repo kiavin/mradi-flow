@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8008:80"
+      - "8988:80"
     volumes:
       - ./mradi360-vue/dist:/usr/share/nginx/html:rw
     networks:
