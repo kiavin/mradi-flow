@@ -31,11 +31,18 @@ const onSubmit = () => {
     <div class="row m-0 align-items-center bg-white vh-100">
       <div class="col-md-6 d-md-block d-none bg-primary p-0 vh-100 overflow-hidden">
         <img
-          src="../../../../app/themes/hopeui/assets/images/auth/02.png"
+          src="/cinematic44.jpg"
           class="img-fluid gradient-main animated-scaleX"
           alt="images"
           loading="lazy"
         />
+        <!-- storage/cinematic44.jpg -->
+          <!-- src="/ill22.jpg" -->
+           <!-- storage/main_preview.jpg -->
+            <!-- storage/stock_view.jpg -->
+             <!-- storage/stock2.jpg -->
+              <!-- storage/stock3.jpg -->
+
       </div>
       <div class="col-md-6 p-0">
         <div class="card card-transparent auth-card shadow-none d-flex justify-content-center mb-0">
@@ -97,11 +104,7 @@ const onSubmit = () => {
                   :disabled="isLoading"
                 >
                   <template v-if="isLoading">
-                    <span
-                      class="spinner-border spinner-border-sm"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
+                    <Spinner size="sm" customClass="me-2" />
                   </template>
                   <template v-else>Send password reset link </template>
                 </Button>

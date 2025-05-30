@@ -30,7 +30,7 @@ const onSubmit = () => {
     <div class="row m-0 align-items-center bg-white vh-100">
       <div class="col-md-6 d-md-block d-none bg-primary p-0 vh-100 overflow-hidden">
         <img
-          src="../../../../app/themes/hopeui/assets/images/auth/02.png"
+          src="/ill22.jpg"
           class="img-fluid gradient-main animated-scaleX"
           alt="images"
           loading="lazy"

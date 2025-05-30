@@ -2,15 +2,15 @@
 defineProps({
   size: {
     type: String,
-    default: 'sm', // Options: 'sm', '', 'lg' (custom if you write your own)
+    default: 'sm', // Accepts: 'sm', '', 'lg', or custom values
   },
   color: {
     type: String,
-    default: 'primary', // Bootstrap contextual color classes
+    default: 'primary', // Bootstrap color class
   },
   customClass: {
     type: String,
-    default: '',
+    default: '', // Optional custom class names
   },
   role: {
     type: String,
@@ -21,7 +21,12 @@ defineProps({
 
 <template>
   <span
-    :class="['spinner-border', size === 'sm' ? 'spinner-border-sm' : '', `text-${color}`, customClass]"
+    :class="[
+      'spinner-border',
+      size === 'sm' ? 'spinner-border-sm' : '',
+      `text-${color}`,
+      customClass,
+    ]"
     :role="role"
     aria-hidden="true"
   />
