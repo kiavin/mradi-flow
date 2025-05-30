@@ -103,14 +103,15 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             if (axios.isCancel(err)) return
             const responseData = err.response?.data || {}
             const statusCode = err.response?.status || 500;
+            const redirectUrl = '';
             //auto  redirect errors
             if (redirectEnabled) {
 
-                const title = responseData?.responseData?.name || '';
-                // const title = responseData?.alertifyPayload?.message || '';
+                // const title = responseData?.responseData?.name || '';
+                const title = responseData?.alertifyPayload?.message || '';
                 const description =
                     statusCode === 500
-                        ? '' // intentionally leave blank since fallback handled in error page
+                        ? responseData?.alertifyPayload?.message || '' // intentionally leave blank since fallback handled in error page
                         : responseData?.alertifyPayload?.message || ''
 
                 if ([401, 403, 404, 500].includes(statusCode)) {
@@ -119,6 +120,7 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
                         code: statusCode,
                         title,
                         description,
+                        redirectUrl
                     })
                 }
             }
@@ -127,8 +129,6 @@ export function useApi(baseUrl, method = 'GET', options = {}, autoFetch = true, 
             error.value = err.response?.data?.errorPayload?.errors || err.response?.data || [err.message]
             status.value = 'error'
             data.value = null
-
-
         }
     }
 

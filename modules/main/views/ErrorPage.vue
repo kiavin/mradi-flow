@@ -5,9 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
-const goBack = () => {
-  router.back()
-}
 const code = parseInt(route.query.code || 500)
 
 const fallbackTitles = {
@@ -27,6 +24,20 @@ const fallbackDescriptions = {
 const title = route.query.title || fallbackTitles[code] || 'Error'
 const description =
   route.query.description || fallbackDescriptions[code] || 'An unknown error occurred.'
+// const redirectUrl = route.query.redirectUrl
+const redirectUrl = 'iam/resetpasswordrequest/index'
+
+// const goBack = () => {
+//   router.back()
+// }
+
+const goBack = () => {
+  if (code === 500 && title === 'Wrong password reset token.') {
+    router.push(redirectUrl)
+  } else {
+    router.back()
+  }
+}
 </script>
  
 <template>
