@@ -33,11 +33,11 @@ const onSubmit = () => {
         <b-card class="shadow-sm p-4 text-center mt-3" body-class="p-0">
           <!-- Brand logo -->
           <router-link
-            :to="{ name: 'playground' }"
+            :to="{ name: 'iam/auth/login' }"
             class="navbar-brand d-flex align-items-center justify-content-center mb-3"
           >
           <!-- app-logo -->
-            <Logo />
+            <Logo v-once />
           </router-link>
 
           <!-- Title & subtitle -->
