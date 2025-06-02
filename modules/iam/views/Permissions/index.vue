@@ -331,7 +331,7 @@ const editableColumns = [
         ...(row.ruleName && { ruleName: row.ruleName }),
       }
 
-      const url = `/v1/iam/rbac/role/${row.name}`
+      const url = `/v1/iam/rbac/permission/${row.name}`
       const res = await inLineEditing(url, updatedData)
 
       refresh()
@@ -354,7 +354,7 @@ onMounted(() => {
       </div>
       <div v-if="1 == 0" class="col-auto mb-4">
         <Button type="submit" customClass="btn btn-primary" @click="handleCreate">
-          New Permissions
+          New Permission
         </Button>
       </div>
 

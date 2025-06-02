@@ -1,8 +1,8 @@
 const layout = 'hopeui'
 export default [
   {
-    path: '/iam/changepassword/index',
-    name: 'iam/changepassword/index',
+    path: '/iam/changepassword',
+    name: 'iam/changepassword',
     component: () => import('../views/ChangePassword/create.vue'),
     meta: { title: 'Mradi360', layout: layout }
   },
