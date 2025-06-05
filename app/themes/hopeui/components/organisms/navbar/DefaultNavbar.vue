@@ -185,7 +185,7 @@ export default {
                 </span>
               </b-button>
             </template>
-            <RouterLink to="/main/dashboard">
+            <RouterLink to="/iam/changepassword">
               <b-dropdown-item variant="none" href="#">Profile</b-dropdown-item>
             </RouterLink>
 

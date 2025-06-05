@@ -37,7 +37,6 @@ const emit = defineEmits(['close', 'refresh'])
 
 // Reactive state
 const allItems = ref([])
-const assignedItems = ref([])
 const selectedAvailableItems = ref([])
 const selectedAssignedItems = ref([])
 const availableItemsSearch = ref('')
@@ -60,12 +59,29 @@ onUnmounted(() => {
 
 // Computed properties
 const availableItems = computed(() => {
-  return allItems.value.filter(
-    (item) =>
-      !assignedItems.value.some(
-        (assigned) => assigned[props.config.keyField] === item[props.config.keyField]
-      )
-  )
+  // Transform the available items from the API structure
+  if (!allItems.value.length) return []
+
+  const available = allItems.value[0]?.items?.available || {}
+  return Object.entries(available).map(([key, value]) => ({
+    [props.config.keyField]: key,
+    [props.config.displayField]: key,
+    type: value,
+    description: key,
+  }))
+})
+
+const assignedItems = computed(() => {
+  // Transform the assigned items from the API structure
+  if (!allItems.value.length) return []
+
+  const assigned = allItems.value[0]?.items?.assigned || {}
+  return Object.entries(assigned).map(([key, value]) => ({
+    [props.config.keyField]: key,
+    [props.config.displayField]: key,
+    type: value,
+    description: key,
+  }))
 })
 
 const filteredAvailableItems = computed(() => {
@@ -94,23 +110,18 @@ const hasAssignedItems = computed(() => assignedItems.value.length > 0)
 // Methods
 const fetchData = async () => {
   try {
-    // Fetch all available items
-    const { data: allItemsData, request: fetchAllItems } = useApi(
-      props.config.getAllEndpoint,
-      'GET'
-    )
-    await fetchAllItems()
-    allItems.value = allItemsData.value?.dataPayload?.data || []
-
-    // Fetch currently assigned items
     const endpoint =
-      typeof props.config.getAssignedEndpoint === 'function'
-        ? props.config.getAssignedEndpoint(props.entity)
-        : props.config.getAssignedEndpoint
+      typeof props.config.getAllEndpoint === 'function'
+        ? props.config.getAllEndpoint(props.entity)
+        : props.config.getAllEndpoint
 
-    const { data: assignedItemsData, request: fetchAssignedItems } = useApi(endpoint, 'GET')
-    await fetchAssignedItems()
-    assignedItems.value = assignedItemsData.value?.dataPayload?.data || []
+    const { data: responseData, request: fetchItems } = useApi(endpoint, 'GET')
+    await fetchItems()
+
+    // Store the raw data
+    allItems.value = responseData.value?.dataPayload?.data
+      ? [responseData.value.dataPayload.data]
+      : []
   } catch (error) {
     console.error('Error fetching data:', error)
   }
@@ -128,7 +139,6 @@ const toggleSelection = (item, type, event = null) => {
 
   const selectedArray = type === 'available' ? selectedAvailableItems : selectedAssignedItems
   const keyField = props.config.keyField
-  console.log('KEYS', props.config.keyField)
 
   const index = selectedArray.value.findIndex((i) => i[keyField] === item[keyField])
 
@@ -163,31 +173,21 @@ const dataPayload = props.config.title
 const assignSelected = async () => {
   if (selectedAvailableItems.value.length === 0) return
 
-  // Validate items have the key field
-  const validItems = selectedAvailableItems.value.filter((item) => props.config.keyField in item)
-
-  if (validItems.length !== selectedAvailableItems.value.length) {
-    console.error(
-      'Some items are missing the key field:',
-      selectedAvailableItems.value.filter((item) => !(props.config.keyField in item))
-    )
-  }
-
   const payload = {
-    [dataPayload]: validItems.map((item) => item[props.config.keyField]),
+    [dataPayload]: selectedAvailableItems.value.map((item) => item[props.config.keyField]),
   }
 
-  assignedItems.value = [...assignedItems.value, ...validItems]
-  selectedAvailableItems.value = []
   await updateBackend(props.config.assignEndpoint, payload)
+  await fetchData() // Refresh data from server
 }
 
 const assignAll = async () => {
   const payload = {
     [dataPayload]: availableItems.value.map((item) => item[props.config.keyField]),
   }
-  assignedItems.value = [...assignedItems.value, ...availableItems.value]
+
   await updateBackend(props.config.assignEndpoint, payload)
+  await fetchData() // Refresh data from server
 }
 
 const removeSelected = async () => {
@@ -196,28 +196,25 @@ const removeSelected = async () => {
   const payload = {
     [dataPayload]: selectedAssignedItems.value.map((item) => item[props.config.keyField]),
   }
-  assignedItems.value = assignedItems.value.filter(
-    (item) =>
-      !selectedAssignedItems.value.some(
-        (i) => i[props.config.keyField] === item[props.config.keyField]
-      )
-  )
-  selectedAssignedItems.value = []
+
   await updateBackend(props.config.removeEndpoint, payload)
+  await fetchData() // Refresh data from server
 }
 
 const removeAll = async () => {
   const payload = {
-    dataPayload: assignedItems.value.map((item) => item[props.config.keyField]),
+    [dataPayload]: assignedItems.value.map((item) => item[props.config.keyField]),
   }
-  assignedItems.value = []
+
   await updateBackend(props.config.removeEndpoint, payload)
+  await fetchData() // Refresh data from server
 }
 
 const closeModal = () => {
-  modalStore.closeModal
+  modalStore.closeModal()
 }
 </script>
+
 
 <template>
   <div class="container-fluid p-3">
