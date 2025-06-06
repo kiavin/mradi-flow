@@ -178,6 +178,7 @@ const assignSelected = async () => {
   }
 
   await updateBackend(props.config.assignEndpoint, payload)
+  selectedAvailableItems.value = []
   await fetchData() // Refresh data from server
 }
 
@@ -187,6 +188,7 @@ const assignAll = async () => {
   }
 
   await updateBackend(props.config.assignEndpoint, payload)
+  selectedAvailableItems.value = []
   await fetchData() // Refresh data from server
 }
 
@@ -198,6 +200,7 @@ const removeSelected = async () => {
   }
 
   await updateBackend(props.config.removeEndpoint, payload)
+  selectedAssignedItems.value = []
   await fetchData() // Refresh data from server
 }
 
@@ -207,10 +210,13 @@ const removeAll = async () => {
   }
 
   await updateBackend(props.config.removeEndpoint, payload)
+  selectedAssignedItems.value = []
   await fetchData() // Refresh data from server
 }
 
 const closeModal = () => {
+  selectedAvailableItems.value = []
+  selectedAssignedItems.value = []
   modalStore.closeModal()
 }
 </script>
