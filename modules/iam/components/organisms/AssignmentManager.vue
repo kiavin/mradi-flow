@@ -249,7 +249,7 @@ const closeModal = () => {
               @click="(event) => toggleSelection(item, 'available', event)"
             >
               <div>
-                <div class="fw-bold">{{ item[config.displayField] }}</div>
+                <!--<div class="fw-bold">{{ item[config.displayField] }}</div>-->
                 <small v-if="item.description" class="text-muted">{{ item.description }}</small>
               </div>
               <span v-if="isSelected(item, 'available')" class="badge bg-primary rounded-pill">
@@ -301,7 +301,7 @@ const closeModal = () => {
               @click="(event) => toggleSelection(item, 'assigned', event)"
             >
               <div>
-                <div class="fw-bold">{{ item[config.displayField] }}</div>
+                <!-- <div class="fw-bold">{{ item[config.displayField] }}</div> -->
                 <small v-if="item.description" class="text-muted">{{ item.description }}</small>
               </div>
               <span v-if="isSelected(item, 'assigned')" class="badge bg-primary rounded-pill">
