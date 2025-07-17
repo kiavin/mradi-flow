@@ -204,7 +204,7 @@ const actions = computed(() => {
       key: 'edit',
       icon: ['fas', 'pen-to-square'],
       show: (row) => props.showEdit && row.is_deleted !== 1,
-      colorClass: 'text-primary',
+      colorClass: 'text-success',
     },
     {
       label: (row) => (row?.is_deleted === 1 ? 'Restore' : 'Delete'),

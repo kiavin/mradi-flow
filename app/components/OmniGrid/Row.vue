@@ -24,7 +24,7 @@ const props = defineProps({
   radioSelect: {
     type: Boolean,
   },
-  title:{type: String},
+  title: { type: String },
   showActionColumn: Boolean,
   index: Number,
   mergedColumns: {
@@ -305,11 +305,88 @@ const getPinnedRightOffset = (colKey) => {
 
   return `${offset}px`
 }
+
+// panel positioning
+const actionPanel = ref(null)
+const panelPositionStyle = ref({
+  zIndex: '1050',
+  minWidth: '150px',
+  top: '0',
+  left: '0'
+})
+
+// Update getPanelPosition method
+const updatePanelPosition = async () => {
+  await nextTick(); // Wait for DOM update
+  
+  if (!actionPanel.value) return;
+  
+  const ellipsisIcon = document.querySelector(`.row-${props.index} .action-ellipsis`);
+  if (!ellipsisIcon) return;
+  
+  const iconRect = ellipsisIcon.getBoundingClientRect();
+  const panelWidth = actionPanel.value.offsetWidth;
+  const panelHeight = actionPanel.value.offsetHeight;
+  
+  // Calculate position relative to viewport
+  let left = iconRect.right - panelWidth;
+  let top = iconRect.bottom;
+  
+  // Adjust for viewport edges
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  if (left < 10) left = 10;
+  if (left + panelWidth > viewportWidth) left = viewportWidth - panelWidth - 10;
+  
+  if (top + panelHeight > viewportHeight) {
+    top = iconRect.top - panelHeight;
+    if (top < 10) top = 10;
+  }
+  
+  // Set initial position (hidden)
+  panelPositionStyle.value = {
+    zIndex: '1050',
+    top: `${top}px`,
+    left: `${left}px`,
+    opacity: 0,
+    transform: 'translateY(-5px) scale(0.95)',
+    display: 'block' // Ensure it's visible for measurement
+  };
+  
+  // Force reflow and animate in
+  await nextTick();
+  panelPositionStyle.value = {
+    ...panelPositionStyle.value,
+    opacity: 1,
+    transform: 'translateY(0) scale(1)'
+  };
+};
+
+// Watch for changes and update position
+watch(() => props.openRow, (newVal) => {
+  if (newVal === (props.row.id ?? props.index)) {
+    nextTick(() => {
+      updatePanelPosition()
+    })
+  }
+})
+
+// Update position on scroll/resize
+onMounted(() => {
+  window.addEventListener('scroll', updatePanelPosition)
+  window.addEventListener('resize', updatePanelPosition)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updatePanelPosition)
+  window.removeEventListener('resize', updatePanelPosition)
+})
 </script>
 
 <template>
   <!-- Main Table Row -->
-  <tr class="border-top border-bottom" :class="{ 'selected-row': isSelected?.(row, index) }">
+  <tr class="border-top border-bottom" :class="[{ 'selected-row': isSelected?.(row, index) }, `row-${index}`]">
     <td v-if="radioSelect" class="text-center align-middle" style="width: 50px">
       <input
         type="radio"
@@ -441,37 +518,48 @@ const getPinnedRightOffset = (colKey) => {
       </template>
 
       <!-- PANEL ACTIONS -->
-      <template v-else-if="actionLayout === 'panel'">
-        <div class="position-relative" style="z-index: 1">
-          <font-awesome-icon
-            icon="ellipsis-v"
-            class="cursor-pointer"
-            @click.stop="toggleActionsPanel(row, index)"
-          />
+      <!-- PANEL ACTIONS -->
+<template v-else-if="actionLayout === 'panel'">
+  <div class="position-relative" style="z-index: 1">
+    <font-awesome-icon
+      icon="ellipsis-v"
+      class="cursor-pointer action-ellipsis"
+      :data-row-index="index"
+      @click.stop="toggleActionsPanel(row, index)"
+    />
 
-          <!-- Floating Actions Panel -->
-          <div
-            v-if="openRow === (row.id ?? index)"
-            class="floating-actions border rounded bg-white p-1 position-absolute"
-            style="z-index: 9999; min-width: 150px; top: 100%; right: 100%"
-            @click.stop
-          >
-            <div
-              v-for="action in visibleActions"
-              :key="getActionKey(action, row)"
-              class="d-flex align-items-center gap-2 mb-2 cursor-pointer px-2 py-1 rounded hover-bg"
-              @click="() => handleClick(action, row)"
-            >
-              <font-awesome-icon
-                v-if="getActionIcon(action, row)"
-                :icon="getActionIcon(action, row)"
-                :class="getColorClass(action, row)"
-              />
-              <span>{{ getActionLabel(action, row) }}</span>
-            </div>
-          </div>
-        </div>
-      </template>
+    <!-- Teleport the panel to body -->
+ <teleport to="body">
+  <div
+    v-if="openRow === (row.id ?? index)"
+    ref="actionPanel"
+    class="floating-actions"
+    :style="{
+      ...panelPositionStyle,
+      display: openRow === (row.id ?? index) ? 'block' : 'none'
+    }"
+    @click.stop
+    v-show="openRow === (row.id ?? index)"
+  >
+    <div class="action-panel-content">
+      <div
+        v-for="action in visibleActions"
+        :key="getActionKey(action, row)"
+        class="action-item"
+        @click="() => handleClick(action, row)"
+      >
+        <font-awesome-icon
+          v-if="getActionIcon(action, row)"
+          :icon="getActionIcon(action, row)"
+          :class="getColorClass(action, row)"
+        />
+        <span class="action-label">{{ getActionLabel(action, row) }}</span>
+      </div>
+    </div>
+  </div>
+</teleport>
+  </div>
+</template>
     </td>
 
     <td
@@ -639,5 +727,57 @@ const getPinnedRightOffset = (colKey) => {
   top: 0;
   backface-visibility: hidden;
   transform: translateZ(0);
+}
+
+/* panel actions */
+/* Action Panel Styles */
+.floating-actions {
+  position: fixed;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  z-index: 1050;
+  padding: 6px 0;
+  min-width: 160px;
+  max-width: 200px;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top right;
+  animation: panelFadeIn 0.15s ease-out forwards;
+}
+
+.action-panel-content {
+  width: 100%;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.action-item:hover {
+  background-color: #f5f5f5;
+}
+
+.action-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 </style>

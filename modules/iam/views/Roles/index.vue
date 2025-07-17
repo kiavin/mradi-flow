@@ -168,7 +168,7 @@ const handleCreate = async () => {
   await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
-    router.push({ name: 'iam/roles/create' })
+    router.push({ name: 'iam/rbac/roles/create' })
     return
   }
 
@@ -414,7 +414,7 @@ const customActions = [
           showRange: true,
         }"
         :toolbar="{
-          show: false ,
+          show: true ,
           showCreateButton: true,
         }"
         :expandable-rows="false"
