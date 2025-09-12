@@ -10,7 +10,7 @@ const route = useRoute();
 const id = route.params.id;
 const apiBaseUrl = `/v1/admin/user-settings/${id}`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', autoFetch: true});
 const formData = ref({});
 const errors = ref({});
 
@@ -28,7 +28,7 @@ watch(data, () => {
 
 const handleSubmit = async (updatedData) => {
   // Create a new API call for PUT request
-  const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+  const { request: updateData, error } = useApi(apiBaseUrl, {method: 'PUT'})
   await updateData(updatedData)
   if (error.value) {
     console.log('Error', error.value)

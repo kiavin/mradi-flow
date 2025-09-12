@@ -39,4 +39,11 @@ router.beforeEach((to, from, next) => {
   authGuard(to, from, next)
 })
 
+router.afterEach((to) => {
+  const APP_NAME = import.meta.env.VITE_APP_NAME || 'Omniface';
+  if (to.meta?.title) {
+    document.title = to.meta.title.replace('Omniface', APP_NAME);
+  }
+})
+
 export default router

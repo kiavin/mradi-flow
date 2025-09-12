@@ -13,7 +13,11 @@ const modalStore = useModalStore()
 
 const apiBaseUrl = `/v1/iam/rbac/roles`
 
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false)
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {
+  method: 'GET',
+  options: {},
+  autoFetch: false,
+})
 
 const tableData = ref({
   data: [],
@@ -79,7 +83,11 @@ const handleView = async (row) => {
 
   const apiBaseUrl = `/v1/iam/rbac/role/${id}`
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+    method: 'GET',
+    options: {},
+    autoFetch: true,
+  })
 
   await request()
 
@@ -92,7 +100,7 @@ const handleView = async (row) => {
       readonly: true,
       hideSubmit: true,
     },
-    'View Roles'
+    'View Role'
   )
 }
 
@@ -118,13 +126,17 @@ const handleEdit = async (row) => {
 
   // Fetch appointment data before opening the modal
   const apiBaseUrl = `/v1/iam/rbac/role/${id}`
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+    method: 'GET',
+    options: {},
+    autoFetch: true,
+  })
 
   await request() // Fetch data before opening modal
 
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
-    const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+    const { data, request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
     await updateData(updatedData)
     if (error.value) {
       console.log('Error', error.value)
@@ -139,7 +151,7 @@ const handleEdit = async (row) => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Roles Updated successfully',
+      text: data.value?.alertifyPayload.message ?? 'Roles Updated successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -159,7 +171,7 @@ const handleEdit = async (row) => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
     },
-    'Edit Roles'
+    'Edit Role'
   )
 }
 
@@ -178,7 +190,7 @@ const handleCreate = async () => {
   const handleSubmit = async (newData) => {
     const apiBaseUrl = `/v1/iam/rbac/role`
 
-    const { request: createData, error } = useApi(apiBaseUrl, 'POST')
+    const { data, request: createData, error } = useApi(apiBaseUrl, { method: 'POST' })
 
     await createData(newData)
 
@@ -194,7 +206,7 @@ const handleCreate = async () => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Roles Created successfully',
+      text: data.value?.alertifyPayload?.message ?? 'Role Created successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -214,7 +226,7 @@ const handleCreate = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    'Create Roles'
+    'Create Role'
   )
 }
 
@@ -244,7 +256,7 @@ const handleDelete = async (row) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(`/v1/iam/rbac/role/${id}`, 'DELETE')
+      const { data, request, isLoading } = useApi(`/v1/iam/rbac/role/${id}`, { method: 'DELETE' })
 
       await request()
 

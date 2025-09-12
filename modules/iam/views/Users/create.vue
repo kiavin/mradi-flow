@@ -7,7 +7,7 @@ const { proxy } = getCurrentInstance()
 const router = useRouter()
 
 const apiBaseUrl = `/v1/iam/roles`;
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'POST'});
 
 const formData = ref({});
 
@@ -21,7 +21,7 @@ const handleSubmit = async (data) => {
   proxy.$showAlert({ 
     title: 'Success',
     icon: 'success', 
-    text: 'Roles created successfully',
+    text: data.value?.alertifyPayload?.message ?? 'User created successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,
@@ -29,7 +29,7 @@ const handleSubmit = async (data) => {
     timerProgressBar: true,
 })
   setTimeout(() => {
-    router.push({ name: 'iam/roles' })
+    router.push({ name: 'iam/users' })
   }, 2000)
 }
 </script>
@@ -37,7 +37,7 @@ const handleSubmit = async (data) => {
 <template>
   <div class="card p-3">
 
-    <h1 class="h4 mt-2">Create Roles</h1>
+    <h1 class="h4 mt-2">Create User</h1>
     <Form 
     :formData="formData" 
     :error="error" 

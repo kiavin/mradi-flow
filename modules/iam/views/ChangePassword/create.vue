@@ -11,7 +11,7 @@ const alertStore = useAlertStore()
 const authStore = useAuthStore()
 
 const apiBaseUrl = `/v1/iam/auth/change-password`
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'PUT')
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'PUT'})
 
 const formData = ref({})
 

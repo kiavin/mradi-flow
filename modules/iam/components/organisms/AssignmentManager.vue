@@ -115,7 +115,7 @@ const fetchData = async () => {
         ? props.config.getAllEndpoint(props.entity)
         : props.config.getAllEndpoint
 
-    const { data: responseData, request: fetchItems } = useApi(endpoint, 'GET')
+    const { data: responseData, request: fetchItems } = useApi(endpoint, { method: 'GET' })
     await fetchItems()
 
     // Store the raw data
@@ -157,7 +157,7 @@ const isProcessing = ref(false)
 const updateBackend = async (url, payload) => {
   isProcessing.value = true
   try {
-    const { data, request } = useApi(url, 'POST')
+    const { data, request } = useApi(url, { method: 'POST' })
     await request(payload)
     alertStore.show(data?.value)
     emit('refresh')

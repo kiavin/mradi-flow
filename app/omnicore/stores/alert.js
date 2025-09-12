@@ -17,5 +17,9 @@ export const useAlertStore = defineStore('alert', {
 
             showAutoAlert(finalPayload)
         },
+
+        suppress(state = true) {
+            this.suppressAutoAlerts = state
+        }
     },
 })

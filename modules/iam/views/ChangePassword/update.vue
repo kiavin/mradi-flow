@@ -10,11 +10,10 @@ const route = useRoute();
 const id = route.params.id;
 const apiBaseUrl = `/v1/iam/auth/change-password`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'GET'});
 const formData = ref({});
 const errors = ref({});
 
-// http://localhost:3000/iam/changepassword/create
 watch(data, () => {
   if (data.value) {
     formData.value = data.value.dataPayload.data || {}
@@ -28,7 +27,7 @@ watch(data, () => {
 
 const handleSubmit = async (updatedData) => {
   // Create a new API call for PUT request
-  const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+  const { data, request: updateData, error } = useApi(apiBaseUrl, {method: 'PUT'})
   await updateData(updatedData)
   if (error.value) {
     console.log('Error', error.value)
@@ -41,7 +40,7 @@ const handleSubmit = async (updatedData) => {
   proxy.$showAlert({
     title: 'Success',
     icon: 'success',
-    text: 'ChangePassword Updated successfully',
+    text: data.value?.alertifyPayload?.message ?? 'Password Updated successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,
@@ -57,7 +56,7 @@ const handleSubmit = async (updatedData) => {
 <template>
   <div class="card p-3">
 
-    <h1 class="h4 mt-2">Update ChangePassword</h1>
+    <h1 class="h4 mt-2">Update Password</h1>
     <Form 
     :formData="formData" 
     :error="errors" 

@@ -7,7 +7,7 @@ const { proxy } = getCurrentInstance()
 const router = useRouter()
 
 const apiBaseUrl = `/v1/iam/permissions`;
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'POST'});
 
 const formData = ref({});
 
@@ -21,7 +21,7 @@ const handleSubmit = async (data) => {
   proxy.$showAlert({ 
     title: 'Success',
     icon: 'success', 
-    text: 'Permissions created successfully',
+    text: data.value?.alertifyPayload?.message ?? 'Permission created successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,
@@ -37,7 +37,7 @@ const handleSubmit = async (data) => {
 <template>
   <div class="card p-3">
 
-    <h1 class="h4 mt-2">Create Permissions</h1>
+    <h1 class="h4 mt-2">Create Permission</h1>
     <Form 
     :formData="formData" 
     :error="error" 

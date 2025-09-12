@@ -42,7 +42,7 @@ export default {
 
     const logOut = async () => {
       const apiBaseUrl = `/v1/iam/auth/logout`
-      const { data, request, error } = useApi(apiBaseUrl, 'POST')
+      const { data, request, error } = useApi(apiBaseUrl, { method: 'POST' })
 
       await request()
 
@@ -58,7 +58,6 @@ export default {
       authStore.removeRefreshToken()
       router.push(redirectUrl) // Just pass the string directly
     }
-   
 
     onMounted(() => {
       window.addEventListener('scroll', onscroll())

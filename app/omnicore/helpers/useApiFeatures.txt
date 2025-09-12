@@ -1,0 +1,188 @@
+ const {
+  batchRequest,
+  data: batchData,
+  error: batchError,
+} = useApi('', {
+  useAuth: true,
+})
+
+const runBatchRequest = async () => {
+  await batchRequest([
+    // ✅ GET
+    {
+      url: '/v1/admin/countries',
+      method: 'GET',
+      requestName: 'getCountries',
+    },
+
+    // ✅ POST
+    {
+      url: '/v1/admin/users',
+      method: 'POST',
+      requestName: 'createUser',
+      payload: {
+        name: 'John Doe',
+        email: 'john@example.com',
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    },
+
+    // ✅ PUT
+    {
+      url: '/v1/admin/users/101',
+      method: 'PUT',
+      requestName: 'updateUser',
+      payload: {
+        name: 'John Updated',
+      },
+    },
+
+    // ✅ PATCH
+    {
+      url: '/v1/admin/users/101',
+      method: 'PATCH',
+      requestName: 'patchUser',
+      payload: {
+        status: 'active',
+      },
+    },
+
+    // ✅ DELETE
+    {
+      url: '/v1/admin/users/202',
+      method: 'DELETE',
+      requestName: 'deleteUser',
+    },
+
+    // ❌ Simulate a failure
+    {
+      url: '/v1/admin/broken-endpoint',
+      method: 'GET',
+      requestName: 'failExample',
+    },
+  ],
+  {
+    failFast: false, // set to true to stop at first failure
+    enableCache: false,
+    autoAlert: true
+  })
+
+  // 🧾 Access success and error results
+  batchData.value.forEach((res) => {
+    if (res.success) {
+      console.log(`[✅ ${res.requestName}] succeeded:`, res.data)
+    } else {
+      console.warn(`[❌ ${res.requestName}] failed:`, res.error)
+    }
+  })
+}
+
+
+ To Retry Specific Failed Requests
+
+
+const failed = batchData.value.filter((r) => !r.success)
+
+await batchRequest(failed.map(fail => ({
+  url: fail.originalRequest.url, // store url in the original req if needed
+  method: fail.originalRequest.method,
+  payload: fail.originalRequest.payload,
+  requestName: fail.requestName
+})))
+
+
+ Optional Enhancements
+
+If you'd like to access the original request config inside each res, you can modify your batchRequest function to attach the original request object to the result:
+
+results.push({
+  success: true,
+  data: transformed,
+  requestName: req.requestName || null,
+  progress: 100,
+  originalRequest: req // 👈 Attach for reuse or debugging
+})
+
+
+
+// mock api usage 
+
+
+// Example 1: Simple mock object
+const { data } = useApi('/api/users', {
+  mock: { users: [{ id: 1, name: 'Mock User' }] }
+})
+
+// Example 2: Mock function
+const { data } = useApi('/api/users', {
+  mock: (payload, queryParams) => ({
+    users: [{ id: 1, name: `Mock ${queryParams?.search ?? 'User'}` }]
+  })
+})
+
+// Example 3: Advanced mock with delay and error simulation
+const { data } = useApi('/api/users', {
+  mock: {
+    delay: 1200,
+    simulateError: true,
+    error: ['This is a mock error']
+  }
+})
+
+
+
+
+
+
+
+
+Supported Mock Config Examples
+
+Here’s how to pass mock when calling useApi:
+🔁 Dynamic function-based mock
+
+useApi('/api/spaces', {
+  method: 'POST',
+  mock: (payload, queryParams, method) => ({
+    id: 999,
+    name: payload.name,
+    methodUsed: method,
+    receivedAt: new Date().toISOString()
+  })
+})
+
+🕗 Simulate delay + error
+
+useApi('/api/fail-check', {
+  method: 'GET',
+  mock: {
+    simulateError: true,
+    delay: 1000,
+    error: ['Oops! Something went wrong']
+  }
+})
+
+🕹️ Simulate progress bar
+
+useApi('/api/upload', {
+  method: 'POST',
+  mock: {
+    simulateProgress: true,
+    delay: 2000,
+    data: { success: true }
+  }
+})
+
+☝️ Run mock only once
+
+useApi('/api/space', {
+  method: 'GET',
+  mock: {
+    once: true,
+    delay: 500,
+    data: { mockData: 'Shown once only' }
+  }
+})
+

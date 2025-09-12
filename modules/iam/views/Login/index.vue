@@ -10,7 +10,7 @@ const alertStore = useAlertStore()
 const authStore = useAuthStore()
 
 const apiBaseUrl = `/v1/iam/auth/login`
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST')
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'POST' })
 
 const formData = ref({
   username: '',

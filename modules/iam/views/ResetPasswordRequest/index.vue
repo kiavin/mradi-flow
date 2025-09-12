@@ -7,7 +7,7 @@ const { proxy } = getCurrentInstance()
 const router = useRouter()
 
 const apiBaseUrl = `/v1/iam/auth/request-password-reset`
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST')
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'POST' })
 
 const formData = ref({})
 
@@ -21,7 +21,9 @@ const handleSubmit = async (data) => {
   proxy.$showAlert({
     title: 'Success',
     icon: 'success',
-    text: 'Your Password reset request was successfully, check your email to set a new password',
+    text:
+      data.value.alertifyPayload.message ??
+      'Your Password reset request was successfully, check your email to set a new password',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,

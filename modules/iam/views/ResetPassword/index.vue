@@ -9,7 +9,7 @@ const router = useRouter()
 const token = '4i2bGDpzC3tl9imVc-4GT-EZVqO_Qhxe_1742739158'
 
 const apiBaseUrl = `/v1/iam/auth/reset-password?token=${token}`
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'PUT')
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'PUT' })
 
 const formData = ref({})
 
@@ -23,7 +23,9 @@ const handleSubmit = async (data) => {
   proxy.$showAlert({
     title: 'Success',
     icon: 'success',
-    text: 'Password Updated successfully, You can now login with your new credentials',
+    text:
+      data.value?.alertifyPayload?.message ??
+      'Password Updated successfully, You can now login with your new credentials',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,

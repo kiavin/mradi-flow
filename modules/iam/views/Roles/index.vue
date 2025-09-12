@@ -13,7 +13,11 @@ const modalStore = useModalStore()
 
 const apiBaseUrl = `/v1/iam/rbac/roles`
 
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false)
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {
+  method: 'GET',
+  options: {},
+  autoFetch: false,
+})
 
 const tableData = ref({
   data: [],
@@ -79,7 +83,11 @@ const handleView = async (row) => {
 
   const apiBaseUrl = `/v1/iam/rbac/role/${id}`
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+    method: 'GET',
+    options: {},
+    autoFetch: true,
+  })
 
   await request()
 
@@ -92,7 +100,7 @@ const handleView = async (row) => {
       readonly: true,
       hideSubmit: true,
     },
-    'View Roles'
+    'View Role'
   )
 }
 
@@ -114,13 +122,17 @@ const handleEdit = async (row) => {
 
   // Fetch appointment data before opening the modal
   const apiBaseUrl = `/v1/iam/rbac/role/${id}`
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+    method: 'GET',
+    options: {},
+    autoFetch: true,
+  })
 
   await request() // Fetch data before opening modal
 
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
-    const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+    const { data, request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
     await updateData(updatedData)
     if (error.value) {
       console.log('Error', error.value)
@@ -135,7 +147,7 @@ const handleEdit = async (row) => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Role Updated successfully',
+      text: data.value?.alertifyPayload?.message ?? 'Role Updated successfully',
       showConfirmButton: false,
       showCancelButton: false,
       draggable: true,
@@ -176,7 +188,7 @@ const handleCreate = async () => {
   const handleSubmit = async (newData) => {
     const apiBaseUrl = `/v1/iam/rbac/role`
 
-    const { request: createData, error } = useApi(apiBaseUrl, 'POST')
+    const { data, request: createData, error } = useApi(apiBaseUrl, { method: 'POST' })
 
     await createData(newData)
 
@@ -192,7 +204,7 @@ const handleCreate = async () => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Roles Created successfully',
+      text: data.value?.alertifyPayload?.message ?? 'Role Created successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -212,7 +224,7 @@ const handleCreate = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    'Create Roles'
+    'Create Role'
   )
 }
 
@@ -242,7 +254,7 @@ const handleDelete = async (row) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(`/v1/iam/rbac/role/${id}`, 'DELETE')
+      const { data, request, isLoading } = useApi(`/v1/iam/rbac/role/${id}`, { method: 'DELETE' })
 
       await request()
 
@@ -305,7 +317,7 @@ onMounted(() => {
 })
 
 const inLineEditing = async (url, data) => {
-  const { request, error, isLoading } = useApi(url, 'PUT')
+  const { request, error, isLoading } = useApi(url, { method: 'PUT' })
   await request(data)
 
   if (error.value) {
@@ -386,7 +398,12 @@ const customActions = [
         <h1 class="h4 mt-2">List of Roles</h1>
       </div>
       <div class="col-auto mb-4">
-        <Button type="submit" customClass="btn btn-primary" @click="handleCreate" v-tooltip:left="'Add New Role'">
+        <Button
+          type="submit"
+          customClass="btn btn-primary"
+          @click="handleCreate"
+          v-tooltip:left="'Add New Role'"
+        >
           New Role
         </Button>
       </div>
@@ -398,7 +415,7 @@ const customActions = [
         :loading="isLoading"
         :dropDownPerPageOptions="[10, 25, 50]"
         :actions="customActions"
-        action-layout="inline" 
+        action-layout="inline"
         title="Role"
         :pagination-config="{
           show: true,
@@ -414,7 +431,7 @@ const customActions = [
           showRange: true,
         }"
         :toolbar="{
-          show: true ,
+          show: true,
           showCreateButton: true,
         }"
         :expandable-rows="false"

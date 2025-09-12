@@ -7,7 +7,7 @@ const { proxy } = getCurrentInstance()
 const router = useRouter()
 
 const apiBaseUrl = `/v1/admin/user-settings`;
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'POST'});
 
 const formData = ref({});
 

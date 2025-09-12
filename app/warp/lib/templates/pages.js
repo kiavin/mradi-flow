@@ -12,7 +12,7 @@ const { proxy } = getCurrentInstance()
 const router = useRouter()
 
 const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'POST');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'POST', autoAlert: true });
 
 const formData = ref({});
 
@@ -22,17 +22,18 @@ const handleSubmit = async (data) => {
   if (error.value) {
     return 
   }
+//  uncomment if auto alert is disabled
 
-  proxy.$showAlert({ 
-    title: 'Success',
-    icon: 'success', 
-    text: '${resource} created successfully',
-    showConfirmButton: false,
-    showCancelButton: false,
-    draggable: true,
-    timer: 2000, 
-    timerProgressBar: true,
-})
+//   proxy.$showAlert({ 
+//     title: 'Success',
+//     icon: 'success', 
+//     text: data.value?.alertifyPayload?.message ?? '${resource} created successfully',
+//     showConfirmButton: false,
+//     showCancelButton: false,
+//     draggable: true,
+//     timer: 2000, 
+//     timerProgressBar: true,
+// })
   setTimeout(() => {
     router.push({ name: '${moduleName}/${formatResourceName(resource)}' })
   }, 2000)
@@ -69,7 +70,7 @@ const route = useRoute();
 const id = route.params.id;
 const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET' });
 const formData = ref({});
 const errors = ref({});
 
@@ -87,7 +88,7 @@ watch(data, () => {
 
 const handleSubmit = async (updatedData) => {
   // Create a new API call for PUT request
-  const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+  const { request: updateData, error } = useApi(apiBaseUrl,{ method: 'PUT', autoAlert: true })
   await updateData(updatedData)
   if (error.value) {
     console.log('Error', error.value)
@@ -97,16 +98,18 @@ const handleSubmit = async (updatedData) => {
     return
   }
 
-  proxy.$showAlert({
-    title: 'Success',
-    icon: 'success',
-    text: '${resource} Updated successfully',
-    showConfirmButton: false,
-    showCancelButton: false,
-    draggable: true,
-    timer: 2000,
-    timerProgressBar: true,
-  })
+  // uncomment if auto alert set to false
+
+  // proxy.$showAlert({
+  //   title: 'Success',
+  //   icon: 'success',
+  //   text: data.value?.alertifyPayload?.message ?? '${resource} Updated successfully',
+  //   showConfirmButton: false,
+  //   showCancelButton: false,
+  //   draggable: true,
+  //   timer: 2000,
+  //   timerProgressBar: true,
+  // })
   setTimeout(() => {
     router.push({ name: '${moduleName}/${formatResourceName(resource)}' })
   }, 2000)
@@ -142,7 +145,7 @@ const router = useRouter();
 const id = route.params.id;
 const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true);
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: true});
 const formData = ref({});
 
 // onMounted(async () => {
@@ -199,7 +202,7 @@ const modalStore = useModalStore()
 
 const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
   
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false);
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: false});
 
 
 const tableData = ref({
@@ -282,7 +285,7 @@ const handleView = async (row) => {
 
   const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET', options: {}, autoFetch: true })
 
   await request()
 
@@ -322,13 +325,13 @@ const handleEdit = async (row) => {
 
   // Fetch appointment data before opening the modal
   const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`;
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl,{ method: 'GET', options: {}, autoFetch: true, autoAlert: true  })
 
   await request() // Fetch data before opening modal
 
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
-    const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+    const { request: updateData, error } = useApi(apiBaseUrl, {method: 'PUT'})
     await updateData(updatedData)
     if (error.value) {
       console.log('Error', error.value)
@@ -339,15 +342,20 @@ const handleEdit = async (row) => {
     // Close modal on success
     modalStore.closeModal()
 
-    // Show success message
-    proxy.$showAlert({
-      title: 'Success',
-      icon: 'success',
-      text: '${resource} Updated successfully',
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true,
-    })
+    // Show success message 
+
+    // if you are not using auto alert uncomment this block in order to see alerts
+
+    // now auto alert is activated as autoAlert = true if set to false uncomment the block 
+
+    // proxy.$showAlert({
+    //   title: 'Success',
+    //   icon: 'success',
+    //   text: data.value?.alertifyPayload?.message} ?? '${resource} Updated successfully',
+    //   showConfirmButton: false,
+    //   timer: 2000,
+    //   timerProgressBar: true,
+    // })
 
     refresh()
   }
@@ -383,7 +391,7 @@ const handleCreate = async() => {
   const handleSubmit = async (newData) => {
     const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
 
-    const { request: createData, error } = useApi(apiBaseUrl, 'POST')
+    const { request: createData, error } = useApi(apiBaseUrl,{method: 'POST', autoAlert: true })
 
     await createData(newData)
 
@@ -396,14 +404,16 @@ const handleCreate = async() => {
     // Close modal and show success message
     modalStore.closeModal()
 
-    proxy.$showAlert({
-      title: 'Success',
-      icon: 'success',
-      text: '${resource} Created successfully',
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true,
-    })
+    // uncomment if not using auto alert,, now its enabled in the use api ie autoAlert = true
+
+    // proxy.$showAlert({
+    //   title: 'Success',
+    //   icon: 'success',
+    //   text: data.value?.alertifyPayload?.message} ?? '${resource} Created successfully',
+    //   showConfirmButton: false,
+    //   timer: 2000,
+    //   timerProgressBar: true,
+    // })
 
     refresh()
   }
@@ -452,7 +462,7 @@ const handleDelete = async (row) => {
       // autoFetch.value = false
       const { data, request, isLoading } = useApi(
         \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`,
-        'DELETE',
+        { method: 'DELETE' },
       )
 
       await request()
@@ -460,7 +470,7 @@ const handleDelete = async (row) => {
      if (data.value) {
         await proxy.$showAlert({
           title: \`\${action}d!\`,
-          text: data.value?.toastPayload?.toastMessage || 'Record deleted successfully',
+          text: data.value?.alertifyPayload?.message || 'Record deleted successfully',
           icon: 'success',
           showCancelButton: false,
           showConfirmButton: false,
@@ -489,7 +499,7 @@ const handleSearch = (query) => {
   request(null, {
     page: tableData.value.paginationData.currentPage,
     'per-page': tableData.value.paginationData.perPage,
-    _search: query,
+    q: query,
   })
 }
 

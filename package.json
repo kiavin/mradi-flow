@@ -43,6 +43,7 @@
     "ora": "^8.2.0",
     "pdfmake": "^0.2.19",
     "pinia": "^3.0.1",
+    "pinia-plugin-persistedstate": "^4.4.1",
     "register-service-worker": "^1.7.1",
     "simplebar": "^6.2.7",
     "smooth-scrollbar": "^8.7.4",

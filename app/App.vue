@@ -12,6 +12,10 @@ const auth = useAuthStore()
 
 onMounted(() => {
   auth.initStore()
+
+  // if (Notification.permission !== 'granted') {
+  //   Notification.requestPermission()
+  // }
 })
 
 watch(

@@ -1,19 +1,18 @@
 <script setup>
-import { ref, onMounted, watch, getCurrentInstance } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import Form from './form.vue';
+import { ref, onMounted, watch, getCurrentInstance } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import Form from './form.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 
-const route = useRoute();
-const id = route.params.id;
-const apiBaseUrl = `/v1/iam/permissions/${id}`;
+const route = useRoute()
+const id = route.params.id
+const apiBaseUrl = `/v1/iam/permissions/${id}`
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET');
-const formData = ref({});
-const errors = ref({});
-
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET' })
+const formData = ref({})
+const errors = ref({})
 
 watch(data, () => {
   if (data.value) {
@@ -28,7 +27,7 @@ watch(data, () => {
 
 const handleSubmit = async (updatedData) => {
   // Create a new API call for PUT request
-  const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+  const { data, request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
   await updateData(updatedData)
   if (error.value) {
     console.log('Error', error.value)
@@ -41,7 +40,7 @@ const handleSubmit = async (updatedData) => {
   proxy.$showAlert({
     title: 'Success',
     icon: 'success',
-    text: 'Permissions Updated successfully',
+    text: data.value?.alertifyPayload.message ?? 'Permissions Updated successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,
@@ -56,15 +55,9 @@ const handleSubmit = async (updatedData) => {
 
 <template>
   <div class="card p-3">
-
-    <h1 class="h4 mt-2">Update Permissions</h1>
-    <Form 
-    :formData="formData" 
-    :error="errors" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
-    />
-    </div>
+    <h1 class="h4 mt-2">Update Permission</h1>
+    <Form :formData="formData" :error="errors" :isLoading="isLoading" @submit="handleSubmit" />
+  </div>
 </template>
 
 <style scoped></style>

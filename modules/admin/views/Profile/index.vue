@@ -12,7 +12,7 @@ const modalStore = useModalStore()
 
 const apiBaseUrl = `/v1/admin/profiles`
 
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false)
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFtech: false})
 
 const tableData = ref({
   data: [],
@@ -84,7 +84,7 @@ const handleView = async (id) => {
 
   const apiBaseUrl = `/v1/admin/profile/${id}`
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl,{ method: 'GET', options: {}, autoFetch: true})
 
   await request()
 
@@ -122,13 +122,13 @@ const handleEdit = async (id = row.id) => {
 
   // Fetch appointment data before opening the modal
   const apiBaseUrl = `/v1/admin/profile/${id}`
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET', options: {}, autoFetch: true})
 
   await request() // Fetch data before opening modal
 
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
-    const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+    const { data, request: updateData, error } = useApi(apiBaseUrl, {method: 'PUT'})
     await updateData(updatedData)
     if (error.value) {
       console.log('Error', error.value)
@@ -143,7 +143,7 @@ const handleEdit = async (id = row.id) => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Profile Updated successfully',
+      text: data.value?.alertifyPayload?.message ?? 'Profile Updated successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -182,7 +182,7 @@ const handleCreate = async () => {
   const handleSubmit = async (newData) => {
     const apiBaseUrl = `/v1/admin/profile`
 
-    const { request: createData, error } = useApi(apiBaseUrl, 'POST')
+    const { request: createData, error } = useApi(apiBaseUrl, {method: 'POST'})
 
     await createData(newData)
 
@@ -246,7 +246,7 @@ const handleDelete = async (id = row.id, is_deleted = row.is_deleted) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(`/v1/admin/profile/${id}`, 'DELETE')
+      const { data, request, isLoading } = useApi(`/v1/admin/profile/${id}`, {method: 'DELETE'})
 
       await request()
 

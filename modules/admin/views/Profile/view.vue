@@ -9,7 +9,7 @@ const router = useRouter();
 const id = route.params.id;
 const apiBaseUrl = `/v1/admin/profile/${id}`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true);
+const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: true});
 const formData = ref({});
 
 // onMounted(async () => {

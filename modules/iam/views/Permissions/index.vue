@@ -12,7 +12,7 @@ const modalStore = useModalStore()
 
 const apiBaseUrl = `/v1/iam/rbac/permission`
 
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, false)
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl,{method: 'GET', options: {}, autoFetch: false})
 
 const tableData = ref({
   data: [],
@@ -81,7 +81,7 @@ const handleView = async (row) => {
 
   const apiBaseUrl = `/v1/iam/rbac/permission/${id}`
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: true})
 
   await request()
 
@@ -94,7 +94,7 @@ const handleView = async (row) => {
       readonly: true,
       hideSubmit: true,
     },
-    'View Permissions'
+    'View Permission'
   )
 }
 
@@ -120,13 +120,13 @@ const handleEdit = async (row) => {
 
   // Fetch appointment data before opening the modal
   const apiBaseUrl = `/v1/iam/rbac/permission/${id}`
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, 'GET', {}, true)
+  const { data, request, isLoading, error } = useApi(apiBaseUrl,  {method: 'GET', options: {}, autoFetch: true})
 
   await request() // Fetch data before opening modal
 
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
-    const { request: updateData, error } = useApi(apiBaseUrl, 'PUT')
+    const { data, request: updateData, error } = useApi(apiBaseUrl, {method: 'PUT'})
     await updateData(updatedData)
     if (error.value) {
       console.log('Error', error.value)
@@ -141,7 +141,7 @@ const handleEdit = async (row) => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Permissions Updated successfully',
+      text: data.value?.alertifypayload?.message ?? 'Permissions Updated successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -161,7 +161,7 @@ const handleEdit = async (row) => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
     },
-    'Edit Permissions'
+    'Edit Permission'
   )
 }
 
@@ -180,7 +180,7 @@ const handleCreate = async () => {
   const handleSubmit = async (newData) => {
     const apiBaseUrl = `/v1/iam/permissions`
 
-    const { request: createData, error } = useApi(apiBaseUrl, 'POST')
+    const { data, request: createData, error } = useApi(apiBaseUrl, {method: 'POST'})
 
     await createData(newData)
 
@@ -196,7 +196,7 @@ const handleCreate = async () => {
     proxy.$showAlert({
       title: 'Success',
       icon: 'success',
-      text: 'Permissions Created successfully',
+      text: data.value?.alertifypayload?.message ?? 'Permissions Created successfully',
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -216,7 +216,7 @@ const handleCreate = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    'Create Permissions'
+    'Create Permission'
   )
 }
 
@@ -247,7 +247,7 @@ const handleDelete = async (row) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(`/v1/iam/permissions/${id}`, 'DELETE')
+      const { data, request, isLoading } = useApi(`/v1/iam/permissions/${id}`, {method: 'DELETE'})
 
       await request()
 
@@ -304,7 +304,7 @@ const updatePerPage = async (perPage) => {
 }
 
 const inLineEditing = async (url, data) => {
-  const { request, error, isLoading } = useApi(url, 'PUT')
+  const { request, error, isLoading } = useApi(url, {method: 'PUT'})
   await request(data)
 
   if (error.value) {
