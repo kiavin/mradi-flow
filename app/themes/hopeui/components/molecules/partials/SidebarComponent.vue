@@ -77,13 +77,8 @@ const rawMenus = ref([
     route: 'dashboard',
   },
   {
-    title: 'ProjectDynamicRoute',
-    icon: 'building',
-    route: 'projectDashboard',
-  },
-  {
     title: 'Project Overview',
-    icon: 'chart-line',
+    icon: 'building',
     route: 'projectDashboard',
   },
   {
