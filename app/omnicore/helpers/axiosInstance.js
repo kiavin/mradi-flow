@@ -32,8 +32,8 @@ async function broadcastLogout() {
     const { useRouter } = await import('vue-router')
     const router = useRouter()
 
-    if (router.currentRoute.value.path !== '/iam/auth/login') {
-        router.push('/iam/auth/login')
+    if (router.currentRoute.value.path !== '/iam/login') {
+        router.push('/iam/login')
     }
 }
 

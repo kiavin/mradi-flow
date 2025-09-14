@@ -9,7 +9,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL || '/'),
   routes: [
     {
-      path: '/',
+      path: '/welcome',
       name: 'home',
       component: LandingView,
       meta: { title: 'Omniface - Home', layout: 'main' },

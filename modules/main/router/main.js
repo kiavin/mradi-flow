@@ -8,7 +8,7 @@ export default [
   },
   {
     path: '/main/dashboard',
-    name: 'dashboard',
+    name: 'dashboard2',
     component: () => import('../views/Dashboard.vue'),
     meta: { title: 'Omniface - dashboard', layout: layout }
   }

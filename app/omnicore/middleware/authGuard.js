@@ -13,7 +13,7 @@ export default function authGuard(to, from, next) {
     }
 
     if (!auth.isAuthenticated && !isSafe) {
-        if (currentRouteName === 'iam/auth/login') {
+        if (currentRouteName === 'iam/login') {
             return next()
         }
         return next({ name: 'iam/auth/login' })

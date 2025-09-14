@@ -20,18 +20,18 @@ const handleSubmit = async (data) => {
   await request(data)
 
   if (error.value) {
-    return 
+    return
   }
 //  uncomment if auto alert is disabled
 
-//   proxy.$showAlert({ 
+//   proxy.$showAlert({
 //     title: 'Success',
-//     icon: 'success', 
+//     icon: 'success',
 //     text: data.value?.alertifyPayload?.message ?? '${resource} created successfully',
 //     showConfirmButton: false,
 //     showCancelButton: false,
 //     draggable: true,
-//     timer: 2000, 
+//     timer: 2000,
 //     timerProgressBar: true,
 // })
   setTimeout(() => {
@@ -44,11 +44,11 @@ const handleSubmit = async (data) => {
   <div class="card p-3">
 
     <h1 class="h4 mt-2">Create ${resource}</h1>
-    <Form 
-    :formData="formData" 
-    :error="error" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
+    <Form
+    :formData="formData"
+    :error="error"
+    :isLoading="isLoading"
+    @submit="handleSubmit"
     />
     </div>
 </template>
@@ -120,11 +120,11 @@ const handleSubmit = async (updatedData) => {
   <div class="card p-3">
 
     <h1 class="h4 mt-2">Update ${resource}</h1>
-    <Form 
-    :formData="formData" 
-    :error="errors" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
+    <Form
+    :formData="formData"
+    :error="errors"
+    :isLoading="isLoading"
+    @submit="handleSubmit"
     />
     </div>
 </template>
@@ -173,10 +173,10 @@ watch(data, () => {
       </div>
     </div>
 
-    <Form 
-    :formData="formData" 
-    :error="error" 
-    :isLoading="isLoading" 
+    <Form
+    :formData="formData"
+    :error="error"
+    :isLoading="isLoading"
     :readonly="true"
     hide-submit
     />
@@ -201,7 +201,7 @@ const modalStore = useModalStore()
 
 
 const apiBaseUrl = \`/v1/${moduleName}/${formatResourceName(resource)}\`;
-  
+
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: false});
 
 
@@ -244,14 +244,14 @@ const updateResponseData = () => {
     // Transform the object data into an array if needed
     const responseData = data.value.dataPayload.data
     let formattedData = []
-    
+
     if (typeof responseData === 'object' && !Array.isArray(responseData)) {
       // Convert object to array if API returns object
       formattedData = Object.values(responseData)
     } else if (Array.isArray(responseData)) {
       formattedData = responseData
     }
-    
+
     tableData.value = {
       data: formattedData,
       paginationData: {
@@ -312,7 +312,7 @@ const errors = ref({})
 const handleEdit = async (row) => {
   const id = row.id
   errors.value = {}
-  
+
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
 
   await nextTick(); // ensure store state is updated
@@ -342,11 +342,11 @@ const handleEdit = async (row) => {
     // Close modal on success
     modalStore.closeModal()
 
-    // Show success message 
+    // Show success message
 
     // if you are not using auto alert uncomment this block in order to see alerts
 
-    // now auto alert is activated as autoAlert = true if set to false uncomment the block 
+    // now auto alert is activated as autoAlert = true if set to false uncomment the block
 
     // proxy.$showAlert({
     //   title: 'Success',
@@ -454,11 +454,11 @@ const handleDelete = async (row) => {
     cancelButtonColor: '#d33',
     reverseButtons: true,
   })
- 
+
   if (result.isConfirmed) {
     try {
       // console.log('Deleting record with ID:', id)
-     
+
       // autoFetch.value = false
       const { data, request, isLoading } = useApi(
         \`/v1/${moduleName}/${formatResourceName(resource)}/\${id}\`,
@@ -505,7 +505,7 @@ const handleSearch = (query) => {
 
 const changePage = async (page) => {
   await request(null, { page, 'per-page': tableData.value.paginationData.perPage })
-     
+
   updateResponseData()
 
   console.log('Page changed to: ', data.value)
@@ -556,16 +556,14 @@ onMounted(() => {
       }"
       :toolbar="{
         show: true,
-        showCreateButton: true,
+        showCreateButton: false,
       }"
-      :expandable-rows="true"
-      :filtering="false"
+      :expandable-rows="false"      :filtering="false"
       rowSize="sm"
       :striped="false"
       :multi-select="false"
       :radio-select="false"
-      :break-extra-columns="true"
-      :search-in-backend="true"
+      :break-extra-columns="false"      :search-in-backend="true"
       @view="handleView"
       @edit="handleEdit"
       @delete="handleDelete"
@@ -588,7 +586,7 @@ onMounted(() => {
 
 
 </template>
-  
+
 <style scoped></style>`;
 }
 

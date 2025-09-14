@@ -1,105 +1,182 @@
-<script setup>
-import DefaultSidebar from '~/themes/hopeui/components/organisms/sidebar/DefaultSidebar.vue'
-import SideMenu from '~/themes/hopeui/components/organisms/menu/SideMenu.vue'
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuthStore } from '~/omnicore/stores/authStore'
-import menuData from '~/omnicore/config/menu.json'
-
-const authStore = useAuthStore()
-
-const currentRoute = ref('')
-const route = useRoute()
-const menuItems = ref(menuData) || {}
-const menus = ref(authStore.getMenus())
-
-// const openMenu = ref('')
-
-const toggle = (routeName) => {
-  if (!routeName) return
-  currentRoute.value = currentRoute.value === routeName ? '' : routeName
-}
-
-// const toggle = (routeName) => {
-//   if (!routeName) return
-//   openMenu.value = openMenu.value === routeName ? '' : routeName
-// }
-
-watch(
-  () => route.name,
-  (newVal) => {
-    if (newVal) {
-      // If the route matches a parent menu, open it
-      const parentRoute = menuItems.value.find((item) =>
-        item.children?.some((child) => child.to === newVal)
-      )
-      if (parentRoute) {
-        currentRoute.value = parentRoute.to
-      }
-    }
-  },
-  { immediate: true }
-)
-</script>
-
 <template>
+  <!-- Sidebar Component Start Here -->
   <default-sidebar>
-    <ul class="navbar-nav iq-main-menu" id="sidebar-menu">
-      <!-- <side-menu title="Home" :static-item="true"></side-menu> -->
-      <!-- <side-menu title="Users" icon="circle" :icon-size="10" icon-type="solid" miniTitle="H" :route="{ to: 'iam/roles' }"></side-menu> -->
+    <template #profile-card>
+      <!-- <profile-card></profile-card> -->
+    </template>
+    <hr class="hr-horizontal" />
+    <ul class="navbar-nav iq-main-menu" id="e-commerce">
+      <template v-for="(item, index) in menuItems" :key="index">
+        <side-menu
+          v-if="!item.children"
+          :isTag="item.isTag"
+          :isChild="false"
+          :title="item.title"
+          :icon="item.icon"
+          :miniTitle="item.miniTitle"
+          :route="{ to: item.route }"
+          :static-item="item.static"
+        />
 
-      <side-menu
-        isTag="router-link"
-        title="Home"
-        icon="house"
-        :route="{ to: 'dashboard' }"
-        v-once
-      ></side-menu>
-
-      <template v-for="(menuGroup, key) in menus" :key="key">
-        <template v-for="(menu, index) in menuGroup" :key="index">
-          <!-- Check if menu has submenus -->
-          <side-menu
-            v-if="menu.submenus && menu.submenus.length"
-            :title="menu.label"
-            :icon="menu.icon || 'circle'"
-            :toggle-id="`toggle-${key}-${index}`"
-            :caret-icon="true"
-            :route="{ popup: 'false', to: menu.route }"
-            @onClick="() => toggle(menu.route)"
-            :active="currentRoute.includes(menu.route)"
+        <side-menu
+          v-else
+          :title="item.title"
+          :isChild="true"
+          :icon="item.icon"
+          :miniTitle="item.miniTitle"
+          :toggle-id="item.toggleId"
+          :caret-icon="true"
+          :route="{ popup: 'false', to: item.route }"
+          @onClick="toggle"
+          :active="currentRoute.includes(item.route)"
+        >
+          <b-collapse
+            tag="ul"
+            class="sub-nav"
+            :id="item.toggleId"
+            accordion="e-commerce"
+            :visible="currentRoute.includes(item.route)"
           >
-            <b-collapse
-              tag="ul"
-              class="sub-nav"
-              :id="`toggle-${key}-${index}`"
-              :accordion="`accordion-group-${key}`"
-              :visible="currentRoute.includes(menu.route)"
-            >
-              <side-menu
-                v-for="(submenu, subIndex) in menu.submenus"
-                :key="subIndex"
-                :title="submenu.label"
-                :route="{ to: submenu.route }"
-                :active-submenu="route.name === submenu.route"
-              ></side-menu>
-            </b-collapse>
-          </side-menu>
-
-          <!-- For single (non-collapsible) menu -->
-          <side-menu
-            v-else
-            :title="menu.label"
-            :icon="menu.icon || 'circle'"
-            :route="{ popup: 'false', to: menu.route }"
-            :active="currentRoute.includes(menu.route)"
-          ></side-menu>
-        </template>
+            <side-menu
+              v-for="(subItem, subIndex) in item.children"
+              :key="subIndex"
+              isTag="router-link"
+              :title="subItem.title"
+              :icon="subItem.icon"
+              :icon-size="subItem.iconSize"
+              icon-type="solid"
+              :miniTitle="subItem.miniTitle"
+              :route="{ to: subItem.route }"
+            />
+          </b-collapse>
+        </side-menu>
       </template>
     </ul>
   </default-sidebar>
+  <!-- Sidebar Component End Here -->
 </template>
-<style></style>
 
+<script setup>
+import { onMounted, ref, computed } from 'vue'
+import DefaultSidebar from '~/themes/hopeui/components/organisms/sidebar/DefaultSidebar.vue'
+import SideMenu from '~/themes/hopeui/components/organisms/menu/SideMenu.vue'
+// import ProfileCard from '@/components/custom/sidebar/ProfileCard.vue'
+import { useRoute } from 'vue-router'
+//use menu store to get menus
+import { useAuthStore } from '~/omnicore/stores/authStore'
+import _ from 'lodash'
 
+const menuStore = useAuthStore()
+// const rawMenus = computed(() => menuStore.getMenus())
+// const rawMenus = computed(() => menuStore.user.menus)
 
+const rawMenus = ref([
+  {
+    title: 'Dashboard',
+    icon: 'home',
+    route: 'dashboard',
+  },
+  {
+    title: 'ProjectDynamicRoute',
+    icon: 'building',
+    route: 'projectDashboard',
+  },
+  {
+    title: 'Project Overview',
+    icon: 'chart-line',
+    route: 'projectDashboard',
+  },
+  {
+    title: 'Projects',
+    icon: 'folder',
+    route: 'project/project',
+
+  },
+  {
+    title: 'Expenses',
+    icon: 'money-bill-trend-up',
+    route: 'project/expense',
+  },
+  {
+    title: 'Expense Contributions',
+    icon: 'hand-holding-dollar',
+    route: 'project/expensecontribution',
+
+  },
+  {
+    title: 'Financiers',
+    icon: 'users',
+    route: 'project/financier',
+
+  },
+  {
+    title: 'Project Expenses',
+    icon: 'file-invoice-dollar',
+    route: 'project/projectexpense',
+
+  },
+  {
+    title: 'Project Financiers',
+    icon: 'user-tie',
+    route: 'project/projectfinancier',
+
+  },
+])
+
+const currentRoute = ref('')
+const route = useRoute()
+const toggle = (route) => {
+  if (route === currentRoute.value && route.includes('.')) {
+    const menu = currentRoute.value.split('.')
+    return (currentRoute.value = menu[menu.length - 2])
+  }
+  if (route !== currentRoute.value && currentRoute.value.includes(route)) {
+    return (currentRoute.value = '')
+  }
+  if (route !== currentRoute.value) {
+    return (currentRoute.value = route)
+  }
+  if (route === currentRoute.value) {
+    return (currentRoute.value = '')
+  }
+  return (currentRoute.value = '')
+}
+toggle(route.name)
+
+const menuItems = ref([])
+
+function transformMenuItem(backendItem) {
+  const transformed = {
+    // Only assign 'router-link' if there's a route and it's not a parent with children
+    isTag: backendItem.route && !backendItem.children ? 'router-link' : 'parent',
+    title: backendItem.title,
+    icon: backendItem.icon,
+    miniTitle: backendItem.miniTitle || '',
+    toggleId: backendItem.children
+      ? backendItem.toggleId || backendItem.title.toLowerCase().replace(/\s+/g, '-')
+      : undefined,
+    route: backendItem.route,
+    popup: backendItem.popup || 'false',
+    caretIcon: backendItem.children ? true : false,
+  }
+
+  // Recursively transform children if they exist
+  if (backendItem.children && Array.isArray(backendItem.children)) {
+    transformed.children = backendItem.children.map((child) => transformMenuItem(child))
+  }
+
+  return transformed
+}
+
+onMounted(() => {
+  console.log('Fetching menu items from backend...', rawMenus.value)
+
+  if (Array.isArray(rawMenus.value)) {
+    menuItems.value = rawMenus.value.map((item) => transformMenuItem(item))
+    console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2))
+  } else {
+    console.warn('Expected an array for rawMenus, but got:', rawMenus.value)
+    menuItems.value = []
+  }
+})
+</script>

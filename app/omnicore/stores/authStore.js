@@ -10,11 +10,12 @@ export const useAuthStore = defineStore('userAuth', {
       username: null,
       token: null,
       ipAddr: null,
-    }
+      menus: [],
+      permissions: [],
+    },
   }),
 
   actions: {
-
     initStore() {
       const encryptedToken = localStorage.getItem('user.token')
       const storedUsername = localStorage.getItem('user.username')
@@ -33,7 +34,6 @@ export const useAuthStore = defineStore('userAuth', {
       }
     },
 
-
     setToken(token, username) {
       const encryptedToken = encrypt(token)
       this.user.token = token
@@ -45,12 +45,114 @@ export const useAuthStore = defineStore('userAuth', {
       localStorage.setItem('loggedIn', true)
     },
 
-     
     setUserData(userData) {
       if (userData) {
         const { menus, permissions } = userData
 
-        this.user.menus = menus || {}
+        const menus2 = [
+          {
+            title: 'Dashboard',
+            icon: 'home',
+            route: 'dashboard',
+          },
+          {
+            title: 'Project Overview',
+            icon: 'chart-line',
+            route: 'projectDashboard',
+          },
+          {
+            title: 'Projects',
+            icon: 'folder',
+            route: 'project/project',
+            children: [
+              {
+                title: 'All Projects',
+                route: 'project/project',
+              },
+              {
+                title: 'Create Project',
+                route: 'project/project/create',
+              },
+            ],
+          },
+          {
+            title: 'Expenses',
+            icon: 'money-bill-trend-up',
+            route: 'project/expense',
+            children: [
+              {
+                title: 'All Expenses',
+                route: 'project/expense',
+              },
+              {
+                title: 'Create Expense',
+                route: 'project/expense/create',
+              },
+            ],
+          },
+          {
+            title: 'Expense Contributions',
+            icon: 'hand-holding-dollar',
+            route: 'project/expensecontribution',
+            children: [
+              {
+                title: 'All Contributions',
+                route: 'project/expensecontribution',
+              },
+              {
+                title: 'Create Contribution',
+                route: 'project/expensecontribution/create',
+              },
+            ],
+          },
+          {
+            title: 'Financiers',
+            icon: 'users',
+            route: 'project/financier',
+            children: [
+              {
+                title: 'All Financiers',
+                route: 'project/financier',
+              },
+              {
+                title: 'Create Financier',
+                route: 'project/financier/create',
+              },
+            ],
+          },
+          {
+            title: 'Project Expenses',
+            icon: 'file-invoice-dollar',
+            route: 'project/projectexpense',
+            children: [
+              {
+                title: 'All Project Expenses',
+                route: 'project/projectexpense',
+              },
+              {
+                title: 'Create Project Expense',
+                route: 'project/projectexpense/create',
+              },
+            ],
+          },
+          {
+            title: 'Project Financiers',
+            icon: 'user-tie',
+            route: 'project/projectfinancier',
+            children: [
+              {
+                title: 'All Project Financiers',
+                route: 'project/projectfinancier',
+              },
+              {
+                title: 'Create Project Financier',
+                route: 'project/projectfinancier/create',
+              },
+            ],
+          },
+        ]
+
+        this.user.menus = menus2 || {}
         this.user.permissions = permissions || []
 
         const encryptedMenus = encrypt(JSON.stringify(this.user.menus))
@@ -64,15 +166,7 @@ export const useAuthStore = defineStore('userAuth', {
     },
 
     getMenus() {
-      const encryptedMenus = localStorage.getItem('user.menus')
-      if (!encryptedMenus) return {}
-
-      try {
-        return JSON.parse(decrypt(encryptedMenus))
-      } catch (error) {
-        console.error('Failed to decrypt menus:', error)
-        return {}
-      }
+      return this.user.menus || []
     },
 
     getPermissions() {
@@ -86,7 +180,6 @@ export const useAuthStore = defineStore('userAuth', {
         return []
       }
     },
-
 
     removeToken() {
       this.user.token = null
@@ -129,10 +222,10 @@ export const useAuthStore = defineStore('userAuth', {
       this.removeRefreshToken()
       localStorage.removeItem('user.menus')
       localStorage.removeItem('user.permissions')
-    }
+    },
   },
 
   getters: {
-    isAuthenticated: (state) => state.user.isAuthenticated
-  }
+    isAuthenticated: (state) => state.user.isAuthenticated,
+  },
 })
