@@ -13,7 +13,7 @@ export default {
     // BrandName
   },
   setup() {
-    const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
+    const fallbackRoute = localStorage.getItem('menus2') ? JSON.parse(localStorage.getItem('menus2'))[0].route : '/'
 
     const store = useSetting()
     const sidebarType = computed(() => store.sidebar_type_value)
