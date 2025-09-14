@@ -60,7 +60,7 @@ export default defineConfig({
         target: process.env.API_BASE_URL,
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/v1/, '')
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     },
     cors: false

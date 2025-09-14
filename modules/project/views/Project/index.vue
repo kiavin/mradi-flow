@@ -11,7 +11,7 @@ const router = useRouter();
 const modalStore = useModalStore()
 
 
-const apiBaseUrl = `/v1/project/project`;
+const apiBaseUrl = `/v1/project/projects`;
 
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: false});
 
@@ -28,7 +28,7 @@ const tableData = ref({
   },
 })
 
-const tableColumns = [{"key":"id","label":"Id"},{"key":"name","label":"Name"},{"key":"tender_amount","label":"Tender Amount"}]
+const tableColumns = [{"key":"id","label":"Id"},{"key":"name","label":"Name"},{"key":"bid_amount","label":"Bid Amount"}]
 
 watch(data, () => {
   updateResponseData()
