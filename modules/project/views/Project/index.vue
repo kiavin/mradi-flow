@@ -11,7 +11,7 @@ const router = useRouter();
 const modalStore = useModalStore()
 
 
-const apiBaseUrl = `/v1/project/projects`;
+const apiBaseUrl = `/v1/project/project`;
 
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: false});
 

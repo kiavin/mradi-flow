@@ -10,7 +10,7 @@ const router = useRouter()
 
 const modalStore = useModalStore()
 
-const apiBaseUrl = `/v1/project/expense-contributions`
+const apiBaseUrl = `/v1/project/expense-contribution`
 
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {
   method: 'GET',
