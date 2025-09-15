@@ -4,6 +4,15 @@ import { useRouter } from 'vue-router'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
+import {
+  fetchFinancierOptions,
+  fetchExpenseOptions,
+  fetchProjectOptions,
+} from '../../utils/selectOptionFetcher'
+
+const financierOptions = ref([])
+const expenseOptions = ref([])
+const projectOptions = ref([])
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -35,7 +44,6 @@ const tableColumns = [
   { key: 'financier_id', label: 'Financier Id' },
   { key: 'amount', label: 'Amount' },
   { key: 'status', label: 'Status' },
-
 ]
 
 watch(data, () => {
@@ -154,7 +162,9 @@ const handleEdit = async (row) => {
   })
 
   await request() // Fetch data before opening modal
-
+  financierOptions.value = await fetchFinancierOptions()
+  expenseOptions.value = await fetchExpenseOptions()
+  projectOptions.value = await fetchProjectOptions()
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
     const { request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
@@ -192,6 +202,9 @@ const handleEdit = async (row) => {
     {
       formData: data.value?.dataPayload?.data || {},
       error: errors,
+      financierOptions: financierOptions.value,
+      expenseOptions: expenseOptions.value,
+      projectOptions: projectOptions.value,
       isLoading,
       readonly: false, // Allow editing
       hideSubmit: false,
@@ -211,6 +224,9 @@ const handleCreate = async () => {
     router.push({ name: 'project/expensecontribution/create' })
     return
   }
+  financierOptions.value = await fetchFinancierOptions()
+  expenseOptions.value = await fetchExpenseOptions()
+  projectOptions.value = await fetchProjectOptions()
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
@@ -249,6 +265,9 @@ const handleCreate = async () => {
     {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
+      financierOptions: financierOptions.value,
+      expenseOptions: expenseOptions.value,
+      projectOptions: projectOptions.value,
       isLoading: false,
       readonly: false, // Allow input
       hideSubmit: false,

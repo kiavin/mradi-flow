@@ -1,20 +1,23 @@
 <script setup>
 import { onMounted, ref, watch, getCurrentInstance, nextTick } from 'vue'
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
+import Financier from '@/project/router/Financier'
 
 const { proxy } = getCurrentInstance()
-const router = useRouter();
+const router = useRouter()
 
 const modalStore = useModalStore()
 
+const apiBaseUrl = `/v1/project/projects`
 
-const apiBaseUrl = `/v1/project/projects`;
-
-const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {method: 'GET', options: {}, autoFetch: false});
-
+const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {
+  method: 'GET',
+  options: {},
+  autoFetch: false,
+})
 
 const tableData = ref({
   data: [],
@@ -28,8 +31,14 @@ const tableData = ref({
   },
 })
 
-const tableColumns = [{"key":"id","label":"Id"},{"key":"name","label":"Name"},{"key":"bid_amount","label":"Bid Amount"}]
+const tableColumns = [
+  { key: 'id', label: 'Id' },
+  { key: 'name', label: 'Name' },
+  { key: 'bid_amount', label: 'Bid Amount' },
+]
 
+const financiersUrl = `/v1/project/financiers`
+const financierOptions = ref([]) // store the fetched financiers
 watch(data, () => {
   updateResponseData()
 })
@@ -72,39 +81,62 @@ const updateResponseData = () => {
         totalCount: data.value.dataPayload.totalCount || 0,
         totalPages: data.value.dataPayload.totalPages || 0,
         paginationLinks: data.value.dataPayload.paginationLinks || {},
-      }
+      },
     }
     // console.log('Updated tableData:', JSON.parse(JSON.stringify(tableData.value)))
   }
 }
-
 
 //const handleView = (id = row.id) => {
 // router.push({ name: 'project/project/view', params: { id } });
 //};
 
 const handleView = async (row) => {
-  const id = row.id;
+  const id = row.id
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
 
-  await nextTick(); // ensure store state is updated
+  await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
-    router.push({ name: 'project/project/view', params: { id } });
+    router.push({ name: 'project/project/view', params: { id } })
     return
   }
 
-  const apiBaseUrl = `/v1/project/project/${id}`;
+  const apiBaseUrl = `/v1/project/project/${id}`
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET', options: {}, autoFetch: true })
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+    method: 'GET',
+    options: {},
+    autoFetch: true,
+  })
 
   await request()
+
+  // ✅ Fetch financiers data
+  const {
+    data: financiersData,
+    request: fetchFinanciers,
+    error: financiersError,
+  } = useApi(financiersUrl, { method: 'GET', autoFetch: true, autoAlert: false })
+
+  await fetchFinanciers()
+
+  if (financiersData.value?.dataPayload?.data) {
+    financierOptions.value = financiersData.value.dataPayload.data.map((financier) => ({
+      value: financier.id,
+      label: financier.name,
+    }))
+  } else {
+    console.warn('Could not load financiers:', financiersData.value)
+  }
+  console.log('Financier Options:', financierOptions.value)
 
   modalStore.openModal(
     Form,
     {
       formData: data.value?.dataPayload?.data || {},
       error,
+      Financiers: financierOptions.value, // Pass fetched financiers
       isLoading,
       readonly: true,
       hideSubmit: true,
@@ -117,7 +149,6 @@ const handleView = async (row) => {
 //   router.push({ name: 'project/project/update', params: { id } });
 //}
 
-
 const errors = ref({})
 
 const handleEdit = async (row) => {
@@ -126,23 +157,46 @@ const handleEdit = async (row) => {
 
   modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
 
-  await nextTick(); // ensure store state is updated
+  await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
     // Navigate to the update page
-    router.push({ name: 'project/project/update', params: { id } });
+    router.push({ name: 'project/project/update', params: { id } })
     return
   }
 
   // Fetch appointment data before opening the modal
-  const apiBaseUrl = `/v1/project/project/${id}`;
-  const { data, request, isLoading, error } = useApi(apiBaseUrl,{ method: 'GET', options: {}, autoFetch: true, autoAlert: true  })
+  const apiBaseUrl = `/v1/project/project/${id}`
+  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+    method: 'GET',
+    options: {},
+    autoFetch: true,
+    autoAlert: true,
+  })
 
   await request() // Fetch data before opening modal
 
+  // ✅ Fetch financiers data
+  const {
+    data: financiersData,
+    request: fetchFinanciers,
+    error: financiersError,
+  } = useApi(financiersUrl, { method: 'GET', autoFetch: true, autoAlert: false })
+
+  await fetchFinanciers()
+
+  if (financiersData.value?.dataPayload?.data) {
+    financierOptions.value = financiersData.value.dataPayload.data.map((financier) => ({
+      value: financier.id,
+      label: financier.name,
+    }))
+  } else {
+    console.warn('Could not load financiers:', financiersData.value)
+  }
+  console.log('Financier Options:', financierOptions.value)
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
-    const { request: updateData, error } = useApi(apiBaseUrl, {method: 'PUT'})
+    const { request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
     await updateData(updatedData)
     if (error.value) {
       console.log('Error', error.value)
@@ -176,6 +230,7 @@ const handleEdit = async (row) => {
     Form,
     {
       formData: data.value?.dataPayload?.data || {},
+      Financiers: financierOptions.value, // Pass fetched financiers
       error: errors,
       isLoading,
       readonly: false, // Allow editing
@@ -186,12 +241,11 @@ const handleEdit = async (row) => {
   )
 }
 
-
-const handleCreate = async() => {
+const handleCreate = async () => {
   errors.value = {}
   modalStore.toggleModalUsage(true)
 
-  await nextTick(); // ensure store state is updated
+  await nextTick() // ensure store state is updated
 
   if (!modalStore.useModal) {
     router.push({ name: 'project/project/create' })
@@ -200,9 +254,9 @@ const handleCreate = async() => {
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
-    const apiBaseUrl = `/v1/project/project`;
+    const apiBaseUrl = `/v1/project/project`
 
-    const { request: createData, error } = useApi(apiBaseUrl,{method: 'POST', autoAlert: true })
+    const { request: createData, error } = useApi(apiBaseUrl, { method: 'POST', autoAlert: true })
 
     await createData(newData)
 
@@ -235,6 +289,7 @@ const handleCreate = async() => {
     {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
+      Financiers: financierOptions.value, // Pass fetched financiers
       isLoading: false,
       readonly: false, // Allow input
       hideSubmit: false,
@@ -244,11 +299,10 @@ const handleCreate = async() => {
   )
 }
 
-
 const handleDelete = async (row) => {
-  const id = row.id;
+  const id = row.id
   const is_deleted = row.is_deleted
-   const action = is_deleted ? 'Restore' : 'Delete'
+  const action = is_deleted ? 'Restore' : 'Delete'
 
   const confirmationText = is_deleted
     ? 'You are about to restore this record. Do you want to proceed?'
@@ -271,14 +325,11 @@ const handleDelete = async (row) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(
-        `/v1/project/project/${id}`,
-        { method: 'DELETE' },
-      )
+      const { data, request, isLoading } = useApi(`/v1/project/project/${id}`, { method: 'DELETE' })
 
       await request()
 
-     if (data.value) {
+      if (data.value) {
         await proxy.$showAlert({
           title: `${action}d!`,
           text: data.value?.alertifyPayload?.message || 'Record deleted successfully',
@@ -303,7 +354,6 @@ const handleDelete = async (row) => {
     console.log('Deletion cancelled')
   }
   // await refresh()
-
 }
 
 const handleSearch = (query) => {
@@ -329,7 +379,6 @@ const updatePerPage = async (perPage) => {
     'per-page': perPage,
   })
   updateResponseData()
-
 }
 
 onMounted(() => {
@@ -340,64 +389,64 @@ onMounted(() => {
 </script>
 <template>
   <div class="card p-3">
-   <div class="row d-flex justify-content-between align-items-center mb-3">
+    <div class="row d-flex justify-content-between align-items-center mb-3">
       <div class="col-auto">
         <h1 class="h4 mt-2">List of Project</h1>
       </div>
       <div class="col-auto mb-4">
-        <Button type="submit" customClass="btn btn-primary" @click="handleCreate"> New Project </Button>
+        <Button type="submit" customClass="btn btn-primary" @click="handleCreate">
+          New Project
+        </Button>
       </div>
 
       <OmniGridView
-      :columns="tableColumns"
-      :data="tableData"
-      :loading="isLoading"
-      action-layout="inline"
-      :pagination-config="{
-        variant: 'circle',
-        position: 'right',
-        bgColor: '#4f46e5',
-        hoverBgColor: '#6366f1',
-        textColor: '#374151',
-        activeTextColor: '#ffffff',
-        showFirstLast: true,
-        showNumbers: true,
-        showTotal: true,
-        showRange: true,
-      }"
-      :toolbar="{
-        show: true,
-        // showCreateButton: false,
-      }"
-      :expandable-rows="false"
-      :filtering="false"
-      rowSize="sm"
-      :striped="false"
-      :multi-select="false"
-      :radio-select="false"
-      :break-extra-columns="false"
-      :search-in-backend="true"
-      @view="handleView"
-      @edit="handleEdit"
-      @delete="handleDelete"
-      @search="handleSearch"
-      @changePage="changePage"
-      @update:perPage="updatePerPage"
-      @refresh="request"
-    >
-      <template #left-buttons>
-        <Button class="btn btn-success btn-sm" @click="handleCreate" style="font-size: 1.2rem">
-          <template #icon>
-            <font-awesome-icon :icon="['fas', 'plus']" />
-          </template>
-         New Project
-        </Button>
-      </template>
-    </OmniGridView>
+        :columns="tableColumns"
+        :data="tableData"
+        :loading="isLoading"
+        action-layout="inline"
+        :pagination-config="{
+          variant: 'circle',
+          position: 'right',
+          bgColor: '#4f46e5',
+          hoverBgColor: '#6366f1',
+          textColor: '#374151',
+          activeTextColor: '#ffffff',
+          showFirstLast: true,
+          showNumbers: true,
+          showTotal: true,
+          showRange: true,
+        }"
+        :toolbar="{
+          show: true,
+          // showCreateButton: false,
+        }"
+        :expandable-rows="false"
+        :filtering="false"
+        rowSize="sm"
+        :striped="false"
+        :multi-select="false"
+        :radio-select="false"
+        :break-extra-columns="false"
+        :search-in-backend="true"
+        @view="handleView"
+        @edit="handleEdit"
+        @delete="handleDelete"
+        @search="handleSearch"
+        @changePage="changePage"
+        @update:perPage="updatePerPage"
+        @refresh="request"
+      >
+        <template #left-buttons>
+          <Button class="btn btn-success btn-sm" @click="handleCreate" style="font-size: 1.2rem">
+            <template #icon>
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </template>
+            New Project
+          </Button>
+        </template>
+      </OmniGridView>
+    </div>
   </div>
-</div>
-
-
 </template>
 
 <style scoped></style>

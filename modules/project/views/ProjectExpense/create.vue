@@ -1,34 +1,34 @@
 <script setup>
-import { ref, getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import Form from './form.vue';
+import Form from './form.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 
-const apiBaseUrl = `/v1/project/project-expense`;
-const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'POST', autoAlert: true });
+const apiBaseUrl = `/v1/project/project-expense`
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'POST', autoAlert: true })
 
-const formData = ref({});
+const formData = ref({})
 
 const handleSubmit = async (data) => {
   await request(data)
 
   if (error.value) {
-    return 
+    return
   }
-//  uncomment if auto alert is disabled
+  //  uncomment if auto alert is disabled
 
-//   proxy.$showAlert({ 
-//     title: 'Success',
-//     icon: 'success', 
-//     text: data.value?.alertifyPayload?.message ?? 'ProjectExpense created successfully',
-//     showConfirmButton: false,
-//     showCancelButton: false,
-//     draggable: true,
-//     timer: 2000, 
-//     timerProgressBar: true,
-// })
+  //   proxy.$showAlert({
+  //     title: 'Success',
+  //     icon: 'success',
+  //     text: data.value?.alertifyPayload?.message ?? 'ProjectExpense created successfully',
+  //     showConfirmButton: false,
+  //     showCancelButton: false,
+  //     draggable: true,
+  //     timer: 2000,
+  //     timerProgressBar: true,
+  // })
   setTimeout(() => {
     router.push({ name: 'project/project-expense' })
   }, 2000)
@@ -37,15 +37,16 @@ const handleSubmit = async (data) => {
 
 <template>
   <div class="card p-3">
-
     <h1 class="h4 mt-2">Create ProjectExpense</h1>
-    <Form 
-    :formData="formData" 
-    :error="error" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
+    <Form
+      :formData="formData"
+      :error="error"
+      :expenseOptions="expenseOptions"
+      :projectOptions="projectOptions"
+      :isLoading="isLoading"
+      @submit="handleSubmit"
     />
-    </div>
+  </div>
 </template>
 
 <style scoped></style>

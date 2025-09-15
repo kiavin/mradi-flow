@@ -4,6 +4,11 @@ import { useRouter } from 'vue-router'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
+import {
+  fetchFinancierOptions,
+  fetchExpenseOptions,
+  fetchProjectOptions,
+} from '../../utils/selectOptionFetcher'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -29,6 +34,10 @@ const tableData = ref({
     paginationLinks: {},
   },
 })
+
+const financierOptions = ref([])
+const expenseOptions = ref([])
+const projectOptions = ref([])
 
 const tableColumns = [
   { key: 'project_id', label: 'Project Id' },
@@ -110,11 +119,18 @@ const handleView = async (row) => {
 
   await request()
 
+  financierOptions.value = await fetchFinancierOptions()
+  expenseOptions.value = await fetchExpenseOptions()
+  projectOptions.value = await fetchProjectOptions()
+
   modalStore.openModal(
     Form,
     {
       formData: data.value?.dataPayload?.data || {},
       error,
+      financierOptions: financierOptions.value,
+      expenseOptions: expenseOptions.value,
+      projectOptions: projectOptions.value,
       isLoading,
       readonly: true,
       hideSubmit: true,
@@ -153,6 +169,9 @@ const handleEdit = async (row) => {
   })
 
   await request() // Fetch data before opening modal
+  financierOptions.value = await fetchFinancierOptions()
+  expenseOptions.value = await fetchExpenseOptions()
+  projectOptions.value = await fetchProjectOptions()
 
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
@@ -191,6 +210,9 @@ const handleEdit = async (row) => {
     {
       formData: data.value?.dataPayload?.data || {},
       error: errors,
+      financierOptions: financierOptions.value,
+      expenseOptions: expenseOptions.value,
+      projectOptions: projectOptions.value,
       isLoading,
       readonly: false, // Allow editing
       hideSubmit: false,
@@ -225,6 +247,10 @@ const handleCreate = async () => {
       return
     }
 
+    financierOptions.value = await fetchFinancierOptions()
+    expenseOptions.value = await fetchExpenseOptions()
+    projectOptions.value = await fetchProjectOptions()
+
     // Close modal and show success message
     modalStore.closeModal()
 
@@ -248,6 +274,9 @@ const handleCreate = async () => {
     {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
+      financierOptions: financierOptions.value,
+      expenseOptions: expenseOptions.value,
+      projectOptions: projectOptions.value,
       isLoading: false,
       readonly: false, // Allow input
       hideSubmit: false,

@@ -7,6 +7,10 @@ import SelectComponent from '@/project/components/atoms/SelectComponent.vue'
 const props = defineProps({
   formData: Object,
   error: Object,
+  Financiers: {
+    type: Array,
+    default: () => [],
+  },
   isLoading: Boolean,
   readonly: {
     type: Boolean,
@@ -19,14 +23,7 @@ const props = defineProps({
   onSubmit: Function,
 })
 
-const financierOptions = [
-  'Equity Bank',
-  'KCB Group',
-  'NCBA Bank',
-  'Standard Chartered',
-  'Family Bank',
-  'Co-op Bank'
-]
+const financierOptions = ref(props.Financiers)
 
 const emit = defineEmits(['submit', 'update'])
 
@@ -78,7 +75,7 @@ const onSubmit = () => {
           placeholder="Choose one or more financiers"
           class="form-control"
           :disabled="readonly"
-        />
+        />{{ financierOptions }}
         <p v-if="error?.financiers" class="text-danger">{{ error.financiers }}</p>
       </b-form-group>
 

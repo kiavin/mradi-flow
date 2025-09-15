@@ -2,6 +2,7 @@
 import { ref, onMounted, watch, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Form from './form.vue';
+import Financier from '@/project/router/Financier';
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -10,7 +11,9 @@ const route = useRoute();
 const id = route.params.id;
 const apiBaseUrl = `/v1/project/project/${id}`;
 
-const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET' });
+
+
+const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET', autoFetch: false });
 const formData = ref({});
 const errors = ref({});
 
@@ -20,6 +23,9 @@ watch(data, () => {
     formData.value = data.value.dataPayload.data || {}
   }
 })
+
+
+
 
 //   onMounted(async () => {
 //     await request();
@@ -60,11 +66,12 @@ const handleSubmit = async (updatedData) => {
   <div class="card p-3">
 
     <h1 class="h4 mt-2">Update Project</h1>
-    <Form 
-    :formData="formData" 
-    :error="errors" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
+    <Form
+    :formData="formData"
+    :error="errors"
+    :isLoading="isLoading"
+    :Financiers="Financiers"
+    @submit="handleSubmit"
     />
     </div>
 </template>

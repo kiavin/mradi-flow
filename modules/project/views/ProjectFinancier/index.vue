@@ -4,6 +4,10 @@ import { useRouter } from 'vue-router'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import { useModalStore } from '~/omnicore/stores/modalStore.js'
 import Form from './form.vue'
+import {
+  fetchFinancierOptions,
+  fetchProjectOptions,
+} from '../../utils/selectOptionFetcher'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -37,6 +41,9 @@ const tableColumns = [
   { key: 'status', label: 'Status' },
 
 ]
+
+const financierOptions = ref([])
+const projectOptions = ref([])
 
 watch(data, () => {
   updateResponseData()
@@ -111,11 +118,16 @@ const handleView = async (row) => {
 
   await request()
 
+  projectOptions.value = await fetchProjectOptions()
+  financierOptions.value = await fetchFinancierOptions()
+
   modalStore.openModal(
     Form,
     {
       formData: data.value?.dataPayload?.data || {},
       error,
+      projectOptions: projectOptions.value,
+      financierOptions: financierOptions.value,
       isLoading,
       readonly: true,
       hideSubmit: true,
@@ -155,6 +167,9 @@ const handleEdit = async (row) => {
 
   await request() // Fetch data before opening modal
 
+  projectOptions.value = await fetchProjectOptions()
+  financierOptions.value = await fetchFinancierOptions()
+
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
     const { request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
@@ -192,6 +207,8 @@ const handleEdit = async (row) => {
     {
       formData: data.value?.dataPayload?.data || {},
       error: errors,
+      projectOptions: projectOptions.value,
+      financierOptions: financierOptions.value,
       isLoading,
       readonly: false, // Allow editing
       hideSubmit: false,
@@ -211,6 +228,9 @@ const handleCreate = async () => {
     router.push({ name: 'project/projectfinancier/create' })
     return
   }
+
+  projectOptions.value = await fetchProjectOptions()
+  financierOptions.value = await fetchFinancierOptions()
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
@@ -249,6 +269,8 @@ const handleCreate = async () => {
     {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
+      projectOptions: projectOptions.value,
+      financierOptions: financierOptions.value,
       isLoading: false,
       readonly: false, // Allow input
       hideSubmit: false,

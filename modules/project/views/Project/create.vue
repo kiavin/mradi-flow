@@ -15,18 +15,18 @@ const handleSubmit = async (data) => {
   await request(data)
 
   if (error.value) {
-    return 
+    return
   }
 //  uncomment if auto alert is disabled
 
-//   proxy.$showAlert({ 
+//   proxy.$showAlert({
 //     title: 'Success',
-//     icon: 'success', 
+//     icon: 'success',
 //     text: data.value?.alertifyPayload?.message ?? 'Project created successfully',
 //     showConfirmButton: false,
 //     showCancelButton: false,
 //     draggable: true,
-//     timer: 2000, 
+//     timer: 2000,
 //     timerProgressBar: true,
 // })
   setTimeout(() => {
@@ -39,11 +39,12 @@ const handleSubmit = async (data) => {
   <div class="card p-3">
 
     <h1 class="h4 mt-2">Create Project</h1>
-    <Form 
-    :formData="formData" 
-    :error="error" 
-    :isLoading="isLoading" 
-    @submit="handleSubmit" 
+    <Form
+    :formData="formData"
+    :error="error"
+    :isLoading="isLoading"
+    :Financiers="Financiers"
+    @submit="handleSubmit"
     />
     </div>
 </template>
