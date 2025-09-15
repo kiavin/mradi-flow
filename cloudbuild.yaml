@@ -1,0 +1,175 @@
+# This Cloud Build configuration defines a CI/CD pipeline for deploying an application
+
+# Define global variables for reusability and easy modification.
+timeout: 1200s
+substitutions:
+  _APP_ID: mini.mradi360.com # Application identifier
+  _REGION: us-central1 # Region for Artifact Registry and Compute Engine instances
+  _DEPLOYMENT_INSTANCE: production-server # Name of your Compute Engine instance
+  _IMAGE: skyforge-mini_mradi360_ui # Name of the Docker image
+  _REPOSITORY: skyforge # Artifact Registry repository name
+  _NETWORK_ADDRESS: 172.20.0.
+# Deployment steps
+steps:
+# Step 2: Build Docker image
+  - name: gcr.io/cloud-builders/docker
+    id: Build docker image
+    args:
+      - build
+      - "--no-cache"
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${SHORT_SHA}"
+      - "."
+# Step 3: Push SHA-tagged image to Artifact Registry
+  - name: gcr.io/cloud-builders/docker
+    id: Push SHA-tagged image
+    waitFor: ["Build docker image"]
+    args:
+      - push
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${SHORT_SHA}"
+# Step 4: Tag the image with 'latest' tag
+  - name: "gcr.io/cloud-builders/docker"
+    id: Tag the image with latest tag
+    waitFor: ["Push SHA-tagged image"]
+    args:
+      - "tag"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${SHORT_SHA}"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:latest"
+# Step 5: Push 'latest' tagged image to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    id: Push latest image
+    waitFor: ["Tag the image with latest tag"]
+    args:
+      - "push"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:latest"
+# Step 6: Initialize SQLite DB on Compute Engine instance
+  - id: "Initialize SQLite DB"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    waitFor: ["Push latest image"]
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_DEPLOYMENT_INSTANCE} --zone=${_REGION}-a --project=$PROJECT_ID --command='
+          # Check if directory exists before creating
+          if [ ! -d "/var/lib/${_REPOSITORY}-data" ]; then
+            echo "Creating directory /var/lib/${_REPOSITORY}-data" &&
+            sudo mkdir -p /var/lib/${_REPOSITORY}-data
+          else
+            echo "Directory /var/lib/${_REPOSITORY}-data already exists"
+          fi &&
+          sudo chown -R 1000:1000 /var/lib/${_REPOSITORY}-data &&
+          echo "Checking database at /var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" &&
+          if [ ! -f "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" ]; then
+            echo "Database does not exist. Creating and initializing..." &&
+            sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "CREATE TABLE IF NOT EXISTS deployments (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, domain TEXT UNIQUE, version TEXT);" &&
+            sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "INSERT INTO deployments (id) VALUES (19);" &&
+            sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "DELETE FROM deployments WHERE id = 19;" &&
+            echo "Database created and initialized." &&
+            echo "Inserting deployment: name=${_IMAGE}, domain=${_APP_ID}, version=${SHORT_SHA}" &&
+            sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "INSERT INTO deployments (name, domain, version) VALUES (\"${_IMAGE}\", \"${_APP_ID}\", \"${SHORT_SHA}\");" ||
+            { echo "SQLite command failed"; exit 1; }
+          else
+            echo "Database already exists. Checking for domain ${_APP_ID}..." &&
+            if [ "$(sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "SELECT COUNT(*) FROM deployments WHERE domain = \"${_APP_ID}\";")" -gt 0 ]; then
+              echo "Domain ${_APP_ID} exists. Updating name and version..." &&
+              sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "UPDATE deployments SET name = \"${_IMAGE}\", version = \"${SHORT_SHA}\" WHERE domain = \"${_APP_ID}\";"
+            else
+              echo "Domain ${_APP_ID} does not exist. Truncating, resetting auto-increment, and inserting new record..." &&
+              sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "INSERT INTO deployments (name, domain, version) VALUES (\"${_IMAGE}\", \"${_APP_ID}\", \"${SHORT_SHA}\");"
+            fi 
+          fi &&
+          # Store the ID in a file and Verify
+          sudo sqlite3 "/var/lib/${_REPOSITORY}-data/${_REPOSITORY}.db" "SELECT id FROM deployments WHERE domain = \"${_APP_ID}\";" | sudo tee /tmp/host_id ||
+            { echo "SQLite command failed"; exit 1; }
+          echo "Deployment ID for domain ${_APP_ID}: $(cat /tmp/host_id)"
+        ' &&
+        # Copy the ID file back to Cloud Build workspace
+        gcloud compute scp ${_DEPLOYMENT_INSTANCE}:/tmp/host_id host_id --zone=${_REGION}-a --project=$PROJECT_ID
+# Step 7: Deploy the new Docker image to the Compute Engine instance  
+  - id: "Deploy to Compute Engine"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    waitFor: ["Initialize SQLite DB"]
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_DEPLOYMENT_INSTANCE} --zone=${_REGION}-a --project=$PROJECT_ID --command="
+          gcloud auth configure-docker ${_REGION}-docker.pkg.dev --quiet &&
+
+          # Stop and remove existing container if it exists
+          if sudo docker ps -a --format '{{.Names}}' | grep -w ${_IMAGE}; then
+            sudo docker stop ${_IMAGE} || true
+            sudo docker rm ${_IMAGE} || true
+          fi
+
+          # Run new container with env file
+          sudo docker pull ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${SHORT_SHA} &&
+          sudo docker run -d --restart unless-stopped --name ${_IMAGE} \
+            --network shared \
+            --ip ${_NETWORK_ADDRESS}$(cat host_id) \
+            -v /home/databank/filestore/${_IMAGE}_data:/var/www/html/storage:rw \
+            ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${SHORT_SHA} &&
+          sleep 10 &&
+          sudo docker system prune -f
+        "
+# Step 8: Update Nginx configuration on the Compute Engine instance
+  - id: "Update Nginx Configuration"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    waitFor: ["Deploy to Compute Engine"]
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_DEPLOYMENT_INSTANCE} --zone=${_REGION}-a --project=$PROJECT_ID --command="
+          # 🔹 Overwrite nginx config
+          sudo tee /etc/nginx/sites-available/domains/${_APP_ID}.conf > /dev/null <<'EOF'
+          server {
+              listen 80;
+              server_name ${_APP_ID};
+
+              location / {
+                  proxy_pass http://${_NETWORK_ADDRESS}$(cat host_id)/;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_redirect off;
+              }
+          }
+        EOF"
+# Step 9: Test and reload Nginx configuration
+  - id: "Test Nginx Configuration and Reload"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    waitFor: ["Update Nginx Configuration"]
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_DEPLOYMENT_INSTANCE} --zone=${_REGION}-a --project=$PROJECT_ID --command="sudo nginx -t && sudo systemctl reload nginx "
+# Step 10: Configure Let's Encrypt SSL certificate using Certbot
+  - id: "Configure Let's Encrypt SSL"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    waitFor: ["Test Nginx Configuration and Reload"]
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_DEPLOYMENT_INSTANCE} --zone=${_REGION}-a --project=$PROJECT_ID --command="
+          sudo certbot --nginx --non-interactive --agree-tos -m $(gcloud secrets versions access latest --secret=admin_email) --redirect --domains ${_APP_ID}
+        "
+# Step 11: Final Nginx reload to apply SSL configuration
+  - id: "Reload Nginx after SSL Configuration"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    waitFor: ["Configure Let's Encrypt SSL"]
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_DEPLOYMENT_INSTANCE} --zone=${_REGION}-a --project=$PROJECT_ID --command="sudo systemctl reload nginx "
+# Define the images to be pushed to Artifact Registry with appropriate tags.
+images:
+  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE}:${SHORT_SHA}"
+tags:
+  - ${_APP_ID}
+  - ${SHORT_SHA}
+
