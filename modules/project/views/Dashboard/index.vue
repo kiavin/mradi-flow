@@ -69,7 +69,6 @@ const fetchReport = async () => {
     totalFinanciers: Number(raw.total_financiers),
     totalContributions: Number(raw.total_contributions),
     totalProjectsBid: Number(raw.total_bid_amount),
-
   }
 
   console.log('last contribution', raw.last_contribution)
@@ -101,13 +100,13 @@ const fetchReport = async () => {
       const bid = Number(proj.bid_amount || 0)
       const expense = Number(proj.sum_expenses || 0)
 
-      const percent = bid === 0 ? 0 : Math.round(((expense || 1) / bid) * 100)
+      const percent = bid === 0 ? 0 : Math.round(((proj.total_contributions || 1) / expense) * 100)
 
       return {
         id: proj.project_id,
         name: proj.project_name,
         avatar: `storage/logos/mradimainlogo.png`,
-        contributors: proj.contributors.count,
+        contributions: proj.total_contributions,
         expense: expense,
         contribution: bid,
         contributionPercent: percent,
@@ -423,8 +422,8 @@ onMounted(fetchReport)
                 <thead>
                   <tr>
                     <th>PROJECT</th>
-                    <th>CONTRIBUTORS</th>
                     <th>TOTAL EXPENSE</th>
+                    <th>CONTRIBUTORS</th>
                     <th>CONTRIBUTION %</th>
                   </tr>
                 </thead>
@@ -442,24 +441,15 @@ onMounted(fetchReport)
                       </div>
                     </td>
 
-                    <!-- CONTRIBUTORS -->
-                    <td>
-                      <div class="iq-media-group iq-media-group-1">
-                        <a
-                          v-for="(contributor, idx) in project.contributors"
-                          :key="idx"
-                          href="#"
-                          class="iq-media-1"
-                        >
-                          <div class="icon iq-icon-box-3 rounded-pill me-1">
-                            {{ contributor.initials }}
-                          </div>
-                        </a>
-                      </div>
-                    </td>
+
 
                     <!-- EXPENSE -->
                     <td>KES {{ formatAmount(project.expense) }}</td>
+
+                          <!-- CONTRIBUTORS -->
+                    <td>
+                       <td>KES {{ formatAmount(project.contributions) }}</td>
+                    </td>
 
                     <!-- CONTRIBUTION PERCENTAGE -->
                     <td>
