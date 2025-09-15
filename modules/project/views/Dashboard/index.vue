@@ -3,41 +3,133 @@ import { ref } from 'vue'
 
 import Vue3autocounter from 'vue3-autocounter'
 import AnalyticsWidget from '../../components/organisms/AnalyticsWidget.vue'
+import { sum } from 'lodash'
+const summaryData = ref({
+  totalProjects: 0,
+  totalFinanciers: 0,
+  totalExpenses: 0,
+  totalContributions: 0,
+  totalProjectsBid: 0,
+  totalContributed: 0,
+  lastUpdated: getRelativeTime(new Date()), // ⬅️ relative to now
+})
+
+const projects = ref([])
+
+const lastContribution = ref('')
+function getRelativeTime(date) {
+  const now = new Date()
+  const then = new Date(date)
+  const diff = Math.floor((now - then) / 1000) // in seconds
+
+  const units = [
+    { name: 'year', seconds: 31536000 },
+    { name: 'month', seconds: 2592000 },
+    { name: 'week', seconds: 604800 },
+    { name: 'day', seconds: 86400 },
+    { name: 'hour', seconds: 3600 },
+    { name: 'minute', seconds: 60 },
+    { name: 'second', seconds: 1 },
+  ]
+
+  for (const unit of units) {
+    if (diff >= unit.seconds) {
+      const value = Math.floor(diff / unit.seconds)
+      return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-value, unit.name)
+    }
+  }
+
+  return 'just now'
+}
 
 const fetchReport = async () => {
-  const endpoint = `v1/project/report/summary`
-
   const {
     data: reportData,
     request: fetchReport,
     error: reportError,
-  } = useApi(endpoint, {
+  } = useApi('v1/project/report/summary', {
     method: 'GET',
     autoFetch: true,
     autoAlert: false,
   })
-
   await fetchReport()
+  summaryData.value.lastUpdated = new Date().toLocaleString()
 
-  console.log('Report Data:', reportData.value)
+  const raw = reportData.value?.dataPayload?.data
+
+  if (!raw) {
+    console.warn('Missing dashboard data')
+    return
+  }
+
+  // 🌟 Set dashboard summary metrics
+  summaryData.value = {
+    totalProjects: Number(raw.total_projects),
+    totalExpenses: Number(raw.total_expenses),
+    totalFinanciers: Number(raw.total_financiers),
+    totalContributions: Number(raw.total_contributions),
+    totalProjectsBid: Number(raw.total_bid_amount),
+
+  }
+
+  console.log('last contribution', raw.last_contribution)
+
+  // 🌟 Format last contribution
+  lastContribution.value = {
+    contributor: raw.last_contribution?.financier_name || 'N/A',
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      raw.last_contribution?.financier_name || 'N/A',
+    )}&background=0D8ABC&color=fff`,
+    project: raw.last_contribution?.project_name || 'N/A',
+    expense: raw.last_contribution?.expense_name || 'N/A',
+    amount: Number(raw.last_contribution?.amount || 0),
+    date: new Date(raw.last_contribution?.created_at * 1000).toISOString(),
+  }
+
+  // 🟦 Update funding chart (example logic)
+  const funding = Number(raw.total_contributions || 0)
+  const spending = Number(raw.total_expenses || 0)
+  const total = funding + spending || 1
+
+  fundingChart.value.series = [
+    Math.round((funding / total) * 100),
+    Math.round((spending / total) * 100),
+  ]
+  // 🔁 Map `projects`
+  if (Array.isArray(raw.projects)) {
+    projects.value = raw.projects.map((proj, index) => {
+      const bid = Number(proj.bid_amount || 0)
+      const expense = Number(proj.sum_expenses || 0)
+
+      const percent = bid === 0 ? 0 : Math.round(((expense || 1) / bid) * 100)
+
+      return {
+        id: proj.project_id,
+        name: proj.project_name,
+        avatar: `storage/logos/mradimainlogo.png`,
+        contributors: proj.contributors.count,
+        expense: expense,
+        contribution: bid,
+        contributionPercent: percent,
+      }
+    })
+  } else {
+    console.warn('Expected `projects` to be an array in summary response')
+    projects.value = []
+  }
 }
 
-const lastContribution = ref({
-  contributor: 'Equity Bank',
-  avatar: 'https://via.placeholder.com/100x100.png?text=EQ', // Replace with real image
-  project: 'Nairobi Affordable Housing',
-  expense: 'Building Materials',
-  date: '2025-09-10',
-  amount: 5855600,
-})
+// const lastContribution = ref({
+//   contributor: 'Equity Bank',
+//   avatar: 'https://via.placeholder.com/100x100.png?text=EQ', // Replace with real image
+//   project: 'Nairobi Affordable Housing',
+//   expense: 'Building Materials',
+//   date: '2025-09-10',
+//   amount: 5855600,
+// })
 
 // Sample mock data (will come from API later)
-const dashboardMetrics = {
-  totalContributed: 7850000,
-  plannedBudget: 10000000,
-  totalExpenses: 8,
-  lastUpdated: '2 hours ago',
-}
+
 // Bar chart for contributions
 const dashboardCharts = {
   contributions: {
@@ -141,33 +233,6 @@ function formatDate(dateStr) {
   })}`
 }
 
-const projects = [
-  {
-    id: 1,
-    name: 'Affordable Housing Phase 1',
-    avatar: '/assets/images/shapes/01.png',
-    contributors: [
-      { name: 'Equity Bank', initials: 'EB' },
-      { name: 'HF Group', initials: 'HF' },
-    ],
-    expense: 10000000,
-    contribution: 8000000,
-  },
-  {
-    id: 2,
-    name: 'Smart Water Grid',
-    avatar: '/assets/images/shapes/02.png',
-    contributors: [{ name: 'County Govt', initials: 'CG' }],
-    expense: 4000000,
-    contribution: 4000000,
-  },
-]
-
-// Compute contribution % per project
-projects.forEach((project) => {
-  const percent = (project.contribution / project.expense) * 100
-  project.contributionPercent = Math.round(percent)
-})
 onMounted(fetchReport)
 </script>
 <template>
@@ -199,10 +264,10 @@ onMounted(fetchReport)
               prefix="KES "
               :duration="3"
               :startAmount="0"
-              :endAmount="dashboardMetrics.totalContributed"
+              :endAmount="summaryData.totalContributions"
             />
           </h2>
-          <small>Updated {{ dashboardMetrics.lastUpdated }}</small>
+          <small>Updated {{ summaryData.lastUpdated }}</small>
         </div>
         <div>
           <apexchart
@@ -220,8 +285,8 @@ onMounted(fetchReport)
         <!-- Total Expenses -->
         <b-col cols="12">
           <analytics-widget
-            title="Total Expenses"
-            :amount="dashboardMetrics.totalExpenses"
+            title="Total Project Bids"
+            :amount="summaryData.totalProjectsBid"
             description="Registered under this project"
             icon="box"
             button-text="View"
@@ -232,8 +297,8 @@ onMounted(fetchReport)
         <b-col cols="12">
           <analytics-widget
             prefix="KES "
-            title="Planned Budget"
-            :amount="dashboardMetrics.plannedBudget"
+            title="Total Expenses"
+            :amount="summaryData.totalExpenses"
             description="Project Bid Amount"
             icon="file-invoice-dollar"
             button-text="View"

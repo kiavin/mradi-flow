@@ -1,16 +1,15 @@
 const layout = 'hopeui'
 export default [
-
   {
     path: '/',
     name: 'dashboard',
     component: () => import('../views/Dashboard/index.vue'),
-    meta: { title: 'Omniface - Index', layout: layout }
+    meta: { title: 'Omniface - Index', layout: layout },
   },
   {
-    path: '/project/one',
+    path: '/project/:id',
     name: 'projectDashboard',
     component: () => import('../views/Dashboard/projectdash.vue'),
-    meta: { title: 'Omniface - Index', layout: layout }
-  }
-];
+    meta: { title: 'Omniface - Project Dashboard', layout: layout },
+  },
+]

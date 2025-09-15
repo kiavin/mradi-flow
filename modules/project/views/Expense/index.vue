@@ -33,8 +33,6 @@ const tableData = ref({
 const tableColumns = [
   { key: 'name', label: 'Name' },
   { key: 'description', label: 'Description' },
-  { key: 'status', label: 'Status' },
-
 ]
 
 watch(data, () => {
@@ -384,7 +382,8 @@ onMounted(() => {
         :striped="false"
         :multi-select="false"
         :radio-select="false"
-        :break-extra-columns="false"        :search-in-backend="true"
+        :break-extra-columns="false"
+        :search-in-backend="true"
         @view="handleView"
         @edit="handleEdit"
         @delete="handleDelete"

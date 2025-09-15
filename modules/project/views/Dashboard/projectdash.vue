@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch} from 'vue'
 import Vue3autocounter from 'vue3-autocounter'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { useRoute } from 'vue-router'
@@ -10,7 +10,8 @@ import 'swiper/css/pagination'
 
 // Get project ID from route
 const route = useRoute()
-const projectId = route.params.id
+const projectId = ref('')
+
 
 // Format number
 const formatNumber = (val) => Number(val).toLocaleString()
@@ -66,7 +67,9 @@ const fundingChart = ref({
 
 // Fetch project report
 const fetchProjectReport = async () => {
-  const endpoint = `/v1/project/report/project/1`
+  const id = route.params.id
+  console.log('endpoint', id)
+  const endpoint = `/v1/project/report/project/${id}`
 
   const {
     data: reportData,
@@ -162,8 +165,17 @@ const fetchProjectReport = async () => {
     console.warn('Failed to load project report:', reportError.value)
   }
 }
+watch(
+  () => route.params.id,
+  (newId) => {
+    if (newId) {
+      projectId.value = newId
+      fetchProjectReport()
+    }
+  },
+  { immediate: true },
+)
 
-onMounted(fetchProjectReport)
 </script>
 <template>
   <div class="row">

@@ -40,10 +40,10 @@ const expenseOptions = ref([])
 const projectOptions = ref([])
 
 const tableColumns = [
-  { key: 'project_id', label: 'Project Id' },
-  { key: 'expense_id', label: 'Expense Id' },
-  { key: 'total_amount', label: 'Total Amount' },
-  { key: 'status', label: 'Status' },
+  { key: 'project_name', label: 'Project'},
+  { key: 'expense_name', label: 'Expenses'},
+  { key: 'total_amount', label: 'Expense Amount' },
+  {key: 'contributed_amount', label: 'Contributed Amount'}
 ]
 
 watch(data, () => {

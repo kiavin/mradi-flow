@@ -33,7 +33,6 @@ const tableData = ref({
 const tableColumns = [
   { key: 'name', label: 'Name' },
   { key: 'contact', label: 'Contact' },
-  { key: 'status', label: 'Status' },
 
 ]
 

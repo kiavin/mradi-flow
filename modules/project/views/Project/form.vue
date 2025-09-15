@@ -28,8 +28,14 @@ const financierOptions = ref(props.Financiers)
 const emit = defineEmits(['submit', 'update'])
 
 const onSubmit = () => {
-  emit('submit', props.formData) // Emit the form data to the parent
+  const transformedPayload = {
+    ...props.formData,
+    financiers: props.formData.financiers.map((id) => ({ financier_id: id })),
+  }
+
+  emit('submit', transformedPayload) // Emit the transformed payload to the parent
 }
+
 </script>
 
 <template>
@@ -75,7 +81,7 @@ const onSubmit = () => {
           placeholder="Choose one or more financiers"
           class="form-control"
           :disabled="readonly"
-        />{{ financierOptions }}
+        />
         <p v-if="error?.financiers" class="text-danger">{{ error.financiers }}</p>
       </b-form-group>
 

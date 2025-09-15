@@ -40,10 +40,9 @@ const tableData = ref({
 })
 
 const tableColumns = [
-  { key: 'expense_id', label: 'Expense Id' },
-  { key: 'financier_id', label: 'Financier Id' },
+  { key: 'project_name', label: 'Project Name' },
+  { key: 'financier_name', label: 'Financier' },
   { key: 'amount', label: 'Amount' },
-  { key: 'status', label: 'Status' },
 ]
 
 watch(data, () => {

@@ -32,9 +32,11 @@ const tableData = ref({
 })
 
 const tableColumns = [
-  { key: 'id', label: 'Id' },
   { key: 'name', label: 'Name' },
   { key: 'bid_amount', label: 'Bid Amount' },
+  { key: 'total_financiers', label: 'Total Financiers' },
+  {key: 'total_expenses', label: 'Total Expenses' }
+
 ]
 
 const financiersUrl = `/v1/project/financiers`
@@ -93,56 +95,52 @@ const updateResponseData = () => {
 
 const handleView = async (row) => {
   const id = row.id
-  modalStore.toggleModalUsage(true) // if you want to navigate to route set to false
+ //redirect to project dash and pass id as param
+ console.log('fff', id)
+router.push({ name: 'projectDashboard', params: { id: id } })
 
-  await nextTick() // ensure store state is updated
 
-  if (!modalStore.useModal) {
-    router.push({ name: 'project/project/view', params: { id } })
-    return
-  }
+  // const apiBaseUrl = `/v1/project/project/${id}`
 
-  const apiBaseUrl = `/v1/project/project/${id}`
+  // const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+  //   method: 'GET',
+  //   options: {},
+  //   autoFetch: true,
+  // })
 
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
-    method: 'GET',
-    options: {},
-    autoFetch: true,
-  })
+  // await request()
 
-  await request()
+  // // ✅ Fetch financiers data
+  // const {
+  //   data: financiersData,
+  //   request: fetchFinanciers,
+  //   error: financiersError,
+  // } = useApi(financiersUrl, { method: 'GET', autoFetch: true, autoAlert: false })
 
-  // ✅ Fetch financiers data
-  const {
-    data: financiersData,
-    request: fetchFinanciers,
-    error: financiersError,
-  } = useApi(financiersUrl, { method: 'GET', autoFetch: true, autoAlert: false })
+  // await fetchFinanciers()
 
-  await fetchFinanciers()
+  // if (financiersData.value?.dataPayload?.data) {
+  //   financierOptions.value = financiersData.value.dataPayload.data.map((financier) => ({
+  //     value: financier.id,
+  //     label: financier.name,
+  //   }))
+  // } else {
+  //   console.warn('Could not load financiers:', financiersData.value)
+  // }
+  // console.log('Financier Options:', financierOptions.value)
 
-  if (financiersData.value?.dataPayload?.data) {
-    financierOptions.value = financiersData.value.dataPayload.data.map((financier) => ({
-      value: financier.id,
-      label: financier.name,
-    }))
-  } else {
-    console.warn('Could not load financiers:', financiersData.value)
-  }
-  console.log('Financier Options:', financierOptions.value)
-
-  modalStore.openModal(
-    Form,
-    {
-      formData: data.value?.dataPayload?.data || {},
-      error,
-      Financiers: financierOptions.value, // Pass fetched financiers
-      isLoading,
-      readonly: true,
-      hideSubmit: true,
-    },
-    'View Project',
-  )
+  // modalStore.openModal(
+  //   Form,
+  //   {
+  //     formData: data.value?.dataPayload?.data || {},
+  //     error,
+  //     Financiers: financierOptions.value, // Pass fetched financiers
+  //     isLoading,
+  //     readonly: true,
+  //     hideSubmit: true,
+  //   },
+  //   'View Project',
+  // )
 }
 
 //const handleEdit = (id) => {
@@ -251,6 +249,27 @@ const handleCreate = async () => {
     router.push({ name: 'project/project/create' })
     return
   }
+
+
+
+  // ✅ Fetch financiers data
+  const {
+    data: financiersData,
+    request: fetchFinanciers,
+    error: financiersError,
+  } = useApi(financiersUrl, { method: 'GET', autoFetch: true, autoAlert: false })
+
+  await fetchFinanciers()
+
+  if (financiersData.value?.dataPayload?.data) {
+    financierOptions.value = financiersData.value.dataPayload.data.map((financier) => ({
+      value: financier.id,
+      label: financier.name,
+    }))
+  } else {
+    console.warn('Could not load financiers:', financiersData.value)
+  }
+  console.log('Financier Options:', financierOptions.value)
 
   // Define form submission handler
   const handleSubmit = async (newData) => {

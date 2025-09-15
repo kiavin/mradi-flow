@@ -76,11 +76,11 @@ const rawMenus = ref([
     icon: 'home',
     route: 'dashboard',
   },
-  {
-    title: 'Project Overview',
-    icon: 'building',
-    route: 'projectDashboard',
-  },
+  // {
+  //   title: 'Project Overview',
+  //   icon: 'building',
+  //   route: 'projectDashboard',
+  // },
   {
     title: 'Projects',
     icon: 'folder',
