@@ -1,6 +1,205 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import Vue3autocounter from 'vue3-autocounter'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { useRoute } from 'vue-router'
+
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+
+// Get project ID from route
+const route = useRoute()
+const projectId = route.params.id
+
+// Format number
+const formatNumber = (val) => Number(val).toLocaleString()
+
+// Swiper cards - will update later with API values
+const swiperItems = ref([])
+const totalFunding = ref(0)
+const totalExpenses = ref(0)
+
+// Contributors, Contributions, Expenses
+const contributors = ref([])
+const contributions = ref([])
+const expenses = ref([])
+const projectDetails = ref({
+  id: '',
+  name: '',
+  bid_amount: 0,
+  balance: 0,
+  total_contributors: 0,
+})
+
+// Funding Chart
+const fundingChart = ref({
+  series: [0, 0], // Funding %, Spending %
+  options: {
+    chart: {
+      height: 230,
+      type: 'radialBar',
+    },
+    plotOptions: {
+      radialBar: {
+        offsetY: 0,
+        startAngle: 0,
+        endAngle: 270,
+        hollow: {
+          margin: 5,
+          size: '30%',
+        },
+        dataLabels: {
+          name: { show: false },
+          value: {
+            fontSize: '18px',
+            formatter: (val) => `${val}%`,
+          },
+        },
+      },
+    },
+    colors: ['#0d6efd', '#dc3545'], // Funding = blue, Spending = red
+    labels: ['Funding', 'Spending'],
+    legend: { show: false },
+  },
+})
+
+// Fetch project report
+const fetchProjectReport = async () => {
+  const endpoint = `/v1/project/report/project/1`
+
+  const {
+    data: reportData,
+    request: fetchReport,
+    error: reportError,
+  } = useApi(endpoint, {
+    method: 'GET',
+    autoFetch: true,
+    autoAlert: false,
+  })
+
+  await fetchReport()
+
+  if (reportData.value?.dataPayload?.data) {
+    const d = reportData.value.dataPayload.data
+
+    totalFunding.value = Number(d.total_contributions)
+    totalExpenses.value = Number(d.allocated_expenses)
+
+    projectDetails.value = {
+      id: d.project_id,
+      name: d.project_name,
+      bid_amount: Number(d.bid_amount),
+      balance: Number(d.balance),
+      total_contributors: Number(d.total_contributors),
+    }
+    // Prepare swiper cards
+    swiperItems.value = [
+      {
+        subTitle: 'Project Bid Amount',
+        amount: Number(d.bid_amount),
+        icon: 'file-invoice-dollar',
+        color: 'info',
+      },
+      {
+        subTitle: 'Total Expenses',
+        amount: Number(d.allocated_expenses),
+        icon: 'receipt',
+        color: 'danger',
+      },
+      {
+        subTitle: 'Total Contributions',
+        amount: Number(d.total_contributions),
+        icon: 'donate',
+        color: 'success',
+      },
+      {
+        subTitle: 'Total Contributors',
+        amount: Number(d.total_contributors),
+        icon: 'users',
+        color: 'primary',
+      },
+    ]
+
+    // Funding chart values (convert to percentages safely)
+    const bidAmount = Number(d.bid_amount) || 1
+    const fundingPercent = Math.round((Number(d.total_contributions) / bidAmount) * 100)
+    const spendingPercent = Math.round((Number(d.allocated_expenses) / bidAmount) * 100)
+    fundingChart.value.series = [fundingPercent, spendingPercent]
+
+    // Set contributors list
+    contributors.value = (d.contributors || []).map((f) => ({
+      name: f.financier_name,
+      totalAmount: Number(f.total_contribution).toLocaleString(),
+    }))
+
+    // Contributions list
+    contributions.value = (d.contributions || []).map((c) => {
+      const contributor = c.financier_name || 'N/A'
+      const initials = contributor
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+
+      return {
+        contributor,
+        expense: c.expense_name,
+        amount: Number(c.amount),
+        date: new Date(c.created_at * 1000), // Convert from seconds to ms
+        initials,
+      }
+    })
+
+    // Expenses summary (optional: fake until backend supports it)
+    expenses.value = (d.expenses || []).map((e) => ({
+      title: e.expense_name,
+      total: Number(e.allocated_amount),
+      contributed: Number(e.contributed_amount),
+      color: 'info',
+    }))
+  } else {
+    console.warn('Failed to load project report:', reportError.value)
+  }
+}
+
+onMounted(fetchProjectReport)
+</script>
 <template>
   <div class="row">
     <div class="col-md-12 col-lg-12">
+      <b-card
+        class="p-4 mb-4 border-0 text-white"
+        style="
+          background:
+            linear-gradient(rgba(0, 123, 255, 0.9), rgba(0, 123, 255, 0.9)),
+            url('/storage/backgrounds/project-banner.jpg') center/cover no-repeat;
+          border-radius: 0.75rem;
+        "
+      >
+        <div class="d-flex align-items-center justify-content-between flex-wrap">
+          <!-- Icon + Name -->
+          <div class="d-flex align-items-center">
+            <!-- Building Icon -->
+            <div
+              class="rounded-circle bg-white bg-opacity-25 d-flex justify-content-center align-items-center me-3"
+              style="width: 60px; height: 60px"
+            >
+              <font-awesome-icon icon="building" class="text-white fs-3" />
+            </div>
+
+            <!-- Project Info -->
+            <div>
+              <h3 class="mb-1 fw-bold text-white">{{ projectDetails.name }}</h3>
+              <p class="mb-0 text-white-50 small">Project ID: #{{ projectDetails.id }}</p>
+            </div>
+          </div>
+
+          <!-- Status Badge -->
+          <b-badge variant="light" class="text-primary px-3 py-2 rounded-pill"> Active </b-badge>
+        </div>
+      </b-card>
+
       <Swiper
         :slides-per-view="4"
         :space-between="32"
@@ -41,7 +240,7 @@
                     separator=""
                     :duration="3"
                     :startAmount="0"
-                    :endAmount="parseFloat(item.amount) "
+                    :endAmount="parseFloat(item.amount)"
                   />
                 </h4>
                 <p class="mb-0 text-muted">{{ item.subTitle }}</p>
@@ -127,10 +326,8 @@
               <p>{{ contributor.description }}</p>
             </div>
             <div class="text-end">
-
               <p>{{ contributor.totalAmount }}</p>
             </div>
-
           </div>
         </b-card-body>
       </b-card>
@@ -259,7 +456,11 @@
                       <td>
                         <div class="mb-1 d-flex align-items-center">
                           <h6 class="mb-0 me-2">
-                            {{ ((item.contributed / item.total) * 100).toFixed(0) }}%
+                            {{
+                              item.total > 0
+                                ? ((item.contributed / item.total) * 100).toFixed(0)
+                                : '0'
+                            }}%
                           </h6>
                         </div>
                         <div class="shadow-none progress bg-light" style="height: 4px">
@@ -285,157 +486,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import Vue3autocounter from 'vue3-autocounter'
-import { Swiper, SwiperSlide } from 'swiper/vue'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-
-const swiperItems = [
-  {
-    subTitle: 'Project Bid Amount',
-    amount: 25000000, // Example value
-    icon: 'file-invoice-dollar', // FontAwesome icon
-    color: 'info',
-  },
-  {
-    subTitle: 'Total Expenses',
-    amount: 178000, // Example value
-    icon: 'receipt', // FontAwesome icon
-    color: 'danger',
-  },
-  {
-    subTitle: 'Total Contributions',
-    amount: 145500, // Example value
-    icon: 'donate', // FontAwesome icon
-    color: 'success',
-  },
-  {
-    subTitle: 'Total Contributors',
-    amount: 36, // Number of unique contributors
-    icon: 'users', // FontAwesome icon
-    color: 'primary',
-  },
-]
-
-const projectBid = 5500000
-const totalFunding = 2500000
-const totalExpenses= 5000000
-const total = projectBid
-const fundingChart = ref({
-  series: [Math.round((totalFunding / total) * 100), Math.round((totalExpenses/ total) * 100)],
-  options: {
-    chart: {
-      height: 230,
-      type: 'radialBar',
-    },
-    plotOptions: {
-      radialBar: {
-        offsetY: 0,
-        startAngle: 0,
-        endAngle: 270,
-        hollow: {
-          margin: 5,
-          size: '30%',
-        },
-        dataLabels: {
-          name: {
-            show: false,
-          },
-          value: {
-            fontSize: '18px',
-            formatter: (val) => `${val}%`,
-          },
-        },
-      },
-    },
-    colors: ['#0d6efd', '#dc3545'], // Funding = blue, Spending = red
-    labels: ['Funding', 'Spending'],
-    legend: {
-      show: false,
-    },
-  },
-})
-
-const contributors = [
-  {
-    name: 'John Doe',
-    description: 'Contributed for logistics support',
-    date: '12 Sep',
-    totalAmount: 'KES 12,000,000',
-  },
-  {
-    name: 'Jane Smith',
-    description: 'Supplied electrical equipment',
-    date: '14 Sep',
-    totalAmount: 'KES 5,000',
-  },
-  {
-    name: 'Michael Otieno',
-    description: 'Funded resource materials',
-    date: '15 Sep',
-    totalAmount: 'KES 23,000',
-  },
-  {
-    name: 'Sarah Wanjiku',
-    description: 'Volunteered consultation hours',
-    date: '16 Sep',
-    totalAmount: 'KES 4,700,000',
-  },
-]
-
-const contributions = [
-  {
-    contributor: 'Alice Wanjiku',
-    expense: 'Transport & Logistics',
-    amount: 4000,
-    date: '2025-09-11',
-    progress: 50,
-    color: 'info',
-    initials: 'AW',
-  },
-  {
-    contributor: 'Michael Otieno',
-    expense: 'Medical Equipment',
-    amount: 18500,
-    date: '2025-09-09',
-    progress: 100,
-    color: 'success',
-    initials: 'MO',
-  },
-  {
-    contributor: 'Jane Smith',
-    expense: 'Stationery Supplies',
-    amount: 2500,
-    date: '2025-09-12',
-    progress: 30,
-    color: 'warning',
-    initials: 'JS',
-  },
-]
-
-const expenses = [
-  {
-    title: 'Water Tank Installation',
-    total: 20000,
-    contributed: 12500,
-    color: 'primary',
-  },
-  {
-    title: 'Transport & Fuel',
-    total: 8000,
-    contributed: 3000,
-    color: 'info',
-  },
-  {
-    title: 'Medical Camp Setup',
-    total: 15000,
-    contributed: 15000,
-    color: 'success',
-  },
-]
-
-const formatNumber = (val) => Number(val).toLocaleString()
-</script>

@@ -53,7 +53,7 @@ const onSubmit = () => {
         <label for="tender-amount" class="form-label">Bid Amount (KES)</label>
         <b-form-input
           id="tender-amount"
-          v-model.number="formData.tender_amount"
+          v-model.number="formData.bid_amount"
           type="number"
           :disabled="readonly"
           min="0"

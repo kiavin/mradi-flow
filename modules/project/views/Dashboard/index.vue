@@ -4,6 +4,24 @@ import { ref } from 'vue'
 import Vue3autocounter from 'vue3-autocounter'
 import AnalyticsWidget from '../../components/organisms/AnalyticsWidget.vue'
 
+const fetchReport = async () => {
+  const endpoint = `v1/project/report/summary`
+
+  const {
+    data: reportData,
+    request: fetchReport,
+    error: reportError,
+  } = useApi(endpoint, {
+    method: 'GET',
+    autoFetch: true,
+    autoAlert: false,
+  })
+
+  await fetchReport()
+
+  console.log('Report Data:', reportData.value)
+}
+
 const lastContribution = ref({
   contributor: 'Equity Bank',
   avatar: 'https://via.placeholder.com/100x100.png?text=EQ', // Replace with real image
@@ -20,7 +38,6 @@ const dashboardMetrics = {
   totalExpenses: 8,
   lastUpdated: '2 hours ago',
 }
-
 // Bar chart for contributions
 const dashboardCharts = {
   contributions: {
@@ -108,97 +125,6 @@ const activityLogs = ref([
     project: 'Machakos Expansion',
     date: '2025-09-09T23:00:00Z',
   },
-  {
-    amount: 50000,
-    expense: 'Materials',
-    contributor: 'Family Bank',
-    project: 'Embu Affordable Units',
-    date: '2025-09-09T19:45:00Z',
-  },
-  {
-    amount: 120000,
-    expense: 'Construction',
-    contributor: 'KCB Group',
-    project: 'Thika Green Homes',
-    date: '2025-09-08T01:21:00Z',
-  },
-  {
-    amount: 85000,
-    expense: 'Transport',
-    contributor: 'Standard Chartered',
-    project: 'Isiolo Flats',
-    date: '2025-09-08T04:50:00Z',
-  },
-  {
-    amount: 2400000,
-    expense: 'Land Purchase',
-    contributor: 'Equity Bank',
-    project: 'Kibera Housing',
-    date: '2025-09-10T20:10:00Z',
-  },
-  {
-    amount: 150000,
-    expense: 'Licensing',
-    contributor: 'NCBA',
-    project: 'Machakos Expansion',
-    date: '2025-09-09T23:00:00Z',
-  },
-  {
-    amount: 50000,
-    expense: 'Materials',
-    contributor: 'Family Bank',
-    project: 'Embu Affordable Units',
-    date: '2025-09-09T19:45:00Z',
-  },
-  {
-    amount: 120000,
-    expense: 'Construction',
-    contributor: 'KCB Group',
-    project: 'Thika Green Homes',
-    date: '2025-09-08T01:21:00Z',
-  },
-  {
-    amount: 85000,
-    expense: 'Transport',
-    contributor: 'Standard Chartered',
-    project: 'Isiolo Flats',
-    date: '2025-09-08T04:50:00Z',
-  },
-  {
-    amount: 2400000,
-    expense: 'Land Purchase',
-    contributor: 'Equity Bank',
-    project: 'Kibera Housing',
-    date: '2025-09-10T20:10:00Z',
-  },
-  {
-    amount: 150000,
-    expense: 'Licensing',
-    contributor: 'NCBA',
-    project: 'Machakos Expansion',
-    date: '2025-09-09T23:00:00Z',
-  },
-  {
-    amount: 50000,
-    expense: 'Materials',
-    contributor: 'Family Bank',
-    project: 'Embu Affordable Units',
-    date: '2025-09-09T19:45:00Z',
-  },
-  {
-    amount: 120000,
-    expense: 'Construction',
-    contributor: 'KCB Group',
-    project: 'Thika Green Homes',
-    date: '2025-09-08T01:21:00Z',
-  },
-  {
-    amount: 85000,
-    expense: 'Transport',
-    contributor: 'Standard Chartered',
-    project: 'Isiolo Flats',
-    date: '2025-09-08T04:50:00Z',
-  },
 ])
 
 const contributionGrowth = ref(16)
@@ -235,137 +161,6 @@ const projects = [
     expense: 4000000,
     contribution: 4000000,
   },
-  {
-    id: 3,
-    name: 'Nairobi Hospital Upgrade',
-    avatar: '/assets/images/shapes/03.png',
-    contributors: [
-      { name: 'Private Donor', initials: 'PD' },
-      { name: 'Ministry of Health', initials: 'MH' },
-    ],
-    expense: 12000000,
-    contribution: 6000000,
-  },
-  {
-    id: 1,
-    name: 'Affordable Housing Phase 1',
-    avatar: '/assets/images/shapes/01.png',
-    contributors: [
-      { name: 'Equity Bank', initials: 'EB' },
-      { name: 'HF Group', initials: 'HF' },
-    ],
-    expense: 10000000,
-    contribution: 8000000,
-  },
-  {
-    id: 2,
-    name: 'Smart Water Grid',
-    avatar: '/assets/images/shapes/02.png',
-    contributors: [{ name: 'County Govt', initials: 'CG' }],
-    expense: 4000000,
-    contribution: 4000000,
-  },
-  {
-    id: 3,
-    name: 'Nairobi Hospital Upgrade',
-    avatar: '/assets/images/shapes/03.png',
-    contributors: [
-      { name: 'Private Donor', initials: 'PD' },
-      { name: 'Ministry of Health', initials: 'MH' },
-    ],
-    expense: 12000000,
-    contribution: 6000000,
-  },
-  {
-    id: 1,
-    name: 'Affordable Housing Phase 1',
-    avatar: '/assets/images/shapes/01.png',
-    contributors: [
-      { name: 'Equity Bank', initials: 'EB' },
-      { name: 'HF Group', initials: 'HF' },
-    ],
-    expense: 10000000,
-    contribution: 8000000,
-  },
-  {
-    id: 2,
-    name: 'Smart Water Grid',
-    avatar: '/assets/images/shapes/02.png',
-    contributors: [{ name: 'County Govt', initials: 'CG' }],
-    expense: 4000000,
-    contribution: 4000000,
-  },
-  {
-    id: 3,
-    name: 'Nairobi Hospital Upgrade',
-    avatar: '/assets/images/shapes/03.png',
-    contributors: [
-      { name: 'Private Donor', initials: 'PD' },
-      { name: 'Ministry of Health', initials: 'MH' },
-    ],
-    expense: 12000000,
-    contribution: 6000000,
-  },
-  {
-    id: 1,
-    name: 'Affordable Housing Phase 1',
-    avatar: '/assets/images/shapes/01.png',
-    contributors: [
-      { name: 'Equity Bank', initials: 'EB' },
-      { name: 'HF Group', initials: 'HF' },
-    ],
-    expense: 10000000,
-    contribution: 8000000,
-  },
-  {
-    id: 2,
-    name: 'Smart Water Grid',
-    avatar: '/assets/images/shapes/02.png',
-    contributors: [{ name: 'County Govt', initials: 'CG' }],
-    expense: 4000000,
-    contribution: 4000000,
-  },
-  {
-    id: 3,
-    name: 'Nairobi Hospital Upgrade',
-    avatar: '/assets/images/shapes/03.png',
-    contributors: [
-      { name: 'Private Donor', initials: 'PD' },
-      { name: 'Ministry of Health', initials: 'MH' },
-    ],
-    expense: 12000000,
-    contribution: 6000000,
-  },
-  {
-    id: 1,
-    name: 'Affordable Housing Phase 1',
-    avatar: '/assets/images/shapes/01.png',
-    contributors: [
-      { name: 'Equity Bank', initials: 'EB' },
-      { name: 'HF Group', initials: 'HF' },
-    ],
-    expense: 10000000,
-    contribution: 8000000,
-  },
-  {
-    id: 2,
-    name: 'Smart Water Grid',
-    avatar: '/assets/images/shapes/02.png',
-    contributors: [{ name: 'County Govt', initials: 'CG' }],
-    expense: 4000000,
-    contribution: 4000000,
-  },
-  {
-    id: 3,
-    name: 'Nairobi Hospital Upgrade',
-    avatar: '/assets/images/shapes/03.png',
-    contributors: [
-      { name: 'Private Donor', initials: 'PD' },
-      { name: 'Ministry of Health', initials: 'MH' },
-    ],
-    expense: 12000000,
-    contribution: 6000000,
-  },
 ]
 
 // Compute contribution % per project
@@ -373,9 +168,7 @@ projects.forEach((project) => {
   const percent = (project.contribution / project.expense) * 100
   project.contributionPercent = Math.round(percent)
 })
-
-// Format currency
-// const formatAmount = (val) => Number(val).toLocaleString()
+onMounted(fetchReport)
 </script>
 <template>
   <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
@@ -561,12 +354,7 @@ projects.forEach((project) => {
 
           <div class="p-0 card-body">
             <div class="mt-4 table-responsive mb-0" style="max-height: 580px; overflow-y: auto">
-              <table
-                id="projects-table"
-                class="table mb-0 table-striped"
-                role="grid"
-
-              >
+              <table id="projects-table" class="table mb-0 table-striped" role="grid">
                 <thead>
                   <tr>
                     <th>PROJECT</th>
@@ -634,8 +422,8 @@ projects.forEach((project) => {
       </div>
     </b-col>
     <b-col lg="4" md="12">
-      <div class="col-md-12 col-lg-12"  >
-        <b-card no-body class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="600" >
+      <div class="col-md-12 col-lg-12">
+        <b-card no-body class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="600">
           <!-- Header -->
           <b-card-header class="d-flex justify-content-between flex-wrap">
             <div class="header-title">
