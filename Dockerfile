@@ -5,8 +5,9 @@ FROM nginx:alpine
 COPY dist /usr/share/nginx/html
 
 # Copy custom Nginx configuration (optional)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
+
 
 # Expose the port
 EXPOSE 80
-
