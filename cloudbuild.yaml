@@ -127,8 +127,6 @@ steps:
           server {
               listen 80;
               server_name ${_APP_ID};
-              large_client_header_buffers 8 32k;
-              client_header_buffer_size 32k;
               location / {
                   proxy_pass http://${_NETWORK_ADDRESS}$(cat host_id)/;
                   proxy_set_header Host \$host;
