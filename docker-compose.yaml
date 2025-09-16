@@ -7,13 +7,14 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8988:80"
+      - "9005:80"
     volumes:
-      - ./mradi360-vue/dist:/usr/share/nginx/html:rw
+      - ./dist:/usr/share/nginx/html:rw
     networks:
-      tummeet:
-        ipv4_address: 172.19.0.13
+      shared:
+          ipv4_address: 172.19.10.120
 
 networks:
-  tummeet:
+  shared:
     external: true
+    name: playground

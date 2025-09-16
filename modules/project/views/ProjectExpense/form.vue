@@ -11,6 +11,7 @@ const props = defineProps({
   expenseOptions: Array,
   projectOptions: Array,
   isLoading: Boolean,
+  context: String,
   readonly: {
     type: Boolean,
     default: false,
@@ -26,6 +27,9 @@ const emit = defineEmits(['submit', 'update'])
 const expenseOptions = ref(props.expenseOptions)
 const projectOptions = ref(props.projectOptions)
 
+const isReadonly = computed(() => {
+  return props.readonly || props.context === 'Edit'
+})
 
 const onSubmit = () => {
   emit('submit', props.formData) // Emit the form data to the parent
@@ -45,7 +49,7 @@ const onSubmit = () => {
           placeholder="Select Project"
           mode="single"
           class="form-control"
-          :disabled="readonly"
+          :disabled="isReadonly"
         />
         <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
       </b-form-group>
@@ -60,7 +64,7 @@ const onSubmit = () => {
           placeholder="Select Expense"
           mode="single"
           class="form-control"
-          :disabled="readonly"
+          :disabled="isReadonly"
         />
         <p v-if="error?.expense_id" class="text-danger">{{ error.expense_id }}</p>
       </b-form-group>
