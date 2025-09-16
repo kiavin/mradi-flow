@@ -127,10 +127,6 @@ steps:
           server {
               listen 80;
               server_name ${_APP_ID};
-<<<<<<< HEAD
-
-=======
->>>>>>> ac3f17028769793ca18098eabf0a0eb115006178
               location / {
                   proxy_pass http://${_NETWORK_ADDRESS}$(cat host_id)/;
                   proxy_set_header Host \$host;
