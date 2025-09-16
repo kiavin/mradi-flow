@@ -139,7 +139,7 @@ steps:
                   proxy_redirect off;
                   proxy_set_header X-Debug-Host \$proxy_host;
                   proxy_set_header X-Debug-Request \$request_uri;
-                  proxy_set_header X-Debug-Scheme \$scheme
+                  proxy_set_header X-Debug-Scheme \$scheme;
               }
 
           }
