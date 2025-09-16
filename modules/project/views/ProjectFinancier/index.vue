@@ -194,6 +194,7 @@ const handleEdit = async (row) => {
       projectOptions: projectOptions.value,
       financierOptions: financierOptions.value,
       isLoading,
+      context: 'Edit',
       readonly: false, // Allow editing
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
