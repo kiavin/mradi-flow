@@ -210,6 +210,7 @@ const handleEdit = async (row) => {
     {
       formData: data.value?.dataPayload?.data || {},
       error: errors,
+      context: 'Edit',
       financierOptions: financierOptions.value,
       expenseOptions: expenseOptions.value,
       projectOptions: projectOptions.value,
@@ -227,6 +228,10 @@ const handleCreate = async () => {
   modalStore.toggleModalUsage(true)
 
   await nextTick() // ensure store state is updated
+
+  expenseOptions.value = await fetchExpenseOptions()
+  projectOptions.value = await fetchProjectOptions()
+  console.log('after click', projectOptions.value)
 
   if (!modalStore.useModal) {
     router.push({ name: 'project/projectexpense/create' })
@@ -246,10 +251,6 @@ const handleCreate = async () => {
       errors.value = error.value // Assign errors to be passed to the form
       return
     }
-
-    financierOptions.value = await fetchFinancierOptions()
-    expenseOptions.value = await fetchExpenseOptions()
-    projectOptions.value = await fetchProjectOptions()
 
     // Close modal and show success message
     modalStore.closeModal()
@@ -274,7 +275,6 @@ const handleCreate = async () => {
     {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
-      financierOptions: financierOptions.value,
       expenseOptions: expenseOptions.value,
       projectOptions: projectOptions.value,
       isLoading: false,
