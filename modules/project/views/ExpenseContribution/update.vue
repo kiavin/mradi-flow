@@ -20,12 +20,6 @@ watch(data, () => {
     formData.value = data.value.dataPayload.data || {}
   }
 })
-
-//   onMounted(async () => {
-//     await request();
-//     formData.value = data.value || {};
-//   });
-
 const handleSubmit = async (updatedData) => {
   // Create a new API call for PUT request
   const { request: updateData, error } = useApi(apiBaseUrl,{ method: 'PUT', autoAlert: true })
@@ -37,18 +31,6 @@ const handleSubmit = async (updatedData) => {
   if (error.value) {
     return
   }
-
-  // uncomment if auto alert set to false
-
-  // proxy.$showAlert({
-  //   title: 'Success',
-  //   icon: 'success',
-  //   text: data.value?.alertifyPayload?.message ?? 'ExpenseContribution Updated successfully',
-  //   showConfirmButton: false,
-  //   showCancelButton: false,
-  //   draggable: true,
-  //   timer: 2000,
-  //   timerProgressBar: true,
   // })
   setTimeout(() => {
     router.push({ name: 'project/expense-contribution' })

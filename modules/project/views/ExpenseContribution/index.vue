@@ -175,7 +175,6 @@ const handleEdit = async (row) => {
     }
 
     // Close modal on success
-    modalStore.closeModal()
 
     // Show success message
 
