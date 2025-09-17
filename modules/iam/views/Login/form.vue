@@ -4,7 +4,6 @@ import { ref } from 'vue'
 import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
 import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
 import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
-import Particles from '@/iam/components/molecules/Particles.vue'
 // import Spiner from '~/components/atoms/Spiner.vue'
 
 const props = defineProps({
@@ -29,9 +28,8 @@ const onSubmit = () => {
 }
 </script>
 <template>
-  <Particles v-once />
   <section class="login-content">
-    <b-row class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100">
+    <b-row class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100 login-page">
       <b-col cols="12" md="8" lg="6" xl="4" class="px-3" style="width: 450px">
         <b-card class="shadow-sm p-4 text-center mt-3" body-class="p-0">
           <!-- Brand logo -->
@@ -42,7 +40,6 @@ const onSubmit = () => {
             <!-- app-logo -->
             <Logo v-once />
           </router-link>
-
           <!-- Title & subtitle -->
           <p class="mb-4">Login to stay connected.</p>
 
@@ -90,57 +87,18 @@ const onSubmit = () => {
                 <template v-else> LOGIN </template>
               </Button>
             </div>
-
-            <!-- <p class="text-center my-3">or sign in with other accounts</p>
-            <div class="d-flex justify-content-center mb-3">
-              <ul class="list-group list-group-horizontal list-group-flush">
-                <li class="list-group-item border-0 pb-0">
-                  <a href="#">
-                    <img
-                      src="../../../../app/themes/hopeui/assets/images/brands/fb.svg"
-                      alt="fb"
-                      loading="lazy"
-                    />
-                  </a>
-                </li>
-                <li class="list-group-item border-0 pb-0">
-                  <a href="#">
-                    <img
-                      src="../../../../app/themes/hopeui/assets/images/brands/gm.svg"
-                      alt="gm"
-                      loading="lazy"
-                    />
-                  </a>
-                </li>
-                <li class="list-group-item border-0 pb-0">
-                  <a href="#">
-                    <img
-                      src="../../../../app/themes/hopeui/assets/images/brands/im.svg"
-                      alt="im"
-                      loading="lazy"
-                    />
-                  </a>
-                </li>
-                <li class="list-group-item border-0 pb-0">
-                  <a href="#">
-                    <img
-                      src="../../../../app/themes/hopeui/assets/images/brands/li.svg"
-                      alt="li"
-                      loading="lazy"
-                    />
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <p class="text-center">
-              Don’t have an account?
-              <router-link :to="{ name: 'playground' }">Click here to sign up.</router-link>
-            </p> -->
           </form>
         </b-card>
       </b-col>
     </b-row>
   </section>
 </template>
+<style>
+.login-page {
+  background-image: url('../../../../app/themes/hopeui/assets/images/auth/01.png');
+  background-size: cover;
+  background-position: center;
+}
+
+</style>
     

@@ -42,3 +42,7 @@ export async function fetchExpenseOptions() {
 export async function fetchProjectOptions() {
   return await fetchSelectOptions('/v1/project/projects')
 }
+
+export async function fetchProjectExpenseOptions(id) {
+  return await fetchSelectOptions(`/v1/project/expenses/${id}`)
+}

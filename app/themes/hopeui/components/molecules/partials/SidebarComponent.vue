@@ -92,30 +92,30 @@ const rawMenus = ref([
     icon: 'money-bill-trend-up',
     route: 'project/expense',
   },
-  {
-    title: 'Expense Contributions',
-    icon: 'hand-holding-dollar',
-    route: 'project/expensecontribution',
+  // {
+  //   title: 'Expense Contributions',
+  //   icon: 'hand-holding-dollar',
+  //   route: 'project/expensecontribution',
 
-  },
+  // },
   {
     title: 'Financiers',
     icon: 'users',
     route: 'project/financier',
 
   },
-  {
-    title: 'Project Expenses',
-    icon: 'file-invoice-dollar',
-    route: 'project/projectexpense',
+  // {
+  //   title: 'Project Expenses',
+  //   icon: 'file-invoice-dollar',
+  //   route: 'project/projectexpense',
 
-  },
-  {
-    title: 'Project Financiers',
-    icon: 'user-tie',
-    route: 'project/projectfinancier',
+  // },
+  // {
+  //   title: 'Project Financiers',
+  //   icon: 'user-tie',
+  //   route: 'project/projectfinancier',
 
-  },
+  // },
 ])
 
 const currentRoute = ref('')

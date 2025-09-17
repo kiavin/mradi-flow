@@ -436,7 +436,7 @@ onMounted(() => {
           showRange: true,
         }"
         :toolbar="{
-          show: true,
+          show: false,
           // showCreateButton: false,
         }"
         :expandable-rows="false"

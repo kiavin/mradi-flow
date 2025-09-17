@@ -350,7 +350,7 @@ onMounted(() => {
   <div class="card p-3">
     <div class="row d-flex justify-content-between align-items-center mb-3">
       <div class="col-auto">
-        <h1 class="h4 mt-2">List of Financier</h1>
+        <h1 class="h4 mt-2">Financiers</h1>
       </div>
       <div class="col-auto mb-4">
         <Button type="submit" customClass="btn btn-primary" @click="handleCreate">
@@ -376,7 +376,7 @@ onMounted(() => {
           showRange: true,
         }"
         :toolbar="{
-          show: true,
+          show: false,
           showCreateButton: false,
         }"
         :expandable-rows="false"

@@ -8,7 +8,7 @@ import SelectComponent from '@/project/components/atoms/SelectComponent.vue'
 const props = defineProps({
   formData: Object,
   error: Object,
-  projectOptions: Array,
+  projectId: String,
   financierOptions: Array,
   isLoading: Boolean,
   context: String,
@@ -25,34 +25,20 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'update'])
 
-const projectOptions = ref(props.projectOptions || [])
+const projectId = ref(props.projectId || '')
 const financierOptions = ref(props.financierOptions || [])
 
-const isReadOnly = computed(() =>{
+const isReadOnly = computed(() => {
   return props.context || props.readonly
 })
 
 const onSubmit = () => {
+  props.formData.project_id = projectId.value
   emit('submit', props.formData) // Emit the form data to the parent
 }
 </script>
 <template>
   <form @submit.prevent="onSubmit" class="row g-3">
-    <!-- Project Dropdown -->
-    <div class="mb-2 form-group">
-      <Label :labelFor="'project_id'"> Project </Label>
-      <select-component
-        id="project_id"
-        v-model="formData.project_id"
-        :options="projectOptions"
-        placeholder="Select Project"
-        mode="single"
-        class="form-control"
-        :disabled="isReadOnly"
-      />
-      <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
-    </div>
-
     <!-- Financier Dropdown -->
     <div class="mb-2 form-group">
       <Label :labelFor="'financier_id'"> Financier </Label>

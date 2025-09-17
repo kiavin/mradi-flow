@@ -67,14 +67,14 @@ export function useApi(baseUrl, {
     transform = null, // response transformation
     onError = null, // Custom error handler
     onSuccess = null, // custom success hanlder
-    onLoading = null, // onloading hanlder 
+    onLoading = null, // onloading hanlder
     onComplete = null,
     onAbort = null, // onAbort event hanlder
     retry = 0, // number of retry attempts
     retryDelay = 1000,// time between retries in ms
     loadingDelay = 0, // in milliseconds
     timeout = 30000, // New: Default timeout of 30 seconds
-    mock = null,   // mock mode 
+    mock = null,   // mock mode
     pagination = false,
     transformPagination = null,
     realtimeOptions = null

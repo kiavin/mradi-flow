@@ -9,7 +9,7 @@ const props = defineProps({
   error: Object,
   financierOptions: Array,
   expenseOptions: Array,
-  projectOptions: Array,
+  projectId: String,
   isLoading: Boolean,
   readonly: {
     type: Boolean,
@@ -26,33 +26,18 @@ const expenseOptions = ref(props.expenseOptions)
 
 const financierOptions = ref(props.financierOptions)
 
-const projectOptions = ref(props.projectOptions)
+const projectId = ref(props.projectId)
 
 const emit = defineEmits(['submit', 'update'])
 
 const onSubmit = () => {
+  props.formData.project_id = projectId.value
   emit('submit', props.formData) // Emit the form data to the parent
 }
 </script>
 <template>
   <b-card-body>
     <b-form @submit.prevent="onSubmit">
-      <!-- Project ID (Single Select) -->
-      <b-form-group class="mt-3">
-        <label for="project_id" class="form-label">Project</label>
-        <select-component
-          id="project_id"
-          v-model="formData.project_id"
-          :options="projectOptions"
-          mode="single"
-          :close-on-select="true"
-          placeholder="Select Project"
-          class="form-control"
-          :disabled="readonly"
-        />
-        <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
-      </b-form-group>
-
       <!-- Expense ID (Single Select) -->
       <b-form-group class="mt-3">
         <label for="expense_id" class="form-label">Expense</label>
@@ -67,6 +52,7 @@ const onSubmit = () => {
           :disabled="readonly"
         />
         <p v-if="error?.expense_id" class="text-danger">{{ error.expense_id }}</p>
+        <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
       </b-form-group>
 
       <!-- Financier ID (Single Select) -->

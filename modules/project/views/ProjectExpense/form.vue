@@ -9,7 +9,7 @@ const props = defineProps({
   formData: Object,
   error: Object,
   expenseOptions: Array,
-  projectOptions: Array,
+  projectId: String,
   isLoading: Boolean,
   context: String,
   readonly: {
@@ -25,35 +25,20 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'update'])
 const expenseOptions = ref(props.expenseOptions)
-const projectOptions = ref(props.projectOptions)
 
 const isReadonly = computed(() => {
   return props.readonly || props.context === 'Edit'
 })
+const projectId = ref(props.projectId || '')
 
 const onSubmit = () => {
+  props.formData.project_id = projectId.value
   emit('submit', props.formData) // Emit the form data to the parent
 }
 </script>
 <template>
   <b-card-body>
     <b-form @submit.prevent="onSubmit">
-
-      <!-- Project ID (Dropdown) -->
-      <b-form-group>
-        <label for="project-id" class="form-label">Project</label>
-        <select-component
-          id="project-id"
-          v-model="formData.project_id"
-          :options="projectOptions"
-          placeholder="Select Project"
-          mode="single"
-          class="form-control"
-          :disabled="isReadonly"
-        />
-        <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
-      </b-form-group>
-
       <!-- Expense ID (Dropdown) -->
       <b-form-group class="mt-3">
         <label for="expense-id" class="form-label">Expense</label>
@@ -66,6 +51,7 @@ const onSubmit = () => {
           class="form-control"
           :disabled="isReadonly"
         />
+        <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
         <p v-if="error?.expense_id" class="text-danger">{{ error.expense_id }}</p>
       </b-form-group>
 
@@ -93,4 +79,3 @@ const onSubmit = () => {
     </b-form>
   </b-card-body>
 </template>
-

@@ -100,7 +100,10 @@ const fetchReport = async () => {
       const bid = Number(proj.bid_amount || 0)
       const expense = Number(proj.sum_expenses || 0)
 
-      const percent = bid === 0 ? 0 : Math.round(((proj.total_contributions || 1) / expense) * 100)
+const percent = (bid === 0 || expense === 0)
+  ? 0
+  : Math.round((proj.total_contributions / expense) * 100)
+
 
       return {
         id: proj.project_id,
@@ -423,7 +426,7 @@ onMounted(fetchReport)
                   <tr>
                     <th>PROJECT</th>
                     <th>TOTAL EXPENSE</th>
-                    <th>CONTRIBUTORS</th>
+                    <th>CONTRIBUTIONS</th>
                     <th>CONTRIBUTION %</th>
                   </tr>
                 </thead>
