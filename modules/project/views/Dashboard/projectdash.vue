@@ -227,7 +227,7 @@ const handleAddContributor = async () => {
     }
     // Close modal and show success message
     modalStore.closeModal();
-    refreshReportData();
+   fetchProjectReport()
   };
 
   // Open modal with Form component
@@ -284,7 +284,7 @@ const handleViewExpense = async (id) => {
       return; // Stop execution if error occurs
     }
     // Close modal on success
-    refreshReportData();
+    fetchProjectReport()
     modalStore.closeModal();
   };
 
@@ -334,7 +334,7 @@ const handleCreateExpense = async () => {
     }
 
     // Close modal and show success message
-    refreshReportData();
+    fetchProjectReport()
     modalStore.closeModal();
   };
 
@@ -384,7 +384,7 @@ const handleCreateContribution = async () => {
       errors.value = error.value; // Assign errors to be passed to the form
       return;
     }
-    refreshReportData();
+    fetchProjectReport()
     // Close modal and show success message
     modalStore.closeModal();
   };
