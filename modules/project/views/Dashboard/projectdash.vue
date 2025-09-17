@@ -9,16 +9,17 @@ import ContributionForm from "../ExpenseContribution/form.vue";
 
 import Form from "../ProjectFinancier/form.vue";
 import {
-  fetchFinancierOptions,
   fetchExpenseOptions,
+  fetchAvailableFinancierOptions,
+  fetchNewExpenseOptions,
   fetchProjectExpenseOptions,
+  fetchProjectFinancierOptions,
 } from "../../utils/selectOptionFetcher";
 import ExpenseForm from "../ProjectExpense/form.vue";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { prefix } from "@fortawesome/free-solid-svg-icons";
 
 // Get project ID from route
 const route = useRoute();
@@ -27,16 +28,8 @@ const errors = ref({});
 const modalStore = useModalStore();
 const financierOptions = ref([]);
 const expenseOptions = ref([]);
-
-// Format number
-const formatNumber = (val) => Number(val).toLocaleString();
-
-// Swiper cards - will update later with API values
 const swiperItems = ref([]);
 const totalFunding = ref(0);
-const totalExpenses = ref(0);
-
-// Contributors, Contributions, Expenses
 const contributors = ref([]);
 const contributions = ref([]);
 const expenses = ref([]);
@@ -47,8 +40,8 @@ const projectDetails = ref({
   balance: 0,
   total_contributors: 0,
 });
-
-// Funding Chart
+// 💡 Define `refresh` in outer scope
+let refreshReportData;
 const fundingChart = ref({
   series: [0, 0], // Funding %, Spending %
   options: {
@@ -79,8 +72,6 @@ const fundingChart = ref({
     legend: { show: false },
   },
 });
-
-// Fetch project report
 const fetchProjectReport = async () => {
   const id = route.params.id;
   console.log("endpoint", id);
@@ -98,13 +89,15 @@ const fetchProjectReport = async () => {
     autoAlert: false,
   });
 
+  // 🔗 Save refresh to outer scope
+  refreshReportData = refresh;
+
   await fetchReport();
 
   if (reportData.value?.dataPayload?.data) {
     const d = reportData.value.dataPayload.data;
 
     totalFunding.value = Number(d.total_contributions);
-    totalExpenses.value = Number(d.allocated_expenses);
 
     projectDetails.value = {
       id: d.project_id,
@@ -201,7 +194,6 @@ watch(
   },
   { immediate: true }
 );
-
 const handleAddContributor = async () => {
   errors.value = {};
   modalStore.toggleModalUsage(true);
@@ -214,7 +206,9 @@ const handleAddContributor = async () => {
     router.push({ name: "project/projectfinancier/create" });
     return;
   }
-  financierOptions.value = await fetchFinancierOptions();
+  financierOptions.value = await fetchAvailableFinancierOptions(
+    projectId.value
+  );
   // Define form submission handler
   const handleSubmit = async (newData) => {
     const apiBaseUrl = `/v1/project/project-financier`;
@@ -233,6 +227,7 @@ const handleAddContributor = async () => {
     }
     // Close modal and show success message
     modalStore.closeModal();
+    refreshReportData();
   };
 
   // Open modal with Form component
@@ -274,10 +269,35 @@ const handleViewExpense = async (id) => {
 
   expenseOptions.value = await fetchExpenseOptions();
 
+  const expenseUpdateUrl = `/v1/project/expense-contribution/${id}`;
+
+  const handleExpenseUpdate = async (updatedData) => {
+    const { request: updateData, error } = useApi(expenseUpdateUrl, {
+      method: "PUT",
+    });
+    console.log("expense update", updateData);
+
+    await updateData(request);
+    if (error.value) {
+      console.log("Error", error.value);
+      errors.value = error.value; // Assign the error object to errors
+      return; // Stop execution if error occurs
+    }
+    // Close modal on success
+    refreshReportData();
+    modalStore.closeModal();
+  };
+
   modalStore.openModal(
     ExpenseDetailModal,
     {
       expenseData: data.value?.dataPayload?.data || {},
+      onSubmit: handleExpenseUpdate,
+      onContributionsUpdated: () => {
+        console.log("✅ Contributions were updated");
+        refresh(); // or any other logic
+        modalStore.closeModal();
+      },
     },
     "Expense Summary"
   );
@@ -289,7 +309,7 @@ const handleCreateExpense = async () => {
 
   await nextTick(); // ensure store state is updated
 
-  expenseOptions.value = await fetchExpenseOptions(projectId.value);
+  expenseOptions.value = await fetchNewExpenseOptions(projectId.value);
 
   if (!modalStore.useModal) {
     router.push({ name: "project/projectexpense/create" });
@@ -314,20 +334,8 @@ const handleCreateExpense = async () => {
     }
 
     // Close modal and show success message
+    refreshReportData();
     modalStore.closeModal();
-
-    // uncomment if not using auto alert,, now its enabled in the use api ie autoAlert = true
-
-    // proxy.$showAlert({
-    //   title: 'Success',
-    //   icon: 'success',
-    //   text: data.value?.alertifyPayload?.message} ?? 'ProjectExpense Created successfully',
-    //   showConfirmButton: false,
-    //   timer: 2000,
-    //   timerProgressBar: true,
-    // })
-
-    refresh();
   };
 
   // Open modal with Form component
@@ -357,8 +365,8 @@ const handleCreateContribution = async () => {
     router.push({ name: "project/expensecontribution/create" });
     return;
   }
-  financierOptions.value = await fetchFinancierOptions();
-  expenseOptions.value = await fetchExpenseOptions();
+  financierOptions.value = await fetchProjectFinancierOptions(projectId.value);
+  expenseOptions.value = await fetchProjectExpenseOptions(projectId.value);
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
@@ -376,9 +384,9 @@ const handleCreateContribution = async () => {
       errors.value = error.value; // Assign errors to be passed to the form
       return;
     }
+    refreshReportData();
     // Close modal and show success message
     modalStore.closeModal();
-    refresh();
   };
 
   // Open modal with Form component
@@ -388,6 +396,7 @@ const handleCreateContribution = async () => {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
       financierOptions: financierOptions.value,
+      expenseOptions: expenseOptions.value,
       projectId: projectId.value,
       isLoading: false,
       readonly: false, // Allow input
@@ -479,7 +488,7 @@ const handleCreateContribution = async () => {
                 <h4 class="counter">
                   <Vue3autocounter
                     :ref="`counter-${index}`"
-                    :prefix= item.prefix
+                    :prefix="item.prefix"
                     separator=","
                     :duration="1"
                     :startAmount="0"
@@ -644,7 +653,7 @@ const handleCreateContribution = async () => {
             class="d-flex justify-content-between align-items-center"
           >
             <div class="header-title">
-              <h4 class="card-title mb-0">Contributors</h4>
+              <h4 class="card-title mb-0">Contributions</h4>
             </div>
           </b-card-header>
 
