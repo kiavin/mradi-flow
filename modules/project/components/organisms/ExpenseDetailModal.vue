@@ -28,7 +28,6 @@ const expense = ref({});
 const contributions = ref([]);
 const emit = defineEmits(["contributions-updated"]);
 
-
 // Format incoming data
 watch(
   () => props.expenseData,
@@ -77,7 +76,8 @@ const handleSave = async () => {
   errors.value = [];
 
   try {
-    for (const c of contributions.value) {
+    // 1. Track all update promises
+    const updatePromises = contributions.value.map(async (c) => {
       const updatedData = {
         amount: c.amount,
         date: Math.floor(new Date(c.date).getTime() / 1000),
@@ -91,20 +91,33 @@ const handleSave = async () => {
 
       await updateData(updatedData);
 
-      if (error.value) {
-        console.error(
-          `Failed to update contribution ID ${c.contribution_id}`,
-          error.value
-        );
+      // 2. Handle errors for this contribution
+      const serverErrors = error.value?.errors;
+      if (serverErrors && typeof serverErrors === "object") {
+        for (const [field, msg] of Object.entries(serverErrors)) {
+          errors.value.push({
+            id: c.contribution_id,
+            field,
+            message: msg,
+          });
+        }
+      } else if (error.value) {
         errors.value.push({
           id: c.contribution_id,
-          message: error.value?.message || "Update failed",
+          message:
+            error.value?.message ||
+            error.value?.amount ||
+            "Update failed",
         });
       }
-    }
+    });
 
+    // 3. Wait for all updates to finish
+    await Promise.all(updatePromises);
+
+    // 4. Show success only if no errors
     if (errors.value.length === 0) {
-      emit("contributions-updated"); 
+      emit("contributions-updated");
       setTimeout(() => {
         router.push({ name: "project/expense-contribution" });
       }, 1500);
@@ -118,6 +131,7 @@ const handleSave = async () => {
     saving.value = false;
   }
 };
+
 </script>
 
 <template>
@@ -176,12 +190,26 @@ const handleSave = async () => {
             placeholder="Enter amount"
           />
         </template>
-
         <!-- Date Column Editable -->
         <template #cell(date)="row">
           <span>{{ row.item.dateFormatted }}</span>
         </template>
       </b-table>
+      <!-- 🔴 Errors Display -->
+      <div v-if="errors.length > 0" class="mt-3">
+        <div
+          v-for="(error, index) in errors"
+          :key="index"
+          class="text-danger small d-flex align-items-start"
+        >
+          <i class="fas fa-exclamation-circle me-2 mt-1"></i>
+          <span>
+            <strong v-if="error.id">Contribution ID {{ error.id }}:</strong>
+            <span v-if="error.field">[{{ error.field }}] </span>
+            {{ error.message || "An error occurred." }}
+          </span>
+        </div>
+      </div>
       <!-- Save Button -->
       <div class="text-end mt-3">
         <b-button variant="success" @click="handleSave" :disabled="saving">

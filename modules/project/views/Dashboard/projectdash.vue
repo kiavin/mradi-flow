@@ -227,7 +227,7 @@ const handleAddContributor = async () => {
     }
     // Close modal and show success message
     modalStore.closeModal();
-   fetchProjectReport()
+    fetchProjectReport();
   };
 
   // Open modal with Form component
@@ -284,7 +284,7 @@ const handleViewExpense = async (id) => {
       return; // Stop execution if error occurs
     }
     // Close modal on success
-    fetchProjectReport()
+    fetchProjectReport();
     modalStore.closeModal();
   };
 
@@ -334,7 +334,7 @@ const handleCreateExpense = async () => {
     }
 
     // Close modal and show success message
-    fetchProjectReport()
+    fetchProjectReport();
     modalStore.closeModal();
   };
 
@@ -384,7 +384,7 @@ const handleCreateContribution = async () => {
       errors.value = error.value; // Assign errors to be passed to the form
       return;
     }
-    fetchProjectReport()
+    fetchProjectReport();
     // Close modal and show success message
     modalStore.closeModal();
   };
@@ -582,6 +582,7 @@ const handleCreateContribution = async () => {
                       v-for="(item, index) in expenses"
                       :key="index"
                       @click="handleViewExpense(item.id)"
+                      class="hover-lift"
                     >
                       <!-- Expense Title -->
                       <td>
@@ -696,3 +697,17 @@ const handleCreateContribution = async () => {
     </div>
   </div>
 </template>
+<style scoped>
+.hover-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  background-color: #f9f9f9; /* Optional: subtle highlight */
+}
+</style>

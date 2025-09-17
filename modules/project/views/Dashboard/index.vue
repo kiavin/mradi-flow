@@ -108,7 +108,9 @@ const percent = (bid === 0 || expense === 0)
       return {
         id: proj.project_id,
         name: proj.project_name,
-        avatar: `storage/logos/mradimainlogo.png`,
+        avatar: `https://ui-avatars.com/api/` +
+        `?name=${encodeURIComponent(proj?.project_name || 'Project')}` +
+        `&background=1AA053&color=fff&bold=true&size=128`,
         contributions: proj.total_contributions,
         expense: expense,
         contribution: bid,
