@@ -1,3 +1,125 @@
+<script setup>
+import { ref, watch } from "vue";
+import { BTable, BFormInput } from "bootstrap-vue-next";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const errors = ref([]);
+
+// Props
+const props = defineProps({
+  modelValue: Boolean,
+  expenseData: Object,
+  onSubmit: Function,
+});
+
+const show = ref(props.modelValue);
+watch(
+  () => props.modelValue,
+  (val) => (show.value = val)
+);
+watch(show, (val) => emit("update:modelValue", val));
+
+// Format number
+const format = (val) => Number(val).toLocaleString();
+
+// Expense and contributions state
+const expense = ref({});
+const contributions = ref([]);
+const emit = defineEmits(["contributions-updated"]);
+
+
+// Format incoming data
+watch(
+  () => props.expenseData,
+  (data) => {
+    if (!data) return;
+
+    expense.value = {
+      expense_id: data.expense_id,
+      expense_name: data.expense_name,
+      allocated_amount: data.allocated_amount,
+      contributed_amount: data.contributed_amount,
+      balance: data.balance,
+    };
+
+    contributions.value = (data.contributions || []).map((c) => {
+      const dateObj = new Date(c.date * 1000);
+      return {
+        contribution_id: c.contribution_id,
+        financier_name: c.financier_name,
+        amount: Number(c.amount),
+        date: dateObj,
+        dateFormatted: new Intl.DateTimeFormat("en-KE", {
+          weekday: "short",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(dateObj),
+      };
+    });
+  },
+  { immediate: true }
+);
+
+// Table Fields
+const fields = [
+  { key: "financier_name", label: "Financier" },
+  { key: "amount", label: "Amount (KES)" },
+  { key: "date", label: "Date" },
+];
+
+const saving = ref(false);
+
+// Save Handler
+const handleSave = async () => {
+  saving.value = true;
+  errors.value = [];
+
+  try {
+    for (const c of contributions.value) {
+      const updatedData = {
+        amount: c.amount,
+        date: Math.floor(new Date(c.date).getTime() / 1000),
+      };
+
+      const apiBaseUrl = `/v1/project/expense-contribution/${c.contribution_id}`;
+      const { request: updateData, error } = useApi(apiBaseUrl, {
+        method: "PUT",
+        autoAlert: true,
+      });
+
+      await updateData(updatedData);
+
+      if (error.value) {
+        console.error(
+          `Failed to update contribution ID ${c.contribution_id}`,
+          error.value
+        );
+        errors.value.push({
+          id: c.contribution_id,
+          message: error.value?.message || "Update failed",
+        });
+      }
+    }
+
+    if (errors.value.length === 0) {
+      emit("contributions-updated"); 
+      setTimeout(() => {
+        router.push({ name: "project/expense-contribution" });
+      }, 1500);
+    }
+  } catch (err) {
+    console.error("Unexpected Error:", err);
+    errors.value.push({
+      general: "Something went wrong while saving. Please try again.",
+    });
+  } finally {
+    saving.value = false;
+  }
+};
+</script>
+
 <template>
   <b-card no-body class="shadow rounded overflow-hidden mb-4 border-0">
     <!-- Expense Summary Card -->
@@ -56,81 +178,20 @@
         </template>
 
         <!-- Date Column Editable -->
-        <template>
-          <flatpickr
-            v-model="row.item.date"
-            class="form-control"
-            :config="{
-              enableTime: true,
-              dateFormat: 'Y-m-d H:i',
-            }"
-          />
+        <template #cell(date)="row">
+          <span>{{ row.item.dateFormatted }}</span>
         </template>
       </b-table>
+      <!-- Save Button -->
+      <div class="text-end mt-3">
+        <b-button variant="success" @click="handleSave" :disabled="saving">
+          <i class="fas fa-save me-1"></i>
+          {{ saving ? "Saving..." : "Save Changes" }}
+        </b-button>
+      </div>
     </div>
   </b-card>
 </template>
-
-<script setup>
-import { ref, watch } from "vue";
-import { BTable, BFormInput } from "bootstrap-vue-next";
-import Flatpickr from "vue-flatpickr-component";
-import "flatpickr/dist/flatpickr.css";
-// Props
-const props = defineProps({
-  modelValue: Boolean,
-  expenseData: Object,
-});
-
-// Emits
-const emit = defineEmits(["update:modelValue", "save"]);
-
-// Modal visibility sync
-const show = ref(props.modelValue);
-watch(
-  () => props.modelValue,
-  (val) => (show.value = val)
-);
-watch(show, (val) => emit("update:modelValue", val));
-
-// Helpers
-const format = (val) => Number(val).toLocaleString();
-
-// Expense details
-const expense = ref({});
-const contributions = ref([]);
-
-// Watch and parse incoming data
-watch(
-  () => props.expenseData,
-  (data) => {
-    if (!data) return;
-
-    expense.value = {
-      expense_id: data.expense_id,
-      expense_name: data.expense_name,
-      allocated_amount: data.allocated_amount,
-      contributed_amount: data.contributed_amount,
-      balance: data.balance,
-    };
-
-    contributions.value = (data.contributions || []).map((c) => ({
-      contribution_id: c.contribution_id,
-      financier_name: c.financier_name,
-      amount: Number(c.amount),
-      date: new Date(c.date * 1000), // Date object for date picker
-    }));
-  },
-  { immediate: true }
-);
-
-// Table fields
-const fields = [
-  { key: "financier_name", label: "Financier" },
-  { key: "amount", label: "Amount (KES)" },
-  { key: "date", label: "Date" },
-];
-</script>
 <style scoped>
 .fas {
   color: white;
