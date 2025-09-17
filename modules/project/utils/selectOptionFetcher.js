@@ -43,6 +43,22 @@ export async function fetchProjectOptions() {
   return await fetchSelectOptions('/v1/project/projects')
 }
 
-export async function fetchProjectExpenseOptions(id) {
-  return await fetchSelectOptions(`/v1/project/expenses/${id}`)
+export async function fetchAvailableFinancierOptions(id) {
+  return await fetchSelectOptions(`/v1/project/${id}/financiers-available`)
 }
+
+export async function fetchNewExpenseOptions(id) {
+  return await fetchSelectOptions(`/v1/project/${id}/expenses-available`)
+}
+
+export async function fetchProjectExpenseOptions(id) {
+  return await fetchSelectOptions(`/v1/project/${id}/expenses`)
+}
+
+export async function fetchProjectFinancierOptions(id) {
+  return await fetchSelectOptions(`/v1/project/${id}/financiers`)
+}
+
+
+
+
