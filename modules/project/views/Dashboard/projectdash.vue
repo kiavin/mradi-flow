@@ -129,7 +129,7 @@ const fetchProjectReport = async () => {
         prefix: "KES ",
       },
       {
-        subTitle: "Total Contributors",
+        subTitle: "Total Financiers",
         amount: Number(d.total_contributors),
         icon: "users",
         color: "primary",

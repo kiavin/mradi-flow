@@ -468,6 +468,7 @@ onMounted(() => {
         :radio-select="false"
         :break-extra-columns="false"
         :search-in-backend="true"
+        :showEdit="false"
         :showDelete="false"
         :actions="customAction"
         @view="handleView"

@@ -376,7 +376,7 @@ onMounted(fetchReport)
             <!-- Avatar -->
             <img
               :src="lastContribution.avatar"
-              alt="contributor"
+              alt="financier"
               class="rounded-circle shadow avatar-100 mb-3 bg-light"
               style="object-fit: cover"
             />
