@@ -73,16 +73,22 @@ const fetchReport = async () => {
 
 
   // 🌟 Format last contribution
-  lastContribution.value = {
-    contributor: raw.last_contribution?.financier_name || 'N/A',
-    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      raw.last_contribution?.financier_name || 'N/A',
-    )}&background=0D8ABC&color=fff`,
-    project: raw.last_contribution?.project_name || 'N/A',
-    expense: raw.last_contribution?.expense_name || 'N/A',
-    amount: Number(raw.last_contribution?.amount || 0),
-    date: new Date(raw.last_contribution?.created_at * 1000).toISOString(),
-  }
+const timestamp = raw.last_contribution?.created_at;
+const isValidTimestamp = Number.isFinite(Number(timestamp));
+
+lastContribution.value = {
+  contributor: raw.last_contribution?.financier_name || 'N/A',
+  avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    raw.last_contribution?.financier_name || 'N/A',
+  )}&background=0D8ABC&color=fff`,
+  project: raw.last_contribution?.project_name || 'N/A',
+  expense: raw.last_contribution?.expense_name || 'N/A',
+  amount: Number(raw.last_contribution?.amount || 0),
+  date: isValidTimestamp
+    ? new Date(Number(timestamp) * 1000).toISOString()
+    : '-', // or ''
+};
+
 
   // 🟦 Update funding chart (example logic)
   const funding = Number(raw.total_contributions || 0)
