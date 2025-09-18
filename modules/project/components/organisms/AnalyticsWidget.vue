@@ -4,7 +4,7 @@
       <span class="text-dark">{{ title }}</span>
       <b-badge tag="a" variant=" bg-primary-subtle" pill :href="buttonLink"> {{ buttonText }} </b-badge>
     </div>
-    <h2 class="counter"><Vue3autocounter ref="counter" separator="" :prefix="prefix" :duration="3" :startAmount="0" :endAmount="amount" /></h2>
+    <h2 class="counter"><Vue3autocounter ref="counter" separator="," :prefix="prefix" :duration="3" :startAmount="0" :endAmount="amount" /></h2>
     <small>{{ description }}</small>
   </b-card>
 </template>
