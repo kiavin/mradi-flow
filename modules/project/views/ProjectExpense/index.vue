@@ -231,7 +231,6 @@ const handleCreate = async () => {
 
   expenseOptions.value = await fetchExpenseOptions()
   projectOptions.value = await fetchProjectOptions()
-  console.log('after click', projectOptions.value)
 
   if (!modalStore.useModal) {
     router.push({ name: 'project/projectexpense/create' })

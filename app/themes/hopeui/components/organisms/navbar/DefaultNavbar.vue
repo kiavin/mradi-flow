@@ -52,7 +52,6 @@ export default {
         redirectUrl = `/${redirectUrl}`
       }
 
-      console.log('LOGOUT URL', redirectUrl)
 
       authStore.removeToken()
       authStore.removeRefreshToken()

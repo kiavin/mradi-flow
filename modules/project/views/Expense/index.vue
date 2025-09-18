@@ -157,7 +157,6 @@ const handleEdit = async (row) => {
     const { request: updateData, error } = useApi(apiBaseUrl, { method: 'PUT' })
     await updateData(updatedData)
     if (error.value) {
-      console.log('Error', error.value)
       errors.value = error.value // Assign the error object to errors
       return // Stop execution if error occurs
     }
@@ -218,7 +217,6 @@ const handleCreate = async () => {
     await createData(newData)
 
     if (error.value) {
-      console.log('Error', error.value)
       errors.value = error.value // Assign errors to be passed to the form
       return
     }
@@ -325,7 +323,6 @@ const changePage = async (page) => {
 
   updateResponseData()
 
-  console.log('Page changed to: ', data.value)
 }
 
 const updatePerPage = async (perPage) => {

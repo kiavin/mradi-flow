@@ -164,11 +164,9 @@ function transformMenuItem(backendItem) {
 }
 
 onMounted(() => {
-  console.log('Fetching menu items from backend...', rawMenus.value)
 
   if (Array.isArray(rawMenus.value)) {
     menuItems.value = rawMenus.value.map((item) => transformMenuItem(item))
-    console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2))
   } else {
     console.warn('Expected an array for rawMenus, but got:', rawMenus.value)
     menuItems.value = []

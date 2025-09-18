@@ -319,7 +319,6 @@ const changePage = async (page) => {
 
   updateResponseData()
 
-  console.log('Page changed to: ', data.value)
 }
 
 const updatePerPage = async (perPage) => {

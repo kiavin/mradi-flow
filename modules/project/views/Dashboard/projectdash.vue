@@ -74,7 +74,6 @@ const fundingChart = ref({
 });
 const fetchProjectReport = async () => {
   const id = route.params.id;
-  console.log("endpoint", id);
   const endpoint = `/v1/project/report/project/${id}`;
 
   const {
@@ -198,7 +197,6 @@ const handleAddContributor = async () => {
   errors.value = {};
   modalStore.toggleModalUsage(true);
 
-  console.log("project id ", projectId.value);
 
   await nextTick(); // ensure store state is updated
 
@@ -221,7 +219,6 @@ const handleAddContributor = async () => {
     await createData(newData);
 
     if (error.value) {
-      console.log("Error", error.value);
       errors.value = error.value; // Assign errors to be passed to the form
       return;
     }
@@ -275,11 +272,9 @@ const handleViewExpense = async (id) => {
     const { request: updateData, error } = useApi(expenseUpdateUrl, {
       method: "PUT",
     });
-    console.log("expense update", updateData);
 
     await updateData(request);
     if (error.value) {
-      console.log("Error", error.value);
       errors.value = error.value; // Assign the error object to errors
       return; // Stop execution if error occurs
     }
@@ -294,7 +289,6 @@ const handleViewExpense = async (id) => {
       expenseData: data.value?.dataPayload?.data || {},
       onSubmit: handleExpenseUpdate,
       onContributionsUpdated: () => {
-        console.log("✅ Contributions were updated");
         refresh(); // or any other logic
         modalStore.closeModal();
       },
@@ -328,7 +322,6 @@ const handleCreateExpense = async () => {
     await createData(newData);
 
     if (error.value) {
-      console.log("Error", error.value);
       errors.value = error.value; // Assign errors to be passed to the form
       return;
     }
@@ -380,7 +373,6 @@ const handleCreateContribution = async () => {
     await createData(newData);
 
     if (error.value) {
-      console.log("Error", error.value);
       errors.value = error.value; // Assign errors to be passed to the form
       return;
     }

@@ -77,7 +77,6 @@ const updateResponseData = () => {
 const handleView = async (row) => {
   const id = row.id;
   //redirect to project dash and pass id as param
-  console.log("fff", id);
   router.push({ name: "projectDashboard", params: { id: id } });
 
   // const apiBaseUrl = `/v1/project/project/${id}`
@@ -177,7 +176,6 @@ const handleEdit = async (row) => {
   } else {
     console.warn("Could not load financiers:", financiersData.value);
   }
-  console.log("Financier Options:", financierOptions.value);
   // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
     const { request: updateData, error } = useApi(apiBaseUrl, {
@@ -261,7 +259,6 @@ const handleCreate = async () => {
   } else {
     console.warn("Could not load financiers:", financiersData.value);
   }
-  console.log("Financier Options:", financierOptions.value);
 
   // Define form submission handler
   const handleSubmit = async (newData) => {
@@ -390,7 +387,6 @@ const changePage = async (page) => {
 
   updateResponseData();
 
-  console.log("Page changed to: ", data.value);
 };
 
 const updatePerPage = async (perPage) => {

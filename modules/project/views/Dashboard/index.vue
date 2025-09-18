@@ -71,7 +71,6 @@ const fetchReport = async () => {
     totalProjectsBid: Number(raw.total_bid_amount),
   }
 
-  console.log('last contribution', raw.last_contribution)
 
   // 🌟 Format last contribution
   lastContribution.value = {
