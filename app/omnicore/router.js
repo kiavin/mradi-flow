@@ -35,12 +35,12 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'Omniface'
+  document.title = to.meta.title || 'Mradi360'
   authGuard(to, from, next)
 })
 
 router.afterEach((to) => {
-  const APP_NAME = import.meta.env.VITE_APP_NAME || 'Omniface';
+  const APP_NAME = import.meta.env.VITE_APP_NAME || 'Mradi360';
   if (to.meta?.title) {
     document.title = to.meta.title.replace('Omniface', APP_NAME);
   }
