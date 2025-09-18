@@ -3,7 +3,6 @@ import { ref } from 'vue'
 
 import Vue3autocounter from 'vue3-autocounter'
 import AnalyticsWidget from '../../components/organisms/AnalyticsWidget.vue'
-import { sum } from 'lodash'
 const summaryData = ref({
   totalProjects: 0,
   totalFinanciers: 0,
@@ -15,6 +14,9 @@ const summaryData = ref({
 })
 
 const projects = ref([])
+const activityLogs = ref([])
+const monthlyTotals = Array(12).fill(0);
+
 
 const lastContribution = ref('')
 function getRelativeTime(date) {
@@ -52,7 +54,10 @@ const fetchReport = async () => {
     autoFetch: true,
     autoAlert: false,
   })
+
   await fetchReport()
+  
+  fetchContributions()
   summaryData.value.lastUpdated = new Date().toLocaleString()
 
   const raw = reportData.value?.dataPayload?.data
@@ -128,24 +133,76 @@ const percent = (bid === 0 || expense === 0)
   }
 }
 
-// const lastContribution = ref({
-//   contributor: 'Equity Bank',
-//   avatar: 'https://via.placeholder.com/100x100.png?text=EQ', // Replace with real image
-//   project: 'Nairobi Affordable Housing',
-//   expense: 'Building Materials',
-//   date: '2025-09-10',
-//   amount: 5855600,
-// })
+const fetchContributions = async () => {
+  const {
+    data: contributions,
+    request: fetchContributions,
+    error: reportError,
+  } = useApi('/v1/project/expense-contributions', {
+    method: 'GET',
+    autoFetch: true,
+    autoAlert: false,
+  });
 
-// Sample mock data (will come from API later)
+  await fetchContributions();
 
-// Bar chart for contributions
-const dashboardCharts = {
+  // ✅ Use .value here!
+  const responseData = contributions.value?.dataPayload?.data;
+
+  if (!Array.isArray(responseData)) {
+    console.warn('Expected an array for contributions, but got:', responseData);
+    activityLogs.value = [];
+    return;
+  }
+
+  // ✅ Now it's safe to map
+  activityLogs.value = responseData.map((item) => {
+    const amount = isNaN(Number(item?.amount)) ? 0 : Number(item.amount);
+    const expense = item?.expense_name || 'Unknown Expense';
+    const contributor = item?.financier_name || 'Unknown Financier';
+    const project = item?.project_name || 'Unknown Project';
+
+    const rawTimestamp = item?.created_at;
+    const isValidTimestamp =
+      typeof rawTimestamp === 'number' && rawTimestamp > 0;
+
+    const date = isValidTimestamp
+      ? new Date(rawTimestamp * 1000).toISOString()
+      : new Date().toISOString(); // fallback
+
+    return {
+      amount,
+      expense,
+      contributor,
+      project,
+      date,
+    };
+  });
+
+  responseData.forEach((item) => {
+  const timestamp = item?.created_at;
+  const amount = parseFloat(item?.amount) || 0;
+
+  if (typeof timestamp === 'number' && timestamp > 0) {
+    const date = new Date(timestamp * 1000);
+    const monthIndex = date.getMonth(); // 0 = Jan, 11 = Dec
+
+    if (monthIndex >= 0 && monthIndex <= 11) {
+      monthlyTotals[monthIndex] += amount;
+    }
+  }
+});
+dashboardCharts.contributions.series[0].data = monthlyTotals;
+
+};
+
+
+const dashboardCharts = reactive({
   contributions: {
     series: [
       {
         name: 'Contributions',
-        data: [500000, 1200000, 1100000, 2000000, 1500000],
+        data: [],
       },
     ],
     options: {
@@ -162,13 +219,14 @@ const dashboardCharts = {
       },
       colors: ['#2dce89', '#5e72e4'],
       xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       },
       dataLabels: { enabled: false },
       legend: { show: false },
     },
   },
-}
+})
+
 
 const totalFunding = 2500000
 const totalSpending = 1500000
@@ -209,24 +267,7 @@ const fundingChart = ref({
   },
 })
 
-const formatNumber = (val) => Number(val).toLocaleString()
 
-const activityLogs = ref([
-  {
-    amount: 2400000,
-    expense: 'Land Purchase',
-    contributor: 'Equity Bank',
-    project: 'Kibera Housing',
-    date: '2025-09-10T20:10:00Z',
-  },
-  {
-    amount: 150000,
-    expense: 'Licensing',
-    contributor: 'NCBA',
-    project: 'Machakos Expansion',
-    date: '2025-09-09T23:00:00Z',
-  },
-])
 
 const contributionGrowth = ref(16)
 
