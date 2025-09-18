@@ -7,7 +7,7 @@ export default {
         'error-page',
     ],
     api: {
-        redirectErrorPages: false,
+        redirectErrorPages: true,
     },
     pwa: {
         enabled: false, // Master switch

@@ -408,7 +408,6 @@ const updateScreenWidth = () => {
 }
 
 const maxVisibleColumns = computed(() => {
-  console.log('Calculating maxVisibleColumns for width:', screenWidth.value)
 
   // Count how many special columns are active
   const specialColumnsCount = [
@@ -643,7 +642,6 @@ watch(() => props.data, updateUniqueValues, { immediate: true })
 watch(
   () => props.data,
   (newData) => {
-    console.log('DataTable received new data:', newData)
     // Reset filters when new data arrives
     clearAllFilters()
     updateUniqueValues()

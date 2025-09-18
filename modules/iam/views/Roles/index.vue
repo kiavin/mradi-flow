@@ -42,7 +42,7 @@ watch(data, () => {
 })
 
 const updateResponseData = () => {
-  console.log('NEW DATA ON PAGINATION', data.value)
+//   console.log('NEW DATA ON PAGINATION', data.value)
   if (data.value?.dataPayload) {
     // Transform the object data into an array if needed
     const responseData = data.value.dataPayload.data
