@@ -251,7 +251,7 @@ const handleCreate = async () => {
 
   await fetchFinanciers();
 
-  if (financiersData.value?.dataPayload?.data) {
+  if (Array.isArray(financiersData.value?.dataPayload?.data)) {
     financierOptions.value = financiersData.value.dataPayload.data.map(
       (financier) => ({
         value: financier.id,

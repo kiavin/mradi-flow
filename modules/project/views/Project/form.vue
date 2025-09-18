@@ -1,9 +1,9 @@
 <script setup>
-import { ref } from 'vue'
-import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
-import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
-import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
-import SelectComponent from '@/project/components/atoms/SelectComponent.vue'
+import { ref } from "vue";
+import Input from "~/themes/hopeui/components/atoms/input/BaseInput.vue";
+import Button from "~/themes/hopeui/components/atoms/button/BaseButton.vue";
+import Label from "~/themes/hopeui/components/atoms/labels/BaseLabel.vue";
+import SelectComponent from "@/project/components/atoms/SelectComponent.vue";
 const props = defineProps({
   formData: Object,
   error: Object,
@@ -21,21 +21,22 @@ const props = defineProps({
     default: false,
   },
   onSubmit: Function,
-})
+});
 
-const financierOptions = ref(props.Financiers)
+const financierOptions = ref(props.Financiers);
 
-const emit = defineEmits(['submit', 'update'])
+const emit = defineEmits(["submit", "update"]);
 
 const onSubmit = () => {
   const transformedPayload = {
     ...props.formData,
-    financiers: props.formData.financiers.map((id) => ({ financier_id: id })),
-  }
+    financiers: Array.isArray(props.formData.financiers)
+      ? props.formData.financiers.map((id) => ({ financier_id: id }))
+      : [],
+  };
 
-  emit('submit', transformedPayload) // Emit the transformed payload to the parent
-}
-
+  emit("submit", transformedPayload); // Emit the transformed payload to the parent
+};
 </script>
 
 <template>
@@ -66,7 +67,9 @@ const onSubmit = () => {
           placeholder="e.g. 100000000"
           required
         />
-        <p v-if="error?.tender_amount" class="text-danger">{{ error.tender_amount }}</p>
+        <p v-if="error?.tender_amount" class="text-danger">
+          {{ error.tender_amount }}
+        </p>
       </b-form-group>
 
       <!-- Financiers Multi-Select -->
@@ -82,13 +85,23 @@ const onSubmit = () => {
           class="form-control"
           :disabled="readonly"
         />
-        <p v-if="error?.financiers" class="text-danger">{{ error.financiers }}</p>
+        <p v-if="error?.financiers" class="text-danger">
+          {{ error.financiers }}
+        </p>
       </b-form-group>
 
       <!-- Submit Buttons -->
-      <div v-if="!hideSubmit" class="d-flex flex-wrap mt-4 justify-content-center">
-        <b-button type="submit" variant="success" class="me-2" :disabled="isLoading">
-          {{ isLoading ? 'Submitting...' : 'Save' }}
+      <div
+        v-if="!hideSubmit"
+        class="d-flex flex-wrap mt-4 justify-content-center"
+      >
+        <b-button
+          type="submit"
+          variant="success"
+          class="me-2"
+          :disabled="isLoading"
+        >
+          {{ isLoading ? "Submitting..." : "Save" }}
         </b-button>
       </div>
     </b-form>
