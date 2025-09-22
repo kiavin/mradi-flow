@@ -441,10 +441,7 @@ onMounted(fetchReport)
               </div>
             </div>
 
-            <!-- Optional Footer -->
-            <div class="mt-3 d-flex justify-content-end">
-              <b-button variant="soft-primary" size="sm"> View Full Report </b-button>
-            </div>
+  
           </b-col>
         </b-row>
       </b-card>

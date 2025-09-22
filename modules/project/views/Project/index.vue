@@ -4,11 +4,13 @@ import { useRouter } from "vue-router";
 import Button from "~/themes/hopeui/components/atoms/button/BaseButton.vue";
 import { useModalStore } from "~/omnicore/stores/modalStore.js";
 import Form from "./form.vue";
-import Financier from "@/project/router/Financier";
+import { fetchProjectFinancierOptions } from "../../utils/selectOptionFetcher";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
-
+const isModalLoading = ref(true); // Initially loading
+const editingData = ref(null);
+const ProjectFinancierOptions = ref(null);
 const modalStore = useModalStore();
 
 const apiBaseUrl = `/v1/project/projects`;
@@ -24,7 +26,7 @@ const tableData = ref({
   paginationData: {
     countOnPage: 0,
     currentPage: 1,
-    perPage: 20,
+    perPage: 25,
     totalCount: 0,
     totalPages: 0,
     paginationLinks: {},
@@ -32,11 +34,29 @@ const tableData = ref({
 });
 
 const tableColumns = [
-  { key: "name", label: "Name" },
-  { key: "bid_amount", label: "Bid Amount" },
-  { key: "total_financiers", label: "Total Financiers" },
-  { key: "total_expenses", label: "Total Expenses" },
+  { key: "name", label: "Name", class: "text-center" },
+  { key: "bid_amount", label: "Bid Amount", class: "text-center" },
+  {
+    key: "total_expense_amount",
+    label: "Total Expenses",
+    class: "text-center",
+  },
+  {
+    key: "total_contributed_amount",
+    label: "Total Contributions",
+    class: "text-center",
+  },
+  {
+    key: "deficit",
+    label: "Deficit",
+    class: "text-center",
+  },
 ];
+const formatCurrency = (val) => {
+  const num = Number(val);
+  if (isNaN(num)) return "-";
+  return num.toLocaleString("en-KE"); // e.g. 1,234,567
+};
 
 const financiersUrl = `/v1/project/financiers`;
 const financierOptions = ref([]); // store the fetched financiers
@@ -49,12 +69,27 @@ const updateResponseData = () => {
     // Transform the object data into an array if needed
     const responseData = data.value.dataPayload.data;
     let formattedData = [];
+    let rawData = [];
 
     if (typeof responseData === "object" && !Array.isArray(responseData)) {
       // Convert object to array if API returns object
       formattedData = Object.values(responseData);
     } else if (Array.isArray(responseData)) {
-      formattedData = responseData;
+      rawData = responseData;
+
+      formattedData = rawData.map((item) => {
+        const totalExpenses = Number(item.total_expense_amount) || 0;
+        const totalContributions = Number(item.total_expenses) || 0;
+        const deficit = totalExpenses - totalContributions;
+
+        return {
+          ...item,
+          bid_amount: Number(item.bid_amount) || 0,
+          total_expense_amount: totalExpenses,
+          total_expenses: totalContributions,
+          deficit, // 👈 add this
+        };
+      });
     }
 
     tableData.value = {
@@ -122,61 +157,98 @@ const handleView = async (row) => {
   // )
 };
 
-//const handleEdit = (id) => {
-//   router.push({ name: 'project/project/update', params: { id } });
-//}
-
 const errors = ref({});
+// const handleEdit = async (row) => {
+//   const id = row.id;
+//   errors.value = {};
 
+//   modalStore.toggleModalUsage(true); // if you want to navigate to route set to false
+
+//   await nextTick(); // ensure store state is updated
+
+//   if (!modalStore.useModal) {
+//     // Navigate to the update page
+//     router.push({ name: "project/project/update", params: { id } });
+//     return;
+//   }
+
+//     // ✅ Open modal **immediately with loader**
+//   modalStore.openModal(
+//     Form,
+//     {
+//       formData: editingData, // this is a ref, initially null
+//       Financiers: financierOptions, // ref
+//       error: errors,
+//       isLoading: isModalLoading,
+//       prefill: true,
+//       readonly: false,
+//       hideSubmit: false,
+//       onSubmit: handleSubmit,
+//     },
+//     "Edit Project"
+//   )
+
+//   // Fetch appointment data before opening the modal
+//   const apiBaseUrl = `/v1/project/project/${id}`;
+//   const { data, request, isLoading, error } = useApi(apiBaseUrl, {
+//     method: "GET",
+//     options: {},
+//     autoFetch: true,
+//     autoAlert: true,
+//   });
+//   await request(); // Fetch data before opening modal
+//   // financierOptions.value = fetchProjectFinancierOptions(id);
+
+//    financierOptions.value = await fetchProjectFinancierOptions(id)
+
+//   // ✅ Fetch financiers data
+
+//   // Function to handle form submission (Update API Call)
+//   const handleSubmit = async (updatedData) => {
+//     const { request: updateData, error } = useApi(apiBaseUrl, {
+//       method: "PUT",
+//     });
+//     await updateData(updatedData);
+//     if (error.value) {
+//       console.log("Error", error.value);
+//       errors.value = error.value; // Assign the error object to errors
+//       return; // Stop execution if error occurs
+//     }
+
+//     // Close modal on success
+//     modalStore.closeModal();
+
+//     refresh();
+//   };
+
+//   // Open modal with Form component
+//   // modalStore.openModal(
+//   //   Form,
+//   //   {
+//   //     formData: data.value?.dataPayload?.data || {},
+//   //     Financiers: financierOptions.value, // Pass fetched financiers
+//   //     error: errors,
+//   //     prefill: true,
+//   //     isLoading,
+//   //     readonly: false, // Allow editing
+//   //     hideSubmit: false,
+//   //     onSubmit: handleSubmit, // Pass the submission function
+//   //   },
+//   //   "Edit Project"
+//   // );
+// };
 const handleEdit = async (row) => {
   const id = row.id;
   errors.value = {};
 
-  modalStore.toggleModalUsage(true); // if you want to navigate to route set to false
+  modalStore.toggleModalUsage(true); // Allow modal usage
+  await nextTick();
 
-  await nextTick(); // ensure store state is updated
-
+  // If modals disabled, fallback to routing
   if (!modalStore.useModal) {
-    // Navigate to the update page
     router.push({ name: "project/project/update", params: { id } });
     return;
   }
-
-  // Fetch appointment data before opening the modal
-  const apiBaseUrl = `/v1/project/project/${id}`;
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
-    method: "GET",
-    options: {},
-    autoFetch: true,
-    autoAlert: true,
-  });
-
-  await request(); // Fetch data before opening modal
-
-  // ✅ Fetch financiers data
-  const {
-    data: financiersData,
-    request: fetchFinanciers,
-    error: financiersError,
-  } = useApi(financiersUrl, {
-    method: "GET",
-    autoFetch: true,
-    autoAlert: false,
-  });
-
-  await fetchFinanciers();
-
-  if (financiersData.value?.dataPayload?.data) {
-    financierOptions.value = financiersData.value.dataPayload.data.map(
-      (financier) => ({
-        value: financier.id,
-        label: financier.name,
-      })
-    );
-  } else {
-    console.warn("Could not load financiers:", financiersData.value);
-  }
-  // Function to handle form submission (Update API Call)
   const handleSubmit = async (updatedData) => {
     const { request: updateData, error } = useApi(apiBaseUrl, {
       method: "PUT",
@@ -191,38 +263,61 @@ const handleEdit = async (row) => {
     // Close modal on success
     modalStore.closeModal();
 
-    // Show success message
-
-    // if you are not using auto alert uncomment this block in order to see alerts
-
-    // now auto alert is activated as autoAlert = true if set to false uncomment the block
-
-    // proxy.$showAlert({
-    //   title: 'Success',
-    //   icon: 'success',
-    //   text: data.value?.alertifyPayload?.message} ?? 'Project Updated successfully',
-    //   showConfirmButton: false,
-    //   timer: 2000,
-    //   timerProgressBar: true,
-    // })
-
     refresh();
   };
-
-  // Open modal with Form component
+  // ✅ Open modal **immediately with loader**
   modalStore.openModal(
     Form,
     {
-      formData: data.value?.dataPayload?.data || {},
-      Financiers: financierOptions.value, // Pass fetched financiers
+      formData: editingData, // this is a ref, initially null
       error: errors,
-      isLoading,
-      readonly: false, // Allow editing
+      isLoading: isModalLoading,
+      prefill: true,
+      Financiers: financierOptions,
+      readonly: false,
       hideSubmit: false,
-      onSubmit: handleSubmit, // Pass the submission function
+      onSubmit: handleSubmit,
     },
     "Edit Project"
   );
+  const apiBaseUrl = `/v1/project/project/${id}`;
+  const { data, request, error } = useApi(apiBaseUrl, {
+    method: "GET",
+    autoFetch: true,
+    autoAlert: true,
+  });
+  try {
+    isModalLoading.value = true;
+    await request(), (editingData.value = data?.value?.dataPayload?.data || {});
+
+    const {
+      data: financiersData,
+      request: fetchFinanciers,
+      error: financiersError,
+    } = useApi(financiersUrl, {
+      method: "GET",
+      autoFetch: true,
+      autoAlert: false,
+    });
+
+    await fetchFinanciers();
+
+    if (Array.isArray(financiersData.value?.dataPayload?.data)) {
+      financierOptions.value = financiersData.value.dataPayload.data.map(
+        (financier) => ({
+          value: financier.id,
+          label: financier.name,
+        })
+      );
+    } else {
+      console.warn("Could not load financiers:", financiersData.value);
+    }
+  } catch (e) {
+    console.error("Failed to fetch edit data", e);
+    errors.value.general = "Could not load project data.";
+  } finally {
+    isModalLoading.value = false; // Unblock form
+  }
 };
 
 const handleCreate = async () => {
@@ -279,17 +374,6 @@ const handleCreate = async () => {
 
     // Close modal and show success message
     modalStore.closeModal();
-
-    // uncomment if not using auto alert,, now its enabled in the use api ie autoAlert = true
-
-    // proxy.$showAlert({
-    //   title: 'Success',
-    //   icon: 'success',
-    //   text: data.value?.alertifyPayload?.message} ?? 'Project Created successfully',
-    //   showConfirmButton: false,
-    //   timer: 2000,
-    //   timerProgressBar: true,
-    // })
 
     refresh();
   };
@@ -386,7 +470,6 @@ const changePage = async (page) => {
   });
 
   updateResponseData();
-
 };
 
 const updatePerPage = async (perPage) => {
@@ -464,11 +547,12 @@ onMounted(() => {
         :filtering="false"
         rowSize="sm"
         :striped="false"
+        :dropDownPerPageOptions="[5, 10, 25, 50]"
         :multi-select="false"
         :radio-select="false"
         :break-extra-columns="false"
         :search-in-backend="true"
-        :showEdit="false"
+        :showEdit="true"
         :showDelete="false"
         :actions="customAction"
         @view="handleView"
@@ -490,6 +574,53 @@ onMounted(() => {
             </template>
             New Project
           </Button>
+        </template>
+        <template #column-bid_amount="{ row }">
+          <div
+            class="text-end font-monospace"
+            style="
+              font-variant-numeric: tabular-nums;
+              max-width: 150px !important;
+            "
+          >
+            {{ formatCurrency(row.bid_amount) }}
+          </div>
+        </template>
+
+        <template #column-total_expense_amount="{ row }">
+          <div
+            class="text-end font-monospace"
+            style="
+              font-variant-numeric: tabular-nums;
+              max-width: 150px !important;
+            "
+          >
+            {{ formatCurrency(row.total_expense_amount) }}
+          </div>
+        </template>
+
+        <template #column-total_contributed_amount="{ row }">
+          <div
+            class="text-end font-monospace"
+            style="
+              font-variant-numeric: tabular-nums;
+              max-width: 150px !important;
+            "
+          >
+            {{ formatCurrency(row.total_contributed_amount) }}
+          </div>
+        </template>
+
+        <template #column-deficit="{ row }">
+          <div
+            class="text-end font-monospace"
+            style="
+              font-variant-numeric: tabular-nums;
+              max-width: 150px !important;
+            "
+          >
+            {{ formatCurrency(row.deficit) }}
+          </div>
         </template>
       </OmniGridView>
     </div>

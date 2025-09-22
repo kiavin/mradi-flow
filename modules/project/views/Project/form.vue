@@ -1,16 +1,16 @@
 <script setup>
-import { ref } from "vue";
-import Input from "~/themes/hopeui/components/atoms/input/BaseInput.vue";
-import Button from "~/themes/hopeui/components/atoms/button/BaseButton.vue";
-import Label from "~/themes/hopeui/components/atoms/labels/BaseLabel.vue";
+import { ref, watch } from "vue";
 import SelectComponent from "@/project/components/atoms/SelectComponent.vue";
 const props = defineProps({
-  formData: Object,
-  error: Object,
+  formData: {
+    type: Array,
+    default: () => [],
+  },
   Financiers: {
     type: Array,
     default: () => [],
   },
+  prefill: Boolean,
   isLoading: Boolean,
   readonly: {
     type: Boolean,
@@ -20,18 +20,49 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  error: Object,
   onSubmit: Function,
 });
 
-const financierOptions = ref(props.Financiers);
-
+const financierOptions = ref("");
+const projectFinanciers = ref("");
 const emit = defineEmits(["submit", "update"]);
+
+watch(
+  () => props.Financiers,
+  (newFinanciers) => {
+    if (Array.isArray(newFinanciers)) {
+      financierOptions.value = newFinanciers;
+    }
+  },
+
+  { immediate: true }
+);
+if (props.prefill) {
+  watch(
+    () => props.formData?.financiers,
+    (newFinanciers) => {
+      if (Array.isArray(newFinanciers)) {
+        const onlyIds = newFinanciers.map((f) => f.financier_id);
+        console.log('Mapped Financier IDs:', onlyIds);
+
+        // ⚠️ Mutating props directly is not recommended.
+        // If you're allowed to or it's internal form usage:
+       projectFinanciers.value = onlyIds;
+      }
+    },
+    { immediate: true, deep: true }
+  );
+}
+
+
+//here watch for the prop changes and
 
 const onSubmit = () => {
   const transformedPayload = {
     ...props.formData,
-    financiers: Array.isArray(props.formData.financiers)
-      ? props.formData.financiers.map((id) => ({ financier_id: id }))
+    financiers: Array.isArray(projectFinanciers.value)
+      ? projectFinanciers.value.map((id) => ({ financier_id: id }))
       : [],
   };
 
@@ -41,7 +72,11 @@ const onSubmit = () => {
 
 <template>
   <b-card-body>
-    <b-form @submit.prevent="onSubmit">
+    <div v-if="isLoading" class="text-center py-5">
+      <b-spinner variant="primary" />
+      <p>Loading data...</p>
+    </div>
+    <b-form v-else @submit.prevent="onSubmit">
       <!-- Project Name -->
       <b-form-group>
         <label for="project-name" class="form-label">Name</label>
@@ -77,7 +112,7 @@ const onSubmit = () => {
         <label for="financiers" class="form-label">Select Financiers</label>
         <select-component
           id="financiers"
-          v-model="formData.financiers"
+          v-model="projectFinanciers"
           mode="tags"
           :options="financierOptions"
           :close-on-select="false"

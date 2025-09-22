@@ -271,7 +271,7 @@ const handleCreate = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    'Create ExpenseContribution',
+    'Add Expense Contribution',
   )
 }
 

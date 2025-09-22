@@ -149,7 +149,7 @@ const props = defineProps({
     type: Array,
     default: () => [10, 25, 50, 100],
   },
-  defaultPerPage: { type: Number, default: 20 },
+  defaultPerPage: { type: Number, default: 25 },
   paginationLayout: { type: String, default: 'default' },
 
   // sorting options
@@ -326,7 +326,6 @@ const createButton = () => emit('handleCreate')
       </slot>
     </div>
     <!-- end-body -->
-
     <!-- Expanded Row -->
     <transition name="slide-fade">
       <div v-if="expandableRows && currentExpandedRow">

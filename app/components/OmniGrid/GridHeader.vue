@@ -67,11 +67,11 @@ const handleSearch = () => {
 const onToggleShowAll = () => {
   if (showAll.value) {
     // Restore previous pagination (default 20)
-    handlePerPageChange(previousPerPage.value || 20)
+    handlePerPageChange(previousPerPage.value || 25)
     showAll.value = false
   } else {
     // Store current setting
-    previousPerPage.value = props.data?.paginationData?.perPage || 20
+    previousPerPage.value = props.data?.paginationData?.perPage || 25
 
     // Set to show all (using large number or special value)
     handlePerPageChange(10000)

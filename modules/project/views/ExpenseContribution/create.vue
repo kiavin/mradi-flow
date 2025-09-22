@@ -38,7 +38,7 @@ const handleSubmit = async (data) => {
 <template>
   <div class="card p-3">
 
-    <h1 class="h4 mt-2">Create ExpenseContribution</h1>
+    <h1 class="h4 mt-2">Add Expense Contribution</h1>
     <Form
     :formData="formData"
     :error="error"

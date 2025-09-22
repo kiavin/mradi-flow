@@ -248,7 +248,7 @@ const paginatedData = computed(() => {
   }
 
   // Client-side pagination
-  const { currentPage = 1, perPage = 20 } = props.paginationData
+  const { currentPage = 1, perPage = 25 } = props.paginationData
   const start = (currentPage - 1) * perPage
   const end = start + perPage
   return sortedData.value.slice(start, end)

@@ -1,13 +1,16 @@
 <script setup>
 const props = defineProps({
-  modelValue: { type: Number, default: 20 },
+  modelValue: {
+    type: Number,
+    default: 25,
+  },
   options: {
     type: Array,
-    default: () => [5, 10, 20, 50, 100],
+    default: () => [5, 10, 25, 50, 100],
   },
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <template>

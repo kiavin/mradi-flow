@@ -344,7 +344,7 @@ const handleCreateExpense = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    "Create ProjectExpense"
+    "Add Project Expense"
   );
 };
 
@@ -395,7 +395,7 @@ const handleCreateContribution = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    "Create ExpenseContribution"
+    "Add Expense Contribution"
   );
 };
 </script>
@@ -523,7 +523,7 @@ const handleCreateContribution = async () => {
           class="btn btn-primary"
           @click="handleAddContributor"
         >
-          + Contributor
+          + Financier
         </button>
       </div>
     </div>
