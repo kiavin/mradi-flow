@@ -45,7 +45,7 @@ export function useAlertify() {
                 })
             } else {
                 showAlert({
-                    title: 'Notification',
+                    title: theme,
                     text: message,
                     icon: theme,
                     showCancelButton: false,

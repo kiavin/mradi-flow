@@ -11,12 +11,18 @@ const props = defineProps({
   modelValue: Boolean,
   expenseData: Object,
   onSubmit: Function,
+  projectId: String,
 });
-
+const projectId = props.projectId ? props.projectId : "";
+console.log("projected id", projectId);
 const show = ref(props.modelValue);
 watch(
   () => props.modelValue,
   (val) => (show.value = val)
+);
+watch(
+  () => props.projectId,
+  (val) => (projectId.value = val)
 );
 watch(show, (val) => emit("update:modelValue", val));
 
@@ -41,6 +47,8 @@ watch(
       contributed_amount: data.contributed_amount,
       balance: data.balance,
     };
+
+    console.log("expense", expense.value);
 
     contributions.value = (data.contributions || []).map((c) => {
       const dateObj = new Date(c.date * 1000);
@@ -76,62 +84,63 @@ const handleSave = async () => {
   errors.value = [];
 
   try {
-    // 1. Track all update promises
-    const updatePromises = contributions.value.map(async (c) => {
-      const updatedData = {
-        amount: c.amount,
-        date: Math.floor(new Date(c.date).getTime() / 1000),
-      };
+    // Step 1: Build the request payload
+    const payload = {
+      project_id: projectId, // make sure this exists
+      expense_id: expense.value.expense_id,
+      expense: {
+        name: expense.value.expense_name,
+        total_amount: Number(expense.value.allocated_amount),
+      },
+      contributions: contributions.value.map((c) => ({
+        id: c.contribution_id,
+        amount: Number(c.amount),
+        date: new Date(c.date).toISOString().split("T")[0], // YYYY-MM-DD
+      })),
+    };
 
-      const apiBaseUrl = `/v1/project/expense-contribution/${c.contribution_id}`;
-      const { request: updateData, error } = useApi(apiBaseUrl, {
-        method: "PUT",
-        autoAlert: true,
-      });
+    console.log("update data", payload);
 
-      await updateData(updatedData);
-
-      // 2. Handle errors for this contribution
-      const serverErrors = error.value?.errors;
-      if (serverErrors && typeof serverErrors === "object") {
-        for (const [field, msg] of Object.entries(serverErrors)) {
-          errors.value.push({
-            id: c.contribution_id,
-            field,
-            message: msg,
-          });
-        }
-      } else if (error.value) {
-        errors.value.push({
-          id: c.contribution_id,
-          message:
-            error.value?.message ||
-            error.value?.amount ||
-            "Update failed",
-        });
-      }
+    // Step 2: API call
+    const {
+      request: updateExpenseContributions,
+      error,
+      refresh,
+    } = useApi(`/v1/project/contribution/update-batch`, {
+      method: "PUT",
+      autoAlert: true,
     });
 
-    // 3. Wait for all updates to finish
-    await Promise.all(updatePromises);
+    await updateExpenseContributions(payload);
 
-    // 4. Show success only if no errors
+    // Step 3: Error Handling
+    const serverErrors = error.value;
+    console.log("errors", serverErrors);
+    if (serverErrors && typeof serverErrors === "object") {
+      for (const [field, msg] of Object.entries(serverErrors)) {
+        errors.value.push({
+          field,
+          message: msg,
+        });
+      }
+    } else if (error.value) {
+      errors.value.push({
+        message: error.value?.message || "Update failed",
+      });
+    }
+
+    // Step 4: Success
     if (errors.value.length === 0) {
       emit("contributions-updated");
-      setTimeout(() => {
-        router.push({ name: "project/expense-contribution" });
-      }, 1500);
     }
   } catch (err) {
-    console.error("Unexpected Error:", err);
     errors.value.push({
-      general: "Something went wrong while saving. Please try again.",
+      message: "Something went wrong while saving. Please try again.",
     });
   } finally {
     saving.value = false;
   }
 };
-
 </script>
 
 <template>

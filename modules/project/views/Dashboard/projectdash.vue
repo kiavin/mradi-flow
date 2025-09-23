@@ -6,6 +6,7 @@ import { useRoute } from "vue-router";
 import { useModalStore } from "~/omnicore/stores/modalStore.js";
 import ExpenseDetailModal from "../../components/organisms/ExpenseDetailModal.vue";
 import ContributionForm from "../ExpenseContribution/form.vue";
+import ViewFinanciersForm from "../../components/organisms/ViewFinanciers.vue";
 
 import Form from "../ProjectFinancier/form.vue";
 import {
@@ -42,6 +43,7 @@ const projectDetails = ref({
 });
 // 💡 Define `refresh` in outer scope
 let refreshReportData;
+const contributorsData = ref(null);
 const fundingChart = ref({
   series: [0, 0], // Funding %, Spending %
   options: {
@@ -97,6 +99,7 @@ const fetchProjectReport = async () => {
     const d = reportData.value.dataPayload.data;
 
     totalFunding.value = Number(d.total_contributions);
+    contributorsData.value = d.contributors;
 
     projectDetails.value = {
       id: d.project_id,
@@ -136,7 +139,6 @@ const fetchProjectReport = async () => {
         prefix: " ",
       },
     ];
-
     // Funding chart values (convert to percentages safely)
     const bidAmount = Number(d.bid_amount) || 1;
     const fundingPercent = Math.round(
@@ -183,6 +185,7 @@ const fetchProjectReport = async () => {
     console.warn("Failed to load project report:", reportError.value);
   }
 };
+
 watch(
   () => route.params.id,
   (newId) => {
@@ -196,7 +199,6 @@ watch(
 const handleAddContributor = async () => {
   errors.value = {};
   modalStore.toggleModalUsage(true);
-
 
   await nextTick(); // ensure store state is updated
 
@@ -288,8 +290,9 @@ const handleViewExpense = async (id) => {
     {
       expenseData: data.value?.dataPayload?.data || {},
       onSubmit: handleExpenseUpdate,
+      projectId: projectDetails.value.id,
       onContributionsUpdated: () => {
-        refresh(); // or any other logic
+        fetchProjectReport();
         modalStore.closeModal();
       },
     },
@@ -396,6 +399,45 @@ const handleCreateContribution = async () => {
       onSubmit: handleSubmit, // Pass submission function
     },
     "Add Expense Contribution"
+  );
+};
+
+const handleViewFinanciers = async () => {
+  errors.value = {};
+  modalStore.toggleModalUsage(true);
+
+  await nextTick(); // ensure store state is updated
+
+  // Define form submission handler
+  const handleSubmit = async (id) => {
+    const apiBaseUrl = `/v1/project/remove-financier/${id}`;
+
+    const { request: createData, error } = useApi(apiBaseUrl, {
+      method: "DELETE",
+      autoAlert: true,
+    });
+
+    await createData();
+
+    if (error.value) {
+      errors.value = error.value; // Assign errors to be passed to the form
+      return;
+    }
+    fetchProjectReport();
+    // Close modal and show success message
+    modalStore.closeModal();
+  };
+
+  // Open modal with Form component
+  modalStore.openModal(
+    ViewFinanciersForm,
+    {
+      contributors: contributorsData.value, // Empty form for creation
+      errors: errors, // Empty error object
+      isLoading: false,
+      onSubmit: handleSubmit, // Pass submission function
+    },
+    "Financiers"
   );
 };
 </script>
@@ -508,25 +550,42 @@ const handleCreateContribution = async () => {
       ></span>
     </div>
     <div class="col-md-12 col-lg-12 d-flex justify-content-between mb-4">
+      <!-- Left: + Contribution button -->
       <div class="col-auto">
         <button
-          type="submit"
-          class="btn btn-info"
+          type="button"
+          class="btn btn-outline-info"
           @click="handleCreateContribution"
         >
-          + Contribution
+          <font-awesome-icon :icon="['fas', 'plus']" beat />
+          Contribution
         </button>
       </div>
-      <div class="col-auto">
+
+      <!-- Right: Add Contributor & View Financiers -->
+      <div class="col-auto d-flex gap-2">
+        <!-- Add Contributor Button -->
         <button
-          type="submit"
-          class="btn btn-primary"
+          type="button"
+          class="btn btn-outline-primary"
           @click="handleAddContributor"
+          title="Add Contributor"
         >
-          + Financier
+          <font-awesome-icon :icon="['fas', 'plus']" beat /> Financier
+        </button>
+
+        <!-- View Financiers Button -->
+        <button
+          type="button"
+          class="btn btn-outline-success"
+          @click="handleViewFinanciers"
+          title="View Financiers"
+        >
+          <font-awesome-icon :icon="['fas', 'eye']" />
         </button>
       </div>
     </div>
+
     <div class="col-md-12 col-lg-9">
       <div class="row">
         <div class="col-md-12 col-lg-12">

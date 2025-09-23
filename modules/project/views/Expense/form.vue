@@ -1,10 +1,5 @@
 
 <script setup>
-import { ref } from 'vue';
-import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
-import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
-import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
-
 const props = defineProps({
     formData: Object,
     error: Object,

@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue";
 
-import Vue3autocounter from 'vue3-autocounter'
-import AnalyticsWidget from '../../components/organisms/AnalyticsWidget.vue'
+import Vue3autocounter from "vue3-autocounter";
+import AnalyticsWidget from "../../components/organisms/AnalyticsWidget.vue";
 const summaryData = ref({
   totalProjects: 0,
   totalFinanciers: 0,
@@ -11,37 +11,39 @@ const summaryData = ref({
   totalProjectsBid: 0,
   totalContributed: 0,
   lastUpdated: getRelativeTime(new Date()), // ⬅️ relative to now
-})
+});
 
-const projects = ref([])
-const activityLogs = ref([])
+const projects = ref([]);
+const activityLogs = ref([]);
 const monthlyTotals = Array(12).fill(0);
 
-
-const lastContribution = ref('')
+const lastContribution = ref("");
 function getRelativeTime(date) {
-  const now = new Date()
-  const then = new Date(date)
-  const diff = Math.floor((now - then) / 1000) // in seconds
+  const now = new Date();
+  const then = new Date(date);
+  const diff = Math.floor((now - then) / 1000); // in seconds
 
   const units = [
-    { name: 'year', seconds: 31536000 },
-    { name: 'month', seconds: 2592000 },
-    { name: 'week', seconds: 604800 },
-    { name: 'day', seconds: 86400 },
-    { name: 'hour', seconds: 3600 },
-    { name: 'minute', seconds: 60 },
-    { name: 'second', seconds: 1 },
-  ]
+    { name: "year", seconds: 31536000 },
+    { name: "month", seconds: 2592000 },
+    { name: "week", seconds: 604800 },
+    { name: "day", seconds: 86400 },
+    { name: "hour", seconds: 3600 },
+    { name: "minute", seconds: 60 },
+    { name: "second", seconds: 1 },
+  ];
 
   for (const unit of units) {
     if (diff >= unit.seconds) {
-      const value = Math.floor(diff / unit.seconds)
-      return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-value, unit.name)
+      const value = Math.floor(diff / unit.seconds);
+      return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
+        -value,
+        unit.name
+      );
     }
   }
 
-  return 'just now'
+  return "just now";
 }
 
 const fetchReport = async () => {
@@ -49,22 +51,22 @@ const fetchReport = async () => {
     data: reportData,
     request: fetchReport,
     error: reportError,
-  } = useApi('v1/project/report/summary', {
-    method: 'GET',
+  } = useApi("v1/project/report/summary", {
+    method: "GET",
     autoFetch: true,
     autoAlert: false,
-  })
+  });
 
-  await fetchReport()
-  
-  fetchContributions()
-  summaryData.value.lastUpdated = new Date().toLocaleString()
+  await fetchReport();
 
-  const raw = reportData.value?.dataPayload?.data
+  fetchContributions();
+  summaryData.value.lastUpdated = new Date().toLocaleString();
+
+  const raw = reportData.value?.dataPayload?.data;
 
   if (!raw) {
-    console.warn('Missing dashboard data')
-    return
+    console.warn("Missing dashboard data");
+    return;
   }
 
   // 🌟 Set dashboard summary metrics
@@ -74,72 +76,71 @@ const fetchReport = async () => {
     totalFinanciers: Number(raw.total_financiers),
     totalContributions: Number(raw.total_contributions),
     totalProjectsBid: Number(raw.total_bid_amount),
-  }
-
+  };
 
   // 🌟 Format last contribution
-const timestamp = raw.last_contribution?.created_at;
-const isValidTimestamp = Number.isFinite(Number(timestamp));
+  const timestamp = raw.last_contribution?.created_at;
+  const isValidTimestamp = Number.isFinite(Number(timestamp));
 
-lastContribution.value = {
-  contributor: raw.last_contribution?.financier_name || 'N/A',
-  avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    raw.last_contribution?.financier_name || 'N/A',
-  )}&background=0D8ABC&color=fff`,
-  project: raw.last_contribution?.project_name || 'N/A',
-  expense: raw.last_contribution?.expense_name || 'N/A',
-  amount: Number(raw.last_contribution?.amount || 0),
-  date: isValidTimestamp
-    ? new Date(Number(timestamp) * 1000).toISOString()
-    : '-', // or ''
-};
-
+  lastContribution.value = {
+    contributor: raw.last_contribution?.financier_name || "N/A",
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      raw.last_contribution?.financier_name || "N/A"
+    )}&background=0D8ABC&color=fff`,
+    project: raw.last_contribution?.project_name || "N/A",
+    expense: raw.last_contribution?.expense_name || "N/A",
+    amount: Number(raw.last_contribution?.amount || 0),
+    date: isValidTimestamp
+      ? new Date(Number(timestamp) * 1000).toISOString()
+      : "-", // or ''
+  };
 
   // 🟦 Update funding chart (example logic)
-  const funding = Number(raw.total_contributions || 0)
-  const spending = Number(raw.total_expenses || 0)
-  const total = funding + spending || 1
+  const funding = Number(raw.total_contributions || 0);
+  const spending = Number(raw.total_expenses || 0);
+  const total = funding + spending || 1;
 
   fundingChart.value.series = [
     Math.round((funding / total) * 100),
     Math.round((spending / total) * 100),
-  ]
+  ];
   // 🔁 Map `projects`
   if (Array.isArray(raw.projects)) {
     projects.value = raw.projects.map((proj, index) => {
-      const bid = Number(proj.bid_amount || 0)
-      const expense = Number(proj.sum_expenses || 0)
+      const bid = Number(proj.bid_amount || 0);
+      const expense = Number(proj.sum_expenses || 0);
 
-const percent = (bid === 0 || expense === 0)
-  ? 0
-  : Math.round((proj.total_contributions / expense) * 100)
-
+      const percent =
+        bid === 0 || expense === 0
+          ? 0
+          : Math.round((proj.total_contributions / expense) * 100);
 
       return {
         id: proj.project_id,
         name: proj.project_name,
-        avatar: `https://ui-avatars.com/api/` +
-        `?name=${encodeURIComponent(proj?.project_name || 'Project')}` +
-        `&background=1AA053&color=fff&bold=true&size=128`,
+        avatar:
+          `https://ui-avatars.com/api/` +
+          `?name=${encodeURIComponent(proj?.project_name || "Project")}` +
+          `&background=1AA053&color=fff&bold=true&size=128`,
         contributions: proj.total_contributions,
         expense: expense,
         contribution: bid,
         contributionPercent: percent,
-      }
-    })
+      };
+    });
   } else {
-    console.warn('Expected `projects` to be an array in summary response')
-    projects.value = []
+    console.warn("Expected `projects` to be an array in summary response");
+    projects.value = [];
   }
-}
+};
 
 const fetchContributions = async () => {
   const {
     data: contributions,
     request: fetchContributions,
     error: reportError,
-  } = useApi('/v1/project/expense-contributions', {
-    method: 'GET',
+  } = useApi("/v1/project/expense-contributions", {
+    method: "GET",
     autoFetch: true,
     autoAlert: false,
   });
@@ -150,7 +151,7 @@ const fetchContributions = async () => {
   const responseData = contributions.value?.dataPayload?.data;
 
   if (!Array.isArray(responseData)) {
-    console.warn('Expected an array for contributions, but got:', responseData);
+    console.warn("Expected an array for contributions, but got:", responseData);
     activityLogs.value = [];
     return;
   }
@@ -158,13 +159,13 @@ const fetchContributions = async () => {
   // ✅ Now it's safe to map
   activityLogs.value = responseData.map((item) => {
     const amount = isNaN(Number(item?.amount)) ? 0 : Number(item.amount);
-    const expense = item?.expense_name || 'Unknown Expense';
-    const contributor = item?.financier_name || 'Unknown Financier';
-    const project = item?.project_name || 'Unknown Project';
+    const expense = item?.expense_name || "Unknown Expense";
+    const contributor = item?.financier_name || "Unknown Financier";
+    const project = item?.project_name || "Unknown Project";
 
     const rawTimestamp = item?.created_at;
     const isValidTimestamp =
-      typeof rawTimestamp === 'number' && rawTimestamp > 0;
+      typeof rawTimestamp === "number" && rawTimestamp > 0;
 
     const date = isValidTimestamp
       ? new Date(rawTimestamp * 1000).toISOString()
@@ -180,64 +181,77 @@ const fetchContributions = async () => {
   });
 
   responseData.forEach((item) => {
-  const timestamp = item?.created_at;
-  const amount = parseFloat(item?.amount) || 0;
+    const timestamp = item?.created_at;
+    const amount = parseFloat(item?.amount) || 0;
 
-  if (typeof timestamp === 'number' && timestamp > 0) {
-    const date = new Date(timestamp * 1000);
-    const monthIndex = date.getMonth(); // 0 = Jan, 11 = Dec
+    if (typeof timestamp === "number" && timestamp > 0) {
+      const date = new Date(timestamp * 1000);
+      const monthIndex = date.getMonth(); // 0 = Jan, 11 = Dec
 
-    if (monthIndex >= 0 && monthIndex <= 11) {
-      monthlyTotals[monthIndex] += amount;
+      if (monthIndex >= 0 && monthIndex <= 11) {
+        monthlyTotals[monthIndex] += amount;
+      }
     }
-  }
-});
-dashboardCharts.contributions.series[0].data = monthlyTotals;
-
+  });
+  dashboardCharts.contributions.series[0].data = monthlyTotals;
 };
-
 
 const dashboardCharts = reactive({
   contributions: {
     series: [
       {
-        name: 'Contributions',
+        name: "Contributions",
         data: [],
       },
     ],
     options: {
       chart: {
-        type: 'bar',
+        type: "bar",
         height: 120,
         toolbar: { show: false },
       },
       plotOptions: {
         bar: {
-          columnWidth: '45%',
+          columnWidth: "45%",
           borderRadius: 4,
         },
       },
-      colors: ['#2dce89', '#5e72e4'],
+      colors: ["#2dce89", "#5e72e4"],
       xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        categories: [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ],
       },
       dataLabels: { enabled: false },
       legend: { show: false },
     },
   },
-})
+});
 
-
-const totalFunding = 2500000
-const totalSpending = 1500000
-const total = totalFunding + totalSpending
+const totalFunding = 2500000;
+const totalSpending = 1500000;
+const total = totalFunding + totalSpending;
 
 const fundingChart = ref({
-  series: [Math.round((totalFunding / total) * 100), Math.round((totalSpending / total) * 100)],
+  series: [
+    Math.round((totalFunding / total) * 100),
+    Math.round((totalSpending / total) * 100),
+  ],
   options: {
     chart: {
       height: 230,
-      type: 'radialBar',
+      type: "radialBar",
     },
     plotOptions: {
       radialBar: {
@@ -246,47 +260,47 @@ const fundingChart = ref({
         endAngle: 270,
         hollow: {
           margin: 5,
-          size: '30%',
+          size: "30%",
         },
         dataLabels: {
           name: {
             show: false,
           },
           value: {
-            fontSize: '18px',
+            fontSize: "18px",
             formatter: (val) => `${val}%`,
           },
         },
       },
     },
-    colors: ['#0d6efd', '#dc3545'], // Funding = blue, Spending = red
-    labels: ['Funding', 'Spending'],
+    colors: ["#0d6efd", "#dc3545"], // Funding = blue, Spending = red
+    labels: ["Funding", "Spending"],
     legend: {
       show: false,
     },
   },
-})
+});
 
-
-
-const contributionGrowth = ref(16)
+const contributionGrowth = ref(16);
 
 function formatAmount(amount) {
-  return new Intl.NumberFormat('en-KE').format(amount)
+  return new Intl.NumberFormat("en-KE").format(amount);
 }
 
 function formatDate(dateStr) {
-  const date = new Date(dateStr)
+  const date = new Date(dateStr);
   return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  })}`
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
 }
 
-onMounted(fetchReport)
+onMounted(fetchReport);
 </script>
 <template>
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+  <div
+    class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3"
+  >
     <div class="d-flex flex-column">
       <h3>Quick Insights</h3>
       <p class="text-primary mb-0">Financial Dashboard</p>
@@ -388,7 +402,9 @@ onMounted(fetchReport)
             <p class="text-muted mb-2">Financier</p>
 
             <!-- Date -->
-            <b-badge variant="primary-subtle" pill>{{ lastContribution.date }}</b-badge>
+            <b-badge variant="primary-subtle" pill>{{
+              lastContribution.date
+            }}</b-badge>
           </b-col>
 
           <!-- RIGHT: Contribution Details -->
@@ -416,11 +432,17 @@ onMounted(fetchReport)
                   <div
                     class="bg-info-subtle avatar-50 rounded d-flex align-items-center justify-content-center"
                   >
-                    <font-awesome-icon icon="building" size="lg" class="text-info" />
+                    <font-awesome-icon
+                      icon="building"
+                      size="lg"
+                      class="text-info"
+                    />
                   </div>
                   <div>
                     <p class="mb-1 text-muted">Project</p>
-                    <h6 class="mb-0 text-body">{{ lastContribution.project }}</h6>
+                    <h6 class="mb-0 text-body">
+                      {{ lastContribution.project }}
+                    </h6>
                   </div>
                 </div>
               </div>
@@ -431,29 +453,42 @@ onMounted(fetchReport)
                   <div
                     class="bg-success-subtle avatar-50 rounded d-flex align-items-center justify-content-center"
                   >
-                    <font-awesome-icon icon="box" size="lg" class="text-success" />
+                    <font-awesome-icon
+                      icon="box"
+                      size="lg"
+                      class="text-success"
+                    />
                   </div>
                   <div>
                     <p class="mb-1 text-muted">Expense</p>
-                    <h6 class="mb-0 text-body">{{ lastContribution.expense }}</h6>
+                    <h6 class="mb-0 text-body">
+                      {{ lastContribution.expense }}
+                    </h6>
                   </div>
                 </div>
               </div>
             </div>
-
-  
           </b-col>
         </b-row>
       </b-card>
     </b-col>
     <b-col lg="8" md="12">
       <div class="col-md-12 col-lg-12">
-        <div class="overflow-hidden card" data-aos="fade-up" data-aos-delay="600">
+        <div
+          class="overflow-hidden card"
+          data-aos="fade-up"
+          data-aos-delay="600"
+        >
           <div class="flex-wrap card-header d-flex justify-content-between">
             <div class="header-title">
               <h4 class="mb-2 card-title">Projects Financial Overview</h4>
               <p class="mb-0">
-                <svg class="me-2 text-primary" width="24" height="24" viewBox="0 0 24 24">
+                <svg
+                  class="me-2 text-primary"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     fill="currentColor"
                     d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
@@ -465,8 +500,15 @@ onMounted(fetchReport)
           </div>
 
           <div class="p-0 card-body">
-            <div class="mt-4 table-responsive mb-0" style="max-height: 580px; overflow-y: auto">
-              <table id="projects-table" class="table mb-0 table-striped" role="grid">
+            <div
+              class="mt-4 table-responsive mb-0"
+              style="max-height: 580px; overflow-y: auto"
+            >
+              <table
+                id="projects-table"
+                class="table mb-0 table-striped"
+                role="grid"
+              >
                 <thead>
                   <tr>
                     <th>PROJECT</th>
@@ -489,25 +531,28 @@ onMounted(fetchReport)
                       </div>
                     </td>
 
-
-
                     <!-- EXPENSE -->
                     <td>KES {{ formatAmount(project.expense) }}</td>
 
-                          <!-- CONTRIBUTORS -->
-                    <td>
-                       <td>KES {{ formatAmount(project.contributions) }}</td>
-                    </td>
+                    <!-- CONTRIBUTORS -->
+                    <td>KES {{ formatAmount(project.contributions) }}</td>
 
                     <!-- CONTRIBUTION PERCENTAGE -->
                     <td>
                       <div class="mb-2 d-flex align-items-center">
                         <h6>{{ project.contributionPercent }}%</h6>
                       </div>
-                      <div class="shadow-none progress bg-primary-subtle w-100" style="height: 4px">
+                      <div
+                        class="shadow-none progress bg-primary-subtle w-100"
+                        style="height: 4px"
+                      >
                         <div
                           class="progress-bar"
-                          :class="project.contributionPercent >= 100 ? 'bg-success' : 'bg-primary'"
+                          :class="
+                            project.contributionPercent >= 100
+                              ? 'bg-success'
+                              : 'bg-primary'
+                          "
                           role="progressbar"
                           :style="{ width: project.contributionPercent + '%' }"
                           :aria-valuenow="project.contributionPercent"
@@ -526,7 +571,12 @@ onMounted(fetchReport)
     </b-col>
     <b-col lg="4" md="12">
       <div class="col-md-12 col-lg-12">
-        <b-card no-body class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="600">
+        <b-card
+          no-body
+          class="aos-init aos-animate"
+          data-aos="fade-up"
+          data-aos-delay="600"
+        >
           <!-- Header -->
           <b-card-header class="d-flex justify-content-between flex-wrap">
             <div class="header-title">
@@ -553,12 +603,14 @@ onMounted(fetchReport)
               <div class="mt-1 profile-dots-pills border-primary"></div>
               <div class="ms-4">
                 <h6 class="mb-1">
-                  <span class="fw-bold">KES {{ formatAmount(activity.amount) }}</span
+                  <span class="fw-bold"
+                    >KES {{ formatAmount(activity.amount) }}</span
                   >,
                   <span class="text-muted">{{ activity.expense }}</span>
                 </h6>
                 <small class="text-muted">
-                  {{ formatDate(activity.date) }} – by {{ activity.contributor }} for
+                  {{ formatDate(activity.date) }} – by
+                  {{ activity.contributor }} for
                   <strong>{{ activity.project }}</strong>
                 </small>
               </div>
