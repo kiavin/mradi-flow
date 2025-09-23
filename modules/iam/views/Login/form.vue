@@ -1,9 +1,8 @@
-
 <script setup>
-import { ref } from 'vue'
-import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
-import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
-import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
+import { ref } from "vue";
+import Input from "~/themes/hopeui/components/atoms/input/BaseInput.vue";
+import Button from "~/themes/hopeui/components/atoms/button/BaseButton.vue";
+import Label from "~/themes/hopeui/components/atoms/labels/BaseLabel.vue";
 // import Spiner from '~/components/atoms/Spiner.vue'
 
 const props = defineProps({
@@ -19,17 +18,19 @@ const props = defineProps({
     default: false,
   },
   onSubmit: Function,
-})
-
-const emit = defineEmits(['submit'])
+});
+const showPassword = ref(false);
+const emit = defineEmits(["submit"]);
 
 const onSubmit = () => {
-  emit('submit', props.formData) // Emit the form data to the parent
-}
+  emit("submit", props.formData); // Emit the form data to the parent
+};
 </script>
 <template>
   <section class="login-content">
-    <b-row class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100 login-page">
+    <b-row
+      class="m-0 align-items-center justify-content-center bg-white-200 min-vh-100 login-page"
+    >
       <b-col cols="12" md="8" lg="6" xl="4" class="px-3" style="width: 450px">
         <b-card class="shadow-sm p-4 text-center mt-3" body-class="p-0">
           <!-- Brand logo -->
@@ -54,25 +55,35 @@ const onSubmit = () => {
                 :disabled="readonly"
                 class="form-control"
               />
-              <p v-if="error?.username" class="text-danger mt-1">{{ error.username }}</p>
+              <p v-if="error?.username" class="text-danger mt-1">
+                {{ error.username }}
+              </p>
             </div>
-
-            <div class="mb-3">
+            <div class="mb-3 position-relative">
               <Label class="form-label" :labelFor="'password'">Password</Label>
+
               <Input
                 :id="'password'"
-                :type="'password'"
+                :type="showPassword ? 'text' : 'password'"
                 v-model="formData.password"
                 :disabled="readonly"
-                class="form-control"
+                class="form-control pe-5"
               />
-              <p v-if="error?.password" class="text-danger mt-1">{{ error.password }}</p>
+              <p v-if="error?.password" class="text-danger mt-1">
+                {{ error.password }}
+              </p>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="customCheck1" />
-                <label class="form-check-label" for="customCheck1">Remember Me</label>
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="customCheck1"
+                />
+                <label class="form-check-label" for="customCheck1"
+                  >Remember Me</label
+                >
               </div>
               <router-link :to="{ name: 'iam/resetpasswordrequest/index' }"
                 >Forgot Password?</router-link
@@ -80,9 +91,17 @@ const onSubmit = () => {
             </div>
 
             <div class="text-center mb-3">
-              <Button type="submit" customClass="btn btn-primary w-100" :disabled="isLoading">
+              <Button
+                type="submit"
+                customClass="btn btn-primary w-100"
+                :disabled="isLoading"
+              >
                 <template v-if="isLoading">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                 </template>
                 <template v-else> LOGIN </template>
               </Button>
@@ -95,10 +114,8 @@ const onSubmit = () => {
 </template>
 <style>
 .login-page {
-  background-image: url('../../../../app/themes/hopeui/assets/images/auth/01.png');
+  background-image: url("../../../../app/themes/hopeui/assets/images/auth/01.png");
   background-size: cover;
   background-position: center;
 }
-
 </style>
-    

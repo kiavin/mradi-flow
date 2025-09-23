@@ -1,5 +1,5 @@
 // useShepherd function to create tour
-import Shepherd from 'shepherd.js'
+// import Shepherd from 'shepherd.js'
 
 export const useShepherd = (steps, conditionToStart, callback = () => {}) => {
   const tour = new Shepherd.Tour({
