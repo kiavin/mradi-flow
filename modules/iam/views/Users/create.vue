@@ -6,7 +6,7 @@ import Form from './form.vue';
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 
-const apiBaseUrl = `/v1/iam/roles`;
+const apiBaseUrl = `/v1/iam/users`;
 const { data, request, isLoading, error } = useApi(apiBaseUrl, {method: 'POST'});
 
 const formData = ref({});

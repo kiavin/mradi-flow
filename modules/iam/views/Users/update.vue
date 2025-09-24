@@ -8,7 +8,7 @@ const router = useRouter()
 
 const route = useRoute()
 const id = route.params.id
-const apiBaseUrl = `/v1/iam/roles/${id}`
+const apiBaseUrl = `/v1/iam/users/${id}`
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, { method: 'GET' })
 const formData = ref({})
@@ -40,7 +40,7 @@ const handleSubmit = async (updatedData) => {
   proxy.$showAlert({
     title: 'Success',
     icon: 'success',
-    text: data.value?.alertifypayload?.message ?? 'Roles Updated successfully',
+    text: data.value?.alertifypayload?.message ?? 'User Updated successfully',
     showConfirmButton: false,
     showCancelButton: false,
     draggable: true,
@@ -48,7 +48,7 @@ const handleSubmit = async (updatedData) => {
     timerProgressBar: true,
   })
   setTimeout(() => {
-    router.push({ name: 'iam/roles' })
+    router.push({ name: 'iam/users' })
   }, 2000)
 }
 </script>

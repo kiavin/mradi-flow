@@ -100,7 +100,7 @@ const rawMenus = ref([
   // },
   {
     title: 'Financiers',
-    icon: 'users',
+    icon: 'user',
     route: 'project/financier',
 
   },
@@ -116,6 +116,11 @@ const rawMenus = ref([
   //   route: 'project/projectfinancier',
 
   // },
+{
+  title: 'Users',
+  icon: 'users',
+  route: 'iam/users'
+}
 ])
 
 const currentRoute = ref('')

@@ -7,7 +7,7 @@ import Form from './form.vue'
 const route = useRoute()
 const router = useRouter()
 const id = route.params.id
-const apiBaseUrl = `/v1/iam/roles/${id}`
+const apiBaseUrl = `/v1/iam/users/${id}`
 
 const { data, request, isLoading, error } = useApi(apiBaseUrl, {
   method: 'GET',
@@ -32,7 +32,7 @@ watch(data, () => {
   <div class="card p-3">
     <div class="row d-flex justify-content-between align-items-center">
       <div class="col-auto">
-        <h1 class="h1 mt-2">View Role</h1>
+        <h1 class="h1 mt-2">View User</h1>
       </div>
       <div class="col-auto">
         <Button
@@ -40,7 +40,7 @@ watch(data, () => {
           customClass="btn btn-primary"
           @click="
             () => {
-              router.push({ name: 'iam/roles/update', params: { id } })
+              router.push({ name: 'iam/users/update', params: { id } })
             }
           "
         >

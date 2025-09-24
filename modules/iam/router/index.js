@@ -5,6 +5,8 @@ import ResetPasswordRoutes from './ResetPassword.js';
 import RolesRoutes from './Roles.js';
 import PermissionsRoutes from './Permissions.js';
 import GroupsRoutes from './Groups.js';
+import UsersRoutes from './Users.js';
+
 
 export default [
   ...ChangePasswordRoutes,
@@ -13,5 +15,6 @@ export default [
   ...ResetPasswordRoutes,
   ...RolesRoutes,
   ...PermissionsRoutes,
-  ...GroupsRoutes
+  ...GroupsRoutes,
+  ...UsersRoutes
 ];
