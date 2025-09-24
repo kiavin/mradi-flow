@@ -129,7 +129,7 @@ const onSubmit = () => {
     </div>
 
     <!-- Row 4: Record Status (full width) -->
-    <div class="col-12" >
+    <div class="col-12" v-if="formData.recordStatus">
       <Label :labelFor="'status'"> Status </Label>
       <div
         class="badge"
