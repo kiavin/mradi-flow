@@ -11,7 +11,7 @@ const router = useRouter();
 
 const modalStore = useModalStore();
 
-const apiBaseUrl = `/v1/admin/profiles`;
+const apiBaseUrl = `/v1/iam/users`;
 
 const { data, request, refresh, isLoading, error } = useApi(apiBaseUrl, {
   method: "GET",
@@ -32,15 +32,39 @@ const tableData = ref({
 });
 
 const tableColumns = [
-  { key: "first_name", label: "First Name" },
-  { key: "middle_name", label: "Middle Name" },
-  { key: "last_name", label: "Last Name" },
-  { key: "email_address", label: "Email" },
-  { key: "phone_number", label: "Phone Number" },
+  {
+    key: "first_name",
+    label: "First Name",
+    formatter: (_, row) => row.profile?.first_name || "N/A",
+  },
+  {
+    key: "middle_name",
+    label: "Middle Name",
+    formatter: (_, row) => row.profile?.middle_name || "N/A",
+  },
+  {
+    key: "last_name",
+    label: "Last Name",
+    formatter: (_, row) => row.profile?.last_name || "N/A",
+  },
+  {
+    key: "username",
+    label: "Username",
+  },
+  {
+    key: "email_address",
+    label: "Email",
+    formatter: (_, row) => row.profile?.email_address || "N/A",
+  },
+  {
+    key: "phone_number",
+    label: "Phone Number",
+    formatter: (_, row) => row.profile?.phone_number || "N/A",
+  },
   {
     key: "recordStatus",
     label: "Status",
-    formatter: (value) => value?.label || "N/A",
+    formatter: (_, row) => row.profile?.recordStatus?.label || "N/A",
   },
 ];
 
@@ -79,40 +103,6 @@ const updateResponseData = () => {
   }
 };
 
-const handleView = async (row) => {
-  const id = row.name;
-  modalStore.toggleModalUsage(true); // if you want to navigate to route set to false
-
-  await nextTick(); // ensure store state is updated
-
-  if (!modalStore.useModal) {
-    router.push({ name: "iam/users", params: { id } });
-    return;
-  }
-
-  const apiBaseUrl = `/v1/iam/users/${id}`;
-
-  const { data, request, isLoading, error } = useApi(apiBaseUrl, {
-    method: "GET",
-    options: {},
-    autoFetch: true,
-  });
-
-  await request();
-
-  modalStore.openModal(
-    Form,
-    {
-      formData: data.value?.dataPayload?.data || {},
-      error,
-      isLoading,
-      readonly: true,
-      hideSubmit: true,
-    },
-    "View Role"
-  );
-};
-
 //const handleEdit = (id) => {
 //   router.push({ name: 'iam/roles/update', params: { id } });
 //}
@@ -120,7 +110,7 @@ const handleView = async (row) => {
 const errors = ref({});
 
 const handleEdit = async (row) => {
-  const id = row.id;
+  const id = row.username;
   errors.value = {};
 
   modalStore.toggleModalUsage(true); // if you want to navigate to route set to false
@@ -134,7 +124,7 @@ const handleEdit = async (row) => {
   }
 
   // Fetch appointment data before opening the modal
-  const apiBaseUrl = `/v1/admin/profile/${id}`;
+  const apiBaseUrl = `/v1/iam/user/${id}`;
   const { data, request, isLoading, error } = useApi(apiBaseUrl, {
     method: "GET",
     options: {},
@@ -180,7 +170,7 @@ const handleEdit = async (row) => {
       formData: data.value?.dataPayload?.data || {},
       error: errors,
       isLoading,
-      context: 'edit',
+      context: "edit",
       readonly: false, // Allow editing
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
@@ -203,6 +193,8 @@ const handleCreate = async () => {
   // Define form submission handler
   const handleSubmit = async (newData) => {
     const apiBaseUrl = `/v1/iam/auth/register`;
+
+    console.log('newdata', newData)
 
     const {
       data,
@@ -240,6 +232,7 @@ const handleCreate = async () => {
       formData: {}, // Empty form for creation
       error: errors, // Empty error object
       isLoading: false,
+      context: 'create',
       readonly: false, // Allow input
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
@@ -253,7 +246,6 @@ const handleDelete = async (row) => {
   const is_deleted = row.is_deleted;
   const action = is_deleted ? "Restore" : "Delete";
 
-  
   const confirmationText = is_deleted
     ? "You are about to restore this record. Do you want to proceed?"
     : "You are about to delete this record. Do you want to proceed?";
@@ -479,9 +471,9 @@ onMounted(() => {
         <template #column-recordStatus="{ row }">
           <span
             class="badge"
-            :class="`bg-${row.recordStatus?.theme || 'secondary'}`"
+            :class="`bg-${row.profile.recordStatus?.theme || 'secondary'}`"
           >
-            {{ row.recordStatus?.label || "N/A" }}
+            {{ row.profile.recordStatus?.label || "N/A" }}
           </span>
         </template>
       </OmniGridView>

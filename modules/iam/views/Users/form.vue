@@ -1,11 +1,30 @@
 <script setup>
-import { ref } from "vue";
+import { ref, reactive, watch } from "vue";
 import Input from "~/themes/hopeui/components/atoms/input/BaseInput.vue";
 import Button from "~/themes/hopeui/components/atoms/button/BaseButton.vue";
 import Label from "~/themes/hopeui/components/atoms/labels/BaseLabel.vue";
 
 const props = defineProps({
-  formData: Object,
+  formData: {
+    type: Object,
+    default: () => ({
+      profile: {
+        first_name: "",
+        middle_name: "",
+        last_name: "",
+        email_address: "",
+        phone_number: "",
+        recordStatus: {
+          label: "N/A",
+          theme: "secondary",
+        },
+      },
+      username: "",
+      password: "",
+      confirm_password: "",
+      is_deleted: 0,
+    }),
+  },
   error: Object,
   isLoading: Boolean,
   readonly: {
@@ -19,16 +38,57 @@ const props = defineProps({
   onSubmit: Function,
   context: {
     type: String,
-    default: 'general'
-  }
+    default: "general",
+  },
 });
 
 const emit = defineEmits(["submit", "update"]);
 
+// ✅ Create a mutable reactive copy of props.formData
+const form = reactive(JSON.parse(JSON.stringify(props.formData)));
+
+// ✅ Watch for prop updates (e.g., when editing or prefill)
+watch(
+  () => props.formData,
+  (newData) => {
+    Object.assign(form, {
+      ...newData,
+      profile: {
+        first_name: "",
+        middle_name: "",
+        last_name: "",
+        email_address: "",
+        phone_number: "",
+        recordStatus: {
+          label: "N/A",
+          theme: "secondary",
+        },
+        ...newData.profile,
+      },
+    });
+  },
+  { deep: true, immediate: true }
+);
+
+// ✅ Flatten profile fields if context === 'create'
 const onSubmit = () => {
-  emit("submit", props.formData);
+  let payload;
+
+  if (props.context === "create" || "edit") {
+    const { profile, ...rest } = form;
+
+    payload = {
+      ...rest,
+      ...profile, // safely spread profile if it exists
+    };
+  } else {
+    payload = form;
+  }
+
+  emit("submit", payload);
 };
 </script>
+
 <template>
   <form @submit.prevent="onSubmit" class="row g-3">
     <!-- Row 1: First Name, Middle Name, Last Name -->
@@ -37,7 +97,7 @@ const onSubmit = () => {
       <Input
         :id="'first_name'"
         :type="'text'"
-        v-model="formData.first_name"
+        v-model="form.profile.first_name"
         :disabled="readonly"
       />
       <p v-if="error?.first_name" class="text-danger">{{ error.first_name }}</p>
@@ -48,7 +108,7 @@ const onSubmit = () => {
       <Input
         :id="'middle_name'"
         :type="'text'"
-        v-model="formData.middle_name"
+        v-model="form.profile.middle_name"
         :disabled="readonly"
       />
       <p v-if="error?.middle_name" class="text-danger">
@@ -61,7 +121,7 @@ const onSubmit = () => {
       <Input
         :id="'last_name'"
         :type="'text'"
-        v-model="formData.last_name"
+        v-model="form.profile.last_name"
         :disabled="readonly"
       />
       <p v-if="error?.last_name" class="text-danger">{{ error.last_name }}</p>
@@ -73,7 +133,7 @@ const onSubmit = () => {
       <Input
         :id="'email_address'"
         :type="'email'"
-        v-model="formData.email_address"
+        v-model="form.profile.email_address"
         :disabled="readonly"
       />
       <p v-if="error?.email_address" class="text-danger">
@@ -86,7 +146,7 @@ const onSubmit = () => {
       <Input
         :id="'phone_number'"
         :type="'text'"
-        v-model="formData.phone_number"
+        v-model="form.profile.phone_number"
         :disabled="readonly"
       />
       <p v-if="error?.phone_number" class="text-danger">
@@ -99,7 +159,7 @@ const onSubmit = () => {
       <Input
         :id="'username'"
         :type="'text'"
-        v-model="formData.username"
+        v-model="form.username"
         :disabled="readonly"
       />
       <p v-if="error?.username" class="text-danger">
@@ -110,7 +170,7 @@ const onSubmit = () => {
     <!-- Row 3: Password, Confirm Password -->
     <div class="col-md-6" v-if="context !== 'edit'">
       <Label :labelFor="'password'"> Password </Label>
-      <Input :id="'password'" :type="'password'" v-model="formData.password" />
+      <Input :id="'password'" :type="'password'" v-model="form.password" />
       <p v-if="error?.password" class="text-danger">
         {{ error.password || "Please choose a password you can remember" }}
       </p>
@@ -121,22 +181,22 @@ const onSubmit = () => {
       <Input
         :id="'confirm_password'"
         :type="'password'"
-        v-model="formData.confirm_password"
+        v-model="form.confirm_password"
       />
       <p v-if="error?.confirm_password" class="text-danger">
         {{ error.confirm_password || "This field can not be blank" }}
       </p>
     </div>
 
-    <!-- Row 4: Record Status (full width) -->
-    <div class="col-12" v-if="formData.recordStatus">
+    <!-- Row 4: Record Status -->
+    <div class="col-12" v-if="form.profile?.recordStatus">
       <Label :labelFor="'status'"> Status </Label>
       <div
         class="badge"
-        :class="`bg-${formData.recordStatus.theme}`"
+        :class="`bg-${form.profile.recordStatus.theme}`"
         id="status"
       >
-        {{ formData.recordStatus.label }}
+        {{ form.profile.recordStatus.label }}
       </div>
     </div>
 
