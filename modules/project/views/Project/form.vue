@@ -24,8 +24,8 @@ const props = defineProps({
   onSubmit: Function,
 });
 
-const financierOptions = ref("");
-const projectFinanciers = ref("");
+const financierOptions = ref([]);
+const projectFinanciers = ref([]);
 const emit = defineEmits(["submit", "update"]);
 
 watch(
