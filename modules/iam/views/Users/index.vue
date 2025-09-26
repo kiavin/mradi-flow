@@ -242,7 +242,7 @@ const handleCreate = async () => {
 };
 
 const handleDelete = async (row) => {
-  const id = row.id;
+  const id = row.username;
   const is_deleted = row.is_deleted;
   const action = is_deleted ? "Restore" : "Delete";
 
@@ -267,7 +267,7 @@ const handleDelete = async (row) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(`/v1/admin/profile/${id}`, {
+      const { data, request, isLoading } = useApi(`/v1/iam/user/${id}`, {
         method: "DELETE",
       });
 
@@ -303,7 +303,7 @@ const handleDelete = async (row) => {
 };
 
 const handleRestore = async (row) => {
-  const id = row.id;
+  const id = row.username;
   const is_deleted = row.is_deleted;
   const action = is_deleted ? "Restore" : "Delete";
 
@@ -328,7 +328,7 @@ const handleRestore = async (row) => {
       // console.log('Deleting record with ID:', id)
 
       // autoFetch.value = false
-      const { data, request, isLoading } = useApi(`/v1/admin/profile/${id}`, {
+      const { data, request, isLoading } = useApi(`/v1/iam/user/${id}`, {
         method: "PATCH",
       });
 

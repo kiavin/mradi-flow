@@ -11,11 +11,6 @@ const axiosInstance = axios.create({
   timeout: 30000,
 });
 
-// Helper: Encrypt & Decrypt
-function encryptToken(token) {
-  return encrypt(token);
-}
-
 function decryptToken(encryptedToken) {
   return decrypt(encryptedToken);
 }
@@ -40,8 +35,8 @@ async function broadcastLogout() {
   const { useRouter } = await import("vue-router");
   const router = useRouter();
 
-  if (router.currentRoute.value.path !== "/iam/login") {
-    router.push("/iam/login");
+  if (router.currentRoute.value.path !== "/iam/auth/login") {
+    router.push("/iam/auth/login");
   }
 }
 
@@ -78,7 +73,8 @@ async function refreshAccessToken() {
       withCredentials: true,
     });
 
-    const newToken = response.data?.dataPayload?.access_token;
+    const newToken = response.data?.dataPayload?.data?.access_token;
+    console.log('new token after refresh', newToken)
 
     if (newToken) {
       const { useAuthStore } = await import("../stores/authStore");
@@ -90,7 +86,8 @@ async function refreshAccessToken() {
 
     throw new Error("No token returned during refresh");
   } catch (err) {
-    await broadcastLogout();
+    console.log('i died here ', err)
+    await broadcastLogout();``
     throw err;
   }
 }
@@ -111,6 +108,7 @@ axiosInstance.interceptors.response.use(
     // Handle 401 Unauthorized
     if (status === 401) {
       // ✅ Exact match with logout-triggering route
+      console.log("401 message and all that ", message, route);
       if (
         message === "Session has expired" ||
         message === "Your account has been deactivated." ||
@@ -125,12 +123,7 @@ axiosInstance.interceptors.response.use(
           const { useRouter } = await import("vue-router");
           const router = useRouter();
 
-          // Normalize route string
-          const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
-
-          if (router.currentRoute.value.path !== normalizedRoute) {
-            await router.push(normalizedRoute);
-          }
+          router.push("/iam/auth/login");
         }
 
         return Promise.reject(error);
@@ -151,10 +144,8 @@ axiosInstance.interceptors.response.use(
           });
         });
       }
-
       // ✅ First 401 triggers refresh
       isRefreshing = true;
-
       try {
         const newToken = await refreshAccessToken();
         isRefreshing = false;
