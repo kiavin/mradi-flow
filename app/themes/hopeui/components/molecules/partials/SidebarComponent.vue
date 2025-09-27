@@ -83,7 +83,7 @@ const rawMenus = ref([
   // },
   {
     title: 'Projects',
-    icon: 'folder',
+    icon: 'person-digging',
     route: 'project/project',
 
   },
@@ -98,12 +98,12 @@ const rawMenus = ref([
   //   route: 'project/expensecontribution',
 
   // },
-  {
-    title: 'Financiers',
-    icon: 'user',
-    route: 'project/financier',
+  // {
+  //   title: 'Financiers',
+  //   icon: 'user',
+  //   route: 'project/financier',
 
-  },
+  // },
   // {
   //   title: 'Project Expenses',
   //   icon: 'file-invoice-dollar',
@@ -117,8 +117,8 @@ const rawMenus = ref([
 
   // },
 {
-  title: 'Users',
-  icon: 'users',
+  title: 'Finaciers',
+  icon: 'bank',
   route: 'iam/users'
 }
 ])

@@ -186,8 +186,6 @@ export default {
             <RouterLink to="/iam/changepassword">
               <b-dropdown-item variant="none" href="#">Profile</b-dropdown-item>
             </RouterLink>
-
-            <b-dropdown-item variant="none" href="#">Privacy Setting</b-dropdown-item>
             <li>
               <hr class="dropdown-divider" />
             </li>

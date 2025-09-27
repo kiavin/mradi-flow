@@ -1,16 +1,16 @@
 
 <script>
 import { computed, onMounted, ref } from 'vue'
-// import BrandLogo from '@/components/custom/logo/BrandLogo.vue'
-// import BrandName from '@/components/custom/logo/BrandName.vue'
+import BrandLogo from '../logo/BrandLogo.vue'
+import BrandName from '../logo/BrandName.vue'
 import Scrollbar from 'smooth-scrollbar'
 import { useSetting } from '../../../../../omnicore/stores'
 
 
 export default {
   components: {
-    // BrandLogo,
-    // BrandName
+    BrandLogo,
+    BrandName
   },
   setup() {
     const fallbackRoute = localStorage.getItem('menus2') ? JSON.parse(localStorage.getItem('menus2'))[0].route : '/'
@@ -76,9 +76,9 @@ export default {
   <aside :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(' ')} ${sidebarShow}`" id="first-tour" data-toggle="main-sidebar" data-sidebar="responsive">
     <div class="sidebar-header d-flex align-items-center justify-content-start">
       <router-link :to="{ name: dashboard }" class="navbar-brand">
-        <!-- <brand-logo /> -->
+        <brand-logo />
         <h4 class="logo-title" data-setting="app_name">
-          <!-- <brand-name /> -->
+          <brand-name />
         </h4>
       </router-link>
       <div class="sidebar-toggle" @click="toggleSidebar">

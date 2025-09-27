@@ -1,10 +1,10 @@
 // Initial Setting State
 export const initialState = {
     saveLocal: 'sessionStorage',
-    storeKey: 'unilink-settings-storages',
+    storeKey: 'Mradi360-settings-storages',
     setting: {
         app_name: {
-            value: 'Unilink'
+            value: 'Mradi360'
         },
         theme_scheme_direction: {
             value: 'ltr'
@@ -67,13 +67,13 @@ export const initialState = {
 // Default Setting State
 export const defaultState = {
     saveLocal: 'sessionStorage',
-    storeKey: 'unilink-settings-storages',
+    storeKey: 'Mradi360-settings-storages',
     setting: {
         app_name: {
             target: '[data-setting="app_name"]',
             choices: [],
             type: 'text',
-            value: 'Unilink'
+            value: 'Mradi360'
         },
         theme_scheme_direction: {
             target: 'html',
