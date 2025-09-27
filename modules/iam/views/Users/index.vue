@@ -175,7 +175,7 @@ const handleEdit = async (row) => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass the submission function
     },
-    "Edit User"
+    "Edit Financier"
   );
 };
 
@@ -237,7 +237,7 @@ const handleCreate = async () => {
       hideSubmit: false,
       onSubmit: handleSubmit, // Pass submission function
     },
-    "Create User"
+    "Add Financier"
   );
 };
 
@@ -401,7 +401,7 @@ onMounted(() => {
   <div class="card p-3">
     <div class="row d-flex justify-content-between align-items-center mb-3">
       <div class="col-auto">
-        <h1 class="h4 mt-2">List of Users</h1>
+        <h1 class="h4 mt-2">Financiers</h1>
       </div>
       <div class="col-auto mb-4">
         <Button
@@ -409,7 +409,7 @@ onMounted(() => {
           customClass="btn btn-primary"
           @click="handleCreate"
         >
-          New User
+          Add Finacier
         </Button>
       </div>
 
@@ -465,7 +465,7 @@ onMounted(() => {
             <template #icon>
               <font-awesome-icon :icon="['fas', 'plus']" />
             </template>
-            New User
+            New Financier
           </Button>
         </template>
         <template #column-recordStatus="{ row }">
