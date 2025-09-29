@@ -8,8 +8,6 @@ services:
     restart: always
     ports:
       - "9005:80"
-    volumes:
-      - ./dist:/usr/share/nginx/html:rw
     networks:
       shared:
           ipv4_address: 172.19.10.120
