@@ -621,3 +621,8 @@ onMounted(fetchReport);
     </b-col>
   </b-row>
 </template>
+<style scoped>
+.profile-media{
+  z-index: 0 !important ;
+}
+</style>
