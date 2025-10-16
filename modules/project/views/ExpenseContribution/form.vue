@@ -1,9 +1,11 @@
 <script setup>
-import { ref } from 'vue'
-import Input from '~/themes/hopeui/components/atoms/input/BaseInput.vue'
-import Button from '~/themes/hopeui/components/atoms/button/BaseButton.vue'
-import Label from '~/themes/hopeui/components/atoms/labels/BaseLabel.vue'
-import SelectComponent from '@/project/components/atoms/SelectComponent.vue'
+import { ref, onMounted } from "vue";
+import Input from "~/themes/hopeui/components/atoms/input/BaseInput.vue";
+import Button from "~/themes/hopeui/components/atoms/button/BaseButton.vue";
+import Label from "~/themes/hopeui/components/atoms/labels/BaseLabel.vue";
+import SelectComponent from "@/project/components/atoms/SelectComponent.vue";
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.css";
 const props = defineProps({
   formData: Object,
   error: Object,
@@ -20,20 +22,36 @@ const props = defineProps({
     default: false,
   },
   onSubmit: Function,
-})
+});
 
-const expenseOptions = ref(props.expenseOptions)
+const expenseOptions = ref(props.expenseOptions);
 
-const financierOptions = ref(props.financierOptions)
+const financierOptions = ref(props.financierOptions);
 
-const projectId = ref(props.projectId)
+const projectId = ref(props.projectId);
+const datepickerRef = ref(null);
 
-const emit = defineEmits(['submit', 'update'])
+const emit = defineEmits(["submit", "update"]);
 
 const onSubmit = () => {
-  props.formData.project_id = projectId.value
-  emit('submit', props.formData) // Emit the form data to the parent
-}
+  props.formData.project_id = projectId.value;
+  emit("submit", props.formData); // Emit the form data to the parent
+};
+
+onMounted(() => {
+  flatpickr(datepickerRef.value, {
+    dateFormat: "Y-m-d", // format: YYYY-MM-DD
+    maxDate: "today", // optional: prevent future dates
+    altInput: true,
+    altFormat: "F j, Y", // human-readable format
+    allowInput: true,
+    disableMobile: false,
+    defaultDate: props.formData.payment_date || null,
+    onChange: (selectedDates, dateStr) => {
+      props.formData.date = dateStr;
+    },
+  });
+});
 </script>
 <template>
   <b-card-body>
@@ -51,8 +69,12 @@ const onSubmit = () => {
           class="form-control"
           :disabled="readonly"
         />
-        <p v-if="error?.expense_id" class="text-danger">{{ error.expense_id }}</p>
-        <p v-if="error?.project_id" class="text-danger">{{ error.project_id }}</p>
+        <p v-if="error?.expense_id" class="text-danger">
+          {{ error.expense_id }}
+        </p>
+        <p v-if="error?.project_id" class="text-danger">
+          {{ error.project_id }}
+        </p>
       </b-form-group>
 
       <!-- Financier ID (Single Select) -->
@@ -68,7 +90,9 @@ const onSubmit = () => {
           class="form-control"
           :disabled="readonly"
         />
-        <p v-if="error?.financier_id" class="text-danger">{{ error.financier_id }}</p>
+        <p v-if="error?.financier_id" class="text-danger">
+          {{ error.financier_id }}
+        </p>
       </b-form-group>
       <!-- Amount -->
       <b-form-group class="mt-3">
@@ -84,10 +108,34 @@ const onSubmit = () => {
         <p v-if="error?.amount" class="text-danger">{{ error.amount }}</p>
       </b-form-group>
 
+      <!-- Flatpickr Datepicker -->
+      <b-form-group class="mt-3">
+        <label for="payment_date" class="form-label">Payment Date</label>
+        <input
+          id="payment_date"
+          ref="datepickerRef"
+          type="text"
+          class="form-control"
+          placeholder="Select date"
+          :readonly="readonly"
+        />
+        <p v-if="error?.payment_date" class="text-danger">
+          {{ error.payment_date }}
+        </p>
+      </b-form-group>
+
       <!-- Submit Button -->
-      <div v-if="!hideSubmit" class="d-flex flex-wrap justify-content-center mt-4">
-        <b-button type="submit" variant="success" class="me-2" :disabled="isLoading">
-          {{ isLoading ? 'Submitting...' : 'Save' }}
+      <div
+        v-if="!hideSubmit"
+        class="d-flex flex-wrap justify-content-center mt-4"
+      >
+        <b-button
+          type="submit"
+          variant="success"
+          class="me-2"
+          :disabled="isLoading"
+        >
+          {{ isLoading ? "Submitting..." : "Save" }}
         </b-button>
       </div>
     </b-form>
