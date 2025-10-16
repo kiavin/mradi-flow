@@ -1,34 +1,12 @@
-# ---------- Stage 1: Build the Vue 3 App ----------
-FROM node:18-alpine AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the entire Vue source code
-COPY . .
-
-# Build the Vue app
-RUN npm run build
-
-
-# ---------- Stage 2: Serve with Nginx ----------
+# Use Nginx as a base image
 FROM nginx:alpine
 
-# Remove default Nginx static files
-RUN rm -rf /usr/share/nginx/html/*
+# Copy the build files to the Nginx html directory
+COPY dist /usr/share/nginx/html
 
-# Copy built Vue app from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy custom Nginx configuration
+# Copy custom Nginx configuration (optional)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
-EXPOSE 80
 
+# Expose the port
+EXPOSE 80

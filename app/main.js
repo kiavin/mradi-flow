@@ -4,6 +4,8 @@ import registerPlugins from './omnicore/plugins/plugin'
 import App from './App.vue'
 import '@vueform/multiselect/themes/default.css'
 import CircleProgress from 'vue3-circle-progress'
+import 'flatpickr/dist/flatpickr.css'
+
 
 import router from './omnicore/router'
 import VueApexCharts from 'vue3-apexcharts'

@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-import CryptoJS from 'crypto-js'
 import { encrypt, decrypt } from '../helpers/crypto'
-import { decodeJwt } from '../helpers/jwtDecode'
 
 export const useAuthStore = defineStore('userAuth', {
   state: () => ({
@@ -185,41 +183,40 @@ export const useAuthStore = defineStore('userAuth', {
       this.user.token = null
       this.user.username = null
       this.user.isAuthenticated = false
-
       localStorage.removeItem('user.token')
       localStorage.removeItem('user.username')
       localStorage.removeItem('loggedIn')
     },
 
-    setIp(ipAddr) {
-      this.user.ipAddr = ipAddr
-      sessionStorage.setItem('ipA', ipAddr)
-    },
+    // ip addr is being handled server side for now
+    // setIp(ipAddr) {
+    //   this.user.ipAddr = ipAddr
+    //   sessionStorage.setItem('ipA', ipAddr)
+    // },
 
-    // secure token
-    setRefreshToken(refreshToken) {
-      const encrypted = encrypt(refreshToken)
-      localStorage.setItem('user.refreshToken', encrypted)
-    },
+    // the refresh token is currently a http only cookie, so we don't need to store it in localStorage
+    // setRefreshToken(refreshToken) {
+    //   const encrypted = encrypt(refreshToken)
+    //   localStorage.setItem('user.refreshToken', encrypted)
+    // },
 
-    getRefreshToken() {
-      const encrypted = localStorage.getItem('user.refreshToken')
-      if (!encrypted) return null
-      try {
-        const bytes = decrypt(encrypted)
-        return bytes.toString(CryptoJS.enc.Utf8)
-      } catch (e) {
-        return null
-      }
-    },
+    // getRefreshToken() {
+    //   const encrypted = localStorage.getItem('user.refreshToken')
+    //   if (!encrypted) return null
+    //   try {
+    //     const bytes = decrypt(encrypted)
+    //     return bytes.toString(CryptoJS.enc.Utf8)
+    //   } catch (e) {
+    //     return null
+    //   }
+    // },
 
-    removeRefreshToken() {
-      localStorage.removeItem('user.refreshToken')
-    },
+    // removeRefreshToken() {
+    //   localStorage.removeItem('user.refreshToken')
+    // },
 
     logOutRequest() {
       this.removeToken()
-      this.removeRefreshToken()
       localStorage.removeItem('user.menus')
       localStorage.removeItem('user.permissions')
     },
