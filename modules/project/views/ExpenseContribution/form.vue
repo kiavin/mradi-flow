@@ -120,7 +120,7 @@ onMounted(() => {
           :readonly="readonly"
         />
         <p v-if="error?.payment_date" class="text-danger">
-          {{ error.payment_date }}
+          {{ error.date }}
         </p>
       </b-form-group>
 
