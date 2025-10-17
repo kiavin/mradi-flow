@@ -4,12 +4,13 @@ import { watch, computed } from 'vue'
 import Modal from '~/components/organisms/GlobalModal'
 import { useLayoutStore } from '~/omnicore/stores/layoutStore.js'
 import { useAuthStore } from './omnicore/stores/authStore'
+import { useAutoLogout } from './omnicore/helpers/useAutoLogout'
 
 const route = useRoute()
 const layoutStore = useLayoutStore()
 
 const auth = useAuthStore()
-
+useAutoLogout(900000)
 onMounted(() => {
   auth.initStore()
 

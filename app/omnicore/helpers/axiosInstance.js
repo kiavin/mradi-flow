@@ -74,7 +74,7 @@ async function refreshAccessToken() {
     });
 
     const newToken = response.data?.dataPayload?.data?.access_token;
-    console.log('new token after refresh', newToken)
+    console.log("new token after refresh", newToken);
 
     if (newToken) {
       const { useAuthStore } = await import("../stores/authStore");
@@ -86,53 +86,52 @@ async function refreshAccessToken() {
 
     throw new Error("No token returned during refresh");
   } catch (err) {
-    console.log('i died here ', err)
-    await broadcastLogout();``
+    console.log("i died here ", err);
+    await broadcastLogout();
+    ``;
     throw err;
   }
 }
 axiosInstance.interceptors.response.use(
-  (response) => response, // Success: pass through
+  (response) => response,
   async (error) => {
     const status = error.response?.status;
     const data = error.response?.data || {};
     const message = data?.message;
-    const route = data?.type?.route; // ✅ Safely extract route
+    const route = data?.type?.route;
     const originalRequest = error.config;
 
-    // Don't retry requests that already failed refresh
+    // Handle forced logout first
+    if (
+      status === 401 &&
+      (message === "Session has expired" ||
+        message === "Your account has been deactivated." ||
+        route === "iam/auth/login")
+    ) {
+      console.warn("⛔ Force logout triggered:", route || message);
+
+      localStorage.clear(); // Remove tokens immediately
+
+      // Redirect to login
+      const { useRouter } = await import("vue-router");
+      const router = useRouter();
+
+      if (router.currentRoute.value.path !== "/iam/auth/login") {
+        router.push("/iam/auth/login");
+      }
+
+      return Promise.reject(error); // Stop any further processing
+    }
+
+    // Skip retries if request already retried
     if (!originalRequest || originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // Handle 401 Unauthorized
+    // Handle normal 401 with refresh
     if (status === 401) {
-      // ✅ Exact match with logout-triggering route
-      console.log("401 message and all that ", message, route);
-      if (
-        message === "Session has expired" ||
-        message === "Your account has been deactivated." ||
-        route === "iam/auth/login"
-      ) {
-        console.warn("⛔ Force logout triggered:", route || message);
-
-        localStorage.clear(); // handles token cleanup & base redirect
-
-        // ✅ Explicit redirect to the route if provided
-        if (route) {
-          const { useRouter } = await import("vue-router");
-          const router = useRouter();
-
-          router.push("/iam/auth/login");
-        }
-
-        return Promise.reject(error);
-      }
-
-      // ✅ Mark request as retried
       originalRequest._retry = true;
 
-      // ✅ Queue if refresh already in progress
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           requestQueue.push({
@@ -144,16 +143,14 @@ axiosInstance.interceptors.response.use(
           });
         });
       }
-      // ✅ First 401 triggers refresh
+
       isRefreshing = true;
       try {
         const newToken = await refreshAccessToken();
         isRefreshing = false;
 
-        // ✅ Process queue
         processQueue(null, newToken);
 
-        // ✅ Retry original request
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
@@ -163,7 +160,7 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    // Any other error
+    // Other errors
     return Promise.reject(error);
   }
 );
